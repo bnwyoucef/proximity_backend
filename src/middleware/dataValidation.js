@@ -277,6 +277,14 @@ const createProductSchema = joi.object({
 exports.createProductSchemaValidation = (req, res, next) => {
 	if (typeof req.body.variantes === 'string' && req.body.variantes != "") {
 		req.body.variantes = JSON.parse(req.body.variantes);
+		console.log(req) ;
+		if(req.files.images && req.files.images.name) {
+			req.files.images = [req.files.images] ;
+		}
+		
+		if(req.files.varientsImages && req.files.varientsImages.name) {
+			req.files.varientsImages = [req.files.varientsImages] ;
+		}
 	}
 	const { error } = createProductSchema.validate(req.body);
 	if (error) {

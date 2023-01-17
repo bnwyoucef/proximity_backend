@@ -12,6 +12,7 @@ exports.updateProduct = async (req, res) => {
 exports.addProduct = async (req, res) => {
 	try {
 		const product = await ProductService.addProduct(req);
+		console.log(product) ;
 		res.send(product);
 	} catch (err) {
 		res.status(500).send(err.message);

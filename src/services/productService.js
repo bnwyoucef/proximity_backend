@@ -71,6 +71,8 @@ exports.addProduct = async (req) => {
 		if (!req.files || Object.keys(req.files).length === 0) {
 			throw new Error('No files were uploaded.');
 		}
+		
+
 		let imagess = [];
 		for (let i = 0; i < req.files.images.length; i++) {
 			const image = req.files.images[i];
@@ -104,6 +106,8 @@ exports.addProduct = async (req) => {
 			req.body.variantes[i].img = storagePath;
 			varientsImages.push(storagePath);
 		}
+		
+		console.log("abdou")
 
 		const newProduct = new Product({
 			name: req.body.name,
@@ -128,6 +132,7 @@ exports.addProduct = async (req) => {
 		await category.save();
 		return savedProduct;
 	} catch (err) {
+		console.log(err.message)
 		throw err;
 	}
 };
