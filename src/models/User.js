@@ -13,11 +13,9 @@ const userSchema = new mongoose.Schema(
 				}
 			},
 		},
-		firstName: {
+		username: {
 			type: String,
-		},
-		lastName: {
-			type: String,
+			unique: true,
 		},
 		role: {
 			type: String,
@@ -30,6 +28,7 @@ const userSchema = new mongoose.Schema(
 		},
 		phone: {
 			type: String,
+			unique: true,
 		},
 
 		verificationCode: {
@@ -47,7 +46,6 @@ const userSchema = new mongoose.Schema(
 		},
 		email: {
 			type: String,
-			required: [true, 'Please provide an email'],
 			unique: true,
 		},
 		favouritsProductst: [

@@ -6,37 +6,60 @@ const { sendMail } = require('../middleware/email');
 exports.register = async (userInfo) => {
 	try {
 		const random = Math.floor(Math.random() * (9999 - 1000 + 1)) + 1000;
+		if(userInfo.email && userInfo.email != "" ) {
+			const userEmail = await User.findOne({ email: userInfo.email });
+			if (userEmail) {
+				throw new Error('Email already exists !');
+			}
+			
+		}else if(userInfo.phone && userInfo.phone != "") {
+			const userphone = await User.findOne({ phone: userInfo.phone });
+			if (userphone) {
+				throw new Error('Phone number already exists !');
+			}
+		}else {
+			throw new Error('You must enter an email or a phone number !');
+		}
 
-		const user = await User.findOne({ email: userInfo.email });
-		if (user) {
-			throw new Error('User already exists');
+		const username = await User.findOne({ username: userInfo.username });
+		if (username) {
+			throw new Error('Username already exists !');
+		}
+
+		if(!(userInfo.password && userInfo.password_confirmation && userInfo.password == userInfo.password_confirmation)) {
+			throw new Error('The password and its confirmation are not the same');
 		}
 
 		const newUser = new User({
 			email: userInfo.email,
+			phone: userInfo.phone ,
+			username : userInfo.username , 
 			password: userInfo.password,
 			role: userInfo.role,
 			verificationCode: random,
 		});
 		newUser.password = CryptoJS.AES.encrypt(newUser.password, process.env.ACCESS_TOKEN_SECRET).toString();
 		try {
-			sendMail(
-				newUser.email,
-				'Welcome to SmartCity',
-				'Welcome ' +
-					newUser.email.split('@')[0] +
-					' You have successfully registered to the app your account is now active you can login to the app ' +
-					'' +
-					' your verification code is ' +
-					random +
-					' ' +
-					' your email is ' +
-					userInfo.email +
-					' your password is ' +
-					userInfo.password +
-					' ' +
-					''
-			);
+			if(newUser.email) {
+				sendMail(
+					newUser.email,
+					'Welcome to SmartCity',
+					'Welcome ' +
+						newUser.email.split('@')[0] +
+						' You have successfully registered to the app your account is now active you can login to the app ' +
+						'' +
+						' your verification code is ' +
+						random +
+						' ' +
+						' your email is ' +
+						userInfo.email +
+						' your password is ' +
+						userInfo.password +
+						' ' +
+						''
+				);
+			}
+			
 		} catch (err) {
 			throw err;
 		}

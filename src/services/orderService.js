@@ -106,8 +106,8 @@ exports.createOrder = async (req) => {
 			const product = await checkProduct(products[i].productId, products[i].variantId, products[i].quantity, req.body.storeId);
 
 			console.log('check product' + i + ' in products Passed');
+			
 			//check if it's null
-
 			if (!product == null) {
 				//delete the product from the cart
 				products.splice(i, 1);
