@@ -3,6 +3,9 @@ const jwt = require('jsonwebtoken');
 var User = require('../models/User');
 const { sendMail } = require('../middleware/email');
 
+var axios = require('axios');
+
+
 exports.register = async (userInfo) => {
 	try {
 		const random = Math.floor(Math.random() * (9999 - 1000 + 1)) + 1000;
@@ -58,6 +61,32 @@ exports.register = async (userInfo) => {
 						' ' +
 						''
 				);
+			}else if (newUser.phone) {
+				var phone_to = "+213"+newUser.phone.substring(1) ;
+				var data = JSON.stringify({
+					"message": ' your verification code is ' +random,
+					"to": phone_to ,
+					"sender_id": "Proximity"
+				  });
+				  
+				  var config = {
+					method: 'post',
+					url: 'https://api.sms.to/sms/estimate',
+					headers: { 
+					  'Authorization': 'Bearer '+process.env.SMSTO_API_KEY, 
+					  'Content-Type': 'application/json'
+					},
+					data : data
+				  };
+				  
+				  axios(config)
+				  .then(function (response) {
+					console.log(JSON.stringify(response.data));
+				  })
+				  .catch(function (error) {
+					console.log(error);
+				  });
+				  
 			}
 			
 		} catch (err) {
