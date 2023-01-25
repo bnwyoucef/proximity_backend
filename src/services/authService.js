@@ -160,3 +160,76 @@ exports.verify = async (userInfo) => {
 		throw err;
 	}
 };
+
+
+//VERIFY
+exports.resend_verification_code = async (userInfo) => {
+	try {
+		var user = await User.findOne({ email: userInfo.email });
+		if (!user) {
+			user =  await User.findOne({ phone: userInfo.email }) ;
+		}
+		if (!user) {
+			user =  await User.findOne({ username: userInfo.email }) ;
+		}
+		if(!user) {
+			throw new Error('user is not registered');
+		}
+		if (user.isVerified) {
+			throw new Error('Account already verified');
+		} else {
+			try {
+				
+				const random = Math.floor(Math.random() * (9999 - 1000 + 1)) + 1000;
+				user.verificationCode = random ;
+				const savedUser = await user.save();
+				if(user.email) {
+					sendMail(
+						user.email,
+						'Welcome to SmartCity',
+						'Welcome ' +
+						user.email.split('@')[0] +
+							' You have successfully registered to the app your account is now active you can login to the app ' +
+							'' +
+							' your verification code is ' +
+							random 
+					);
+				}else if (user.phone) {
+					var phone_to = "+213"+user.phone.substring(1) ;
+					var data = JSON.stringify({
+						"message": ' your verification code is ' +random,
+						"to": phone_to ,
+						"sender_id": "Proximity"
+					  });
+					  
+					  var config = {
+						method: 'post',
+						url: 'https://api.sms.to/sms/estimate',
+						headers: { 
+						  'Authorization': 'Bearer '+process.env.SMSTO_API_KEY, 
+						  'Content-Type': 'application/json'
+						},
+						data : data
+					  };
+					  
+					  axios(config)
+					  .then(function (response) {
+						console.log(JSON.stringify(response.data));
+					  })
+					  .catch(function (error) {
+						console.log(error);
+					  });
+					  
+				}
+				
+				return true ;
+				
+			} catch (err) {
+				throw err;
+			}
+		}
+	} catch (err) {
+		console.log(err);
+		throw err;
+	}
+};

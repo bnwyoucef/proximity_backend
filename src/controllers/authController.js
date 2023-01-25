@@ -24,3 +24,14 @@ exports.verify = async (req, res) => {
 		res.status(500).send(err.message);
 	}
 };
+
+exports.resend_verification_code = async (req, res) => {
+	try {
+		const user = await AuthService.resend_verification_code(req.body);
+		res.send(user);
+	} catch (err) {
+		res.status(500).send(err.message);
+	}
+};
+
+

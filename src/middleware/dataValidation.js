@@ -33,12 +33,26 @@ exports.userLoginSchemaValidation = (req, res, next) => {
 };
 
 const userVerificationSchema = joi.object({
-	email: joi.string().email().required(),
+	email: joi.string().required(),
 	verificationCode: joi.string().min(3).max(5).required(),
 });
 //user registration data
 exports.userVerificationSchemaValidation = (req, res, next) => {
 	const { error } = userVerificationSchema.validate(req.body);
+	if (error) {
+		console.log(error);
+		return res.status(400).send(error.details[0].message);
+	}
+	next();
+};
+
+
+const resendUserVerificationSchema = joi.object({
+	email: joi.string().required(),
+});
+//user registration data
+exports.resendUserVerificationSchemaValidation = (req, res, next) => {
+	const { error } = resendUserVerificationSchema.validate(req.body);
 	if (error) {
 		console.log(error);
 		return res.status(400).send(error.details[0].message);
