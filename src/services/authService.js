@@ -73,18 +73,20 @@ exports.register = async (userInfo) => {
 //LOGIN
 exports.login = async (userInfo) => {
 	try {
-		console.log(userInfo);
-		console.log(userInfo.email);
-		const user = await User.findOne({ email: userInfo.email });
-		console.log(user);
+		let user = await User.findOne({ email: userInfo.email });
+		if(!user) {
+			user = await User.findOne({ phone: userInfo.email });
+		}
+		if(!user) {
+			user = await User.findOne({ username: userInfo.email });
+		}
+
 		if (user) {
 			if (user.isVerified) {
-				console.log('pass1');
 				const hashedPassword = CryptoJS.AES.decrypt(user.password, process.env.ACCESS_TOKEN_SECRET).toString(CryptoJS.enc.Utf8);
 				const inputPassword = userInfo.password;
 				if (hashedPassword === inputPassword) {
 					const token = jwt.sign({ id: user._id, role: user.role }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '7d' });
-					console.log('pass1');
 					return {
 						token,
 						user: {
@@ -94,19 +96,13 @@ exports.login = async (userInfo) => {
 						},
 					};
 				} else {
-					console.log('pass3');
-
 					throw new Error('password is incorrect');
 				}
 			} else {
-				console.log('pass4');
-
-				throw new Error('please verify your email');
+				throw new Error('Account not verified');
 			}
 		} else {
-			console.log('pass5');
-
-			throw new Error('email is not registered');
+			throw new Error('user is not registered');
 		}
 	} catch (err) {
 		throw err;
