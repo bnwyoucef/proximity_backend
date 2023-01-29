@@ -21,6 +21,7 @@ exports.userSchemaValidation = (req, res, next) => {
 
 const userLoginSchema = joi.object({
 	email: joi.string().required(),
+	role: joi.string().valid('user', 'admin', 'seller').required(),
 	password: joi.string().min(6).max(20).required(),
 });
 exports.userLoginSchemaValidation = (req, res, next) => {

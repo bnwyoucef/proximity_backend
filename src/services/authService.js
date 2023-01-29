@@ -111,27 +111,49 @@ exports.login = async (userInfo) => {
 		}
 
 		if (user) {
-			if (user.isVerified) {
-				const hashedPassword = CryptoJS.AES.decrypt(user.password, process.env.ACCESS_TOKEN_SECRET).toString(CryptoJS.enc.Utf8);
+			const hashedPassword = CryptoJS.AES.decrypt(user.password, process.env.ACCESS_TOKEN_SECRET).toString(CryptoJS.enc.Utf8);
 				const inputPassword = userInfo.password;
 				if (hashedPassword === inputPassword) {
 					const token = jwt.sign({ id: user._id, role: user.role }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '7d' });
+					if(user.role != userInfo.role) {
+						return {
+							success : false , 
+							message : "Permission denied" , 
+							data : 3
+						};
+					}
+					if (!user.isVerified) {
+						return {
+							success : false , 
+							message : "Account not verified" , 
+							data : 4
+						};
+					}
 					return {
-						token,
-						user: {
-							id: user._id,
-							email: user.email,
-							role: user.role,
-						},
+						success : true , 
+						message : "" , 
+						data : {
+							token,
+							user: {
+								id: user._id,
+								email: user.email,
+								role: user.role,
+							}
+						}
 					};
 				} else {
-					throw new Error('password is incorrect');
+					return {
+						success : false , 
+						message : "password is incorrect" , 
+						data : 2
+					};
 				}
-			} else {
-				throw new Error('Account not verified');
-			}
 		} else {
-			throw new Error('user is not registered');
+			return {
+				success : false , 
+				message : "user is not registered" , 
+				data : 1
+			};
 		}
 	} catch (err) {
 		throw err;
