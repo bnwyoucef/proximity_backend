@@ -19,6 +19,36 @@ exports.userSchemaValidation = (req, res, next) => {
 	next();
 };
 
+
+//reset password request validation data
+const resetPasswordRequestSchema = joi.object({
+	email: joi.string().required()  
+});
+exports.resetPasswordRequestSchemaValidation = (req, res, next) => {
+	const { error } = resetPasswordRequestSchema.validate(req.body);
+	if (error) {
+		console.log(error);
+		return res.status(400).send(error.details[0].message);
+	}
+	next();
+};
+
+
+
+//reset password validation data
+const resetPasswordSchema = joi.object({
+	password: joi.string().min(6).max(20).required(),
+	password_confirmation: joi.string().min(6).max(20).required(),
+});
+exports.resetPasswordSchemaValidation = (req, res, next) => {
+	const { error } = resetPasswordSchema.validate(req.body);
+	if (error) {
+		console.log(error);
+		return res.status(400).send(error.details[0].message);
+	}
+	next();
+};
+
 const userLoginSchema = joi.object({
 	email: joi.string().required(),
 	role: joi.string().valid('user', 'admin', 'seller').required(),

@@ -7,3 +7,4 @@ module.exports = require('./Payment');
 module.exports = require('./Store');
 module.exports = require('./Offer');
 module.exports = require('./Category');
+module.exports = require('./ResetPassword');

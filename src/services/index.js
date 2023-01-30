@@ -7,3 +7,4 @@ module.exports = require('./orderService');
 module.exports = require('./offerService');
 module.exports = require('./storeService');
 module.exports = require('./searchService');
+module.exports = require('./resetPasswordService');

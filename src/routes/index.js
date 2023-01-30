@@ -7,3 +7,4 @@ module.exports = require('./offerRoute');
 module.exports = require('./orderRoute');
 module.exports = require('./searchRoute');
 module.exports = require('./storeRoute');
+module.exports = require('./resetPasswordRoute');
