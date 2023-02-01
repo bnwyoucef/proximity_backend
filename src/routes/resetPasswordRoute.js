@@ -8,9 +8,9 @@ const { resetPasswordRequestSchemaValidation , resetPasswordSchemaValidation } =
 router.post('/', resetPasswordRequestSchemaValidation , ResetPasswordController.requestResetPassword);
 
 //reset password
-router.post('/:id/:token', resetPasswordSchemaValidation, ResetPasswordController.resetPassword);
+router.post('/:email/:token', resetPasswordSchemaValidation, ResetPasswordController.resetPassword);
 
 //check
-router.get('/:id/:token', ResetPasswordController.checkToken);
+router.get('/:email/:token', ResetPasswordController.checkToken);
 
 module.exports = router;
