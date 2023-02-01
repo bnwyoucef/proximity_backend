@@ -44,7 +44,7 @@ exports.requestResetPassword = async (req) => {
 							' Best Regards, ' 
 					);
 				}else if (user.phone) {
-					var phone_to = "+213"+user.phone.substring(1) ;
+					var phone_to = user.phone.substring(1) ;
 					var data = JSON.stringify({
 						"message": ' your code for reset password is : ' +random,
 						"to": phone_to ,

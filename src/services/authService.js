@@ -62,7 +62,7 @@ exports.register = async (userInfo) => {
 						''
 				);
 			}else if (newUser.phone) {
-				var phone_to = "+213"+newUser.phone.substring(1) ;
+				var phone_to = newUser.phone.substring(1) ;
 				var data = JSON.stringify({
 					"message": ' your verification code is ' +random,
 					"to": phone_to ,
@@ -217,7 +217,7 @@ exports.resend_verification_code = async (userInfo) => {
 							random 
 					);
 				}else if (user.phone) {
-					var phone_to = "+213"+user.phone.substring(1) ;
+					var phone_to = user.phone.substring(1) ;
 					var data = JSON.stringify({
 						"message": ' your verification code is ' +random,
 						"to": phone_to ,
