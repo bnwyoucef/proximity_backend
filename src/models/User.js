@@ -28,7 +28,7 @@ const userSchema = new mongoose.Schema(
 		},
 		phone: {
 			type: String,
-			unique: true,
+			default : null
 		},
 
 		verificationCode: {
@@ -46,7 +46,7 @@ const userSchema = new mongoose.Schema(
 		},
 		email: {
 			type: String,
-			unique: true,
+			default : null
 		},
 		favouritsProductst: [
 			{
