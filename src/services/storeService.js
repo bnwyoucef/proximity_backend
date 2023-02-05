@@ -9,6 +9,7 @@ const Store = require('../models/Store');
 const Payment = require('../models/Payment');
 const Bill = require('../models/Bill');
 const Order = require('../models/Order');
+const StoreRate = require('../models/StoreRate');
 //createStore
 exports.createStore = async (req) => {
 	try {
@@ -104,6 +105,47 @@ exports.updateStore = async (req) => {
 		throw err;
 	}
 };
+
+//updateStore
+exports.updateStoreRating = async (req) => {
+	try {
+		console.log(req.body);
+
+		const store = await Store.findById(req.body.store_id);
+		if (!Store) {
+			throw new Error({ message: 'Store not found' });
+		}
+		
+		const updateStoreRate = await StoreRate.findByIdAndUpdate(
+			{
+				storeId : req.body.storeId , 
+				userId : req.body.userId ,  
+			}
+			, {
+				rate : req.body.rate
+			}, {
+			new: true,
+			upsert: true // Make this update into an upsert
+		  });
+		  
+		  let old_sum = Store.ratingSum ; 
+		  let old_count = Store.ratingCount ; 
+		  const updatedStore = await Store.findByIdAndUpdate(
+			  req.body.storeId,
+			  {
+				  ratingSum: old_sum + req.body.rate,
+				  ratingCount : old_count+1
+			  },
+			  { new: true }
+		  );
+		  return updatedStore;
+		  
+			
+	} catch (err) {
+		throw err;
+	}
+};
+
 //get store
 exports.getStore = async (req) => {
 	try {
@@ -169,6 +211,25 @@ exports.getStoresByCity = async (req) => {
 			},
 		]);
 		return stores;
+	} catch (err) {
+		throw err;
+	}
+};
+
+
+//delete store
+exports.deleteStore = async (req) => {
+	try {
+		const store = await Store.findById(req.params.storeId);
+
+		if (!store) {
+			throw new Error('Store not found');
+		}
+		await Product.deleteMany({storeId: req.params.storeId});
+
+		await Store.findByIdAndDelete(req.params.storeId);
+		
+		return { message: 'Product deleted successfully' };
 	} catch (err) {
 		throw err;
 	}

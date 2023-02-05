@@ -7,6 +7,8 @@ const { updateSchemaValidation } = require('../middleware/dataValidation');
 
 //update user
 router.put('/:id', verifyTokenAndAutherization, updateSchemaValidation, UserController.updateUser);
+//update user image
+router.put('/update_image/:id', verifyTokenAndAutherization,  UserController.updateUserImage);
 //delete
 router.delete('/:id', verifyTokenAndAutherization, UserController.deleteUser);
 //get

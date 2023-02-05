@@ -1,6 +1,8 @@
 const User = require('../models/User');
 
 const CryptoJS = require('crypto-js');
+const uuid = require('uuid');
+const path = require('path');
 
 //Update User
 
@@ -24,6 +26,36 @@ exports.updateUser = async (req) => {
 		throw err;
 	}
 };
+
+exports.updateUserImage = async(req) => {
+	
+	try {
+		
+		const image = req.files.image;
+		//remove spaces from name
+		image.name = image.name.replace(/\s/g, '');
+		const fileName = `${uuid.v4()}${image.name}`;
+		const uploadPath = path.resolve(__dirname, '..', '..', 'public', 'images', 'users', fileName);
+		const storagePath = `images/users/${fileName}`;
+		image.mv(uploadPath, function (err) {
+			if (err) return console.log(err);
+		});
+		
+		const updatedUser = await User.findByIdAndUpdate(
+			req.params.id,
+			{
+				profileImage : storagePath,
+			},
+			{ new: true }
+		).select('-password');
+		
+		return updatedUser;
+	} catch (err) {
+		throw err;
+	}
+	
+}
+
 //delete user
 exports.deleteUser = async (req) => {
 	try {

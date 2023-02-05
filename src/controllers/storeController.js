@@ -17,6 +17,14 @@ exports.updateStore = async (req, res) => {
 		res.status(500).send(err.message);
 	}
 };
+exports.updateStoreRating = async (req, res) => {
+	try {
+		const store = await StoreService.updateStoreRating(req);
+		res.send(store);
+	} catch (err) {
+		res.status(500).send(err.message);
+	}
+};
 exports.getStore = async (req, res) => {
 	try {
 		const store = await StoreService.getStore(req);
@@ -46,6 +54,16 @@ exports.getSellerStores = async (req, res) => {
 exports.getStoresByLocation = async (req, res) => {
 	try {
 		const stores = await StoreService.getStoresByLocation(req);
+		res.send(stores);
+	} catch (err) {
+		res.status(500).send(err.message);
+	}
+};
+
+
+exports.deleteStore = async (req, res) => {
+	try {
+		const stores = await StoreService.deleteStore(req);
 		res.send(stores);
 	} catch (err) {
 		res.status(500).send(err.message);

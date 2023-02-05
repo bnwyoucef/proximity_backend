@@ -4,7 +4,7 @@ const joi = require('joi');
 //auth validation data
 const userSchema = joi.object({
 	email: joi.string().email() ,
-	phone : joi.string().min(10).max(20),
+	phone : joi.string().max(20),
 	username : joi.string().min(5).required() ,
 	password: joi.string().min(6).max(20).required(),
 	password_confirmation: joi.string().min(6).max(20).required(),
@@ -473,3 +473,21 @@ exports.schemaUpdateStoreValidation = (req, res, next) => {
 	}
 	next();
 };
+
+
+const schemaUpdateStoreRating = joi.object({
+	userId: joi.string().required(),
+	storeId: joi.string().required(),
+	rate: joi.number().required()
+});
+
+
+exports.schemaUpdateStoreRatingValidation = (req, res, next) => {
+	const { error } = schemaUpdateStoreRating.validate(req.body);
+	if (error) {
+		console.log(error);
+		return res.status(400).send(error.details[0].message);
+	}
+	next();
+};
+

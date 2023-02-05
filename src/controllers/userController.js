@@ -8,6 +8,16 @@ exports.updateUser = async (req, res) => {
 	}
 };
 
+
+exports.updateUserImage = async (req, res) => {
+	try {
+		const user = await UserService.updateUserImage(req);
+		res.send(user);
+	} catch (err) {
+		res.status(500).send(err.message);
+	}
+};
+
 exports.deleteUser = async (req, res) => {
 	try {
 		const user = await UserService.deleteUser(req);
