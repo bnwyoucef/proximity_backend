@@ -161,19 +161,31 @@ exports.login = async (userInfo) => {
 };
 
 //VERIFY
-exports.verify = async (userInfo) => {
+exports.verify = async (req) => {
 	try {
-		const user = await User.findOne({ email: userInfo.email });
+		const user = await User.findOne({ email: req.email });
 		if (!user) throw new Error('Wrong User Name');
-		if (user.verificationCode == userInfo.verificationCode) {
+		if (user.verificationCode == req.verificationCode) {
 			user.isVerified = true;
 			user.save();
+			const token = jwt.sign({ id: user._id, role: user.role }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '7d' });
 			try {
 				sendMail(user.email, 'Registration Completed', 'Your email is Now Verified');
 			} catch (err) {
 				console.log(err);
 			}
-			return 'hello ' + user.email + ' your email is now verified';
+			return {
+				success : true , 
+				message : 'hello ' + user.email + ' your email is now verified' , 
+				data : {
+					token,
+					user: {
+						id: user._id,
+						email: user.email,
+						role: user.role,
+					}
+				}
+			};
 		} else {
 			throw Error('User code incorrect');
 		}
