@@ -4,10 +4,10 @@ const joi = require('joi');
 //auth validation data
 const userSchema = joi.object({
 	email: joi.string().email() ,
-	phone : joi.string().max(20),
+	phone : joi.string(),
 	username : joi.string().min(5).required() ,
-	password: joi.string().min(6).max(20).required(),
-	password_confirmation: joi.string().min(6).max(20).required(),
+	password: joi.string().min(6).required(),
+	password_confirmation: joi.string().min(6).required(),
 	role: joi.string().valid('user', 'admin', 'seller').required(),
 });
 exports.userSchemaValidation = (req, res, next) => {
@@ -37,8 +37,8 @@ exports.resetPasswordRequestSchemaValidation = (req, res, next) => {
 
 //reset password validation data
 const resetPasswordSchema = joi.object({
-	password: joi.string().min(6).max(20).required(),
-	password_confirmation: joi.string().min(6).max(20).required(),
+	password: joi.string().min(6).required(),
+	password_confirmation: joi.string().min(6).required(),
 });
 exports.resetPasswordSchemaValidation = (req, res, next) => {
 	const { error } = resetPasswordSchema.validate(req.body);
@@ -52,7 +52,7 @@ exports.resetPasswordSchemaValidation = (req, res, next) => {
 const userLoginSchema = joi.object({
 	email: joi.string().required(),
 	role: joi.string().valid('user', 'admin', 'seller').required(),
-	password: joi.string().min(6).max(20).required(),
+	password: joi.string().min(6).required(),
 });
 exports.userLoginSchemaValidation = (req, res, next) => {
 	const { error } = userLoginSchema.validate(req.body);
@@ -93,31 +93,31 @@ exports.resendUserVerificationSchemaValidation = (req, res, next) => {
 
 const updateSchema = joi.object({
 	email: joi.string().email(),
-	password: joi.string().min(6).max(20),
-	password_confirmation: joi.string().min(6).max(20),
+	password: joi.string().min(6),
+	password_confirmation: joi.string().min(6),
 	username: joi.string().min(5),
-	phone: joi.string().min(10).max(20),
+	phone: joi.string().min(10),
 	profileImage: joi.string().min(3).max(200),
 	adresse: joi.object({
 		latitude: joi.number().required(),
 		longitude: joi.number().required(),
-		countryCode: joi.string().min(2).max(20),
-		country: joi.string().min(3).max(20),
-		city: joi.string().min(3).max(20),
-		streetName: joi.string().min(3).max(20),
-		postalCode: joi.string().min(3).max(20),
+		countryCode: joi.string().min(2),
+		country: joi.string().min(3),
+		city: joi.string().min(3),
+		streetName: joi.string().min(3),
+		postalCode: joi.string().min(3),
 		fullAdress: joi.string(),
 		region: joi.string(),
 		apartmentNumber: joi.string(),
 	}),
-	discountCode: joi.string().min(3).max(20),
-	companyName: joi.string().min(3).max(20),
+	discountCode: joi.string().min(3),
+	companyName: joi.string().min(3),
 	shippingAdress: joi.object({
-		countryCode: joi.string().min(2).max(20),
-		country: joi.string().min(3).max(20),
-		city: joi.string().min(3).max(20),
-		streetName: joi.string().min(3).max(20),
-		postalCode: joi.string().min(3).max(20),
+		countryCode: joi.string().min(2),
+		country: joi.string().min(3),
+		city: joi.string().min(3),
+		streetName: joi.string().min(3),
+		postalCode: joi.string().min(3),
 		fullAdress: joi.string(),
 		region: joi.string(),
 		apartmentNumber: joi.string(),
@@ -232,21 +232,21 @@ const orderSchema = joi.object({
 	billingAdress: joi.object({
 		name: joi.string().min(3).max(40),
 		address: joi.string().min(3).max(200),
-		city: joi.string().min(3).max(20),
-		state: joi.string().min(3).max(20),
-		country: joi.string().min(3).max(20),
+		city: joi.string().min(3),
+		state: joi.string().min(3),
+		country: joi.string().min(3),
 		postalCode: joi.string().min(5).max(5),
-		phone: joi.string().min(3).max(20),
+		phone: joi.string().min(3),
 		street1: joi.string().min(3).max(60),
 		street2: joi.string().min(3).max(60),
 	}),
 
-	shippingMethod: joi.string().min(3).max(20),
+	shippingMethod: joi.string().min(3),
 	shippingPrice: joi.number().min(1).max(1000000),
 	shippingTax: joi.number().min(1).max(1000000),
 	shippingDiscount: joi.number().min(1).max(1000000),
 	shippingTotal: joi.number().min(1).max(1000000),
-	shippingStatus: joi.string().min(3).max(20),
+	shippingStatus: joi.string().min(3),
 });
 exports.orderSchemaValidation = (req, res, next) => {
 	const { error } = orderSchema.validate(req.body);
@@ -258,11 +258,11 @@ exports.orderSchemaValidation = (req, res, next) => {
 };
 //product validation data
 const updateProductSchema = joi.object({
-	name: joi.string().min(3).max(20),
+	name: joi.string().min(3),
 	sellerId: joi.string().required(),
 	price: joi.number().min(1).max(1000000),
 	description: joi.string().min(3).max(200),
-	tags: joi.array().items(joi.string().min(3).max(20)),
+	tags: joi.array().items(joi.string().min(3)),
 	discount: joi.number().min(0).max(100),
 	images: joi.array().items(joi.string().min(3).max(200)),
 	storeId: joi.string().required(),
@@ -270,14 +270,14 @@ const updateProductSchema = joi.object({
 	variantes: joi.array().items(
 		joi.object({
 			_id: joi.string(),
-			name: joi.string().min(3).max(20),
+			name: joi.string().min(3),
 			quantity: joi.number().min(1).max(1000000),
 			price: joi.number().min(1).max(1000000),
 			description: joi.string().min(3).max(200),
 			image: joi.string().min(3).max(200),
 			characterstics: joi.array().items(
 				joi.object({
-					name: joi.string().min(3).max(20),
+					name: joi.string().min(3),
 					value: joi.string(),
 				})
 			),
@@ -298,14 +298,14 @@ exports.updateProductSchemaValidation = (req, res, next) => {
 
 //product validation data
 const createProductSchema = joi.object({
-	name: joi.string().min(3).max(20).required(),
+	name: joi.string().min(3).required(),
 	price: joi.number().min(1).required(),
 	description: joi.string().min(3).max(200),
 	image: joi.string().min(3).max(200),
 	categoryId: joi.string(),
-	subcategory: joi.string().min(3).max(20),
+	subcategory: joi.string().min(3),
 	discount: joi.number().min(1).max(100),
-	tags: joi.array().items(joi.string().min(2).max(20)),
+	tags: joi.array().items(joi.string().min(2)),
 	sellerId: joi.string(),
 	storeId: joi.string().required(),
 	images: joi.array().items(joi.string().min(3).max(200)),
@@ -315,7 +315,7 @@ const createProductSchema = joi.object({
 			quantity: joi.number().min(1).required(),
 			characterstics: joi.array().items(
 				joi.object({
-					name: joi.string().min(3).max(20).required(),
+					name: joi.string().min(3).required(),
 					value: joi.string().required(),
 				})
 			),
@@ -361,7 +361,7 @@ const schemaSearchProduct = joi.object({
 	langitude: joi.number().required(),
 	latitude: joi.number().required(),
 	radius: joi.number().required(),
-	name: joi.string().min(3).max(20),
+	name: joi.string().min(3),
 	page: joi.number().min(0),
 	limit: joi.number().min(0),
 });
@@ -396,12 +396,12 @@ const schemaStore = joi.object({
 		})
 		.required(),
 	address: joi.object({
-		city: joi.string().min(3).max(20).required(),
+		city: joi.string().min(3).required(),
 		streetName: joi.string().min(3),
 		postalCode: joi.string().min(2).max(5),
 		fullAdress: joi.string().min(3),
-		region: joi.string().min(3).max(20),
-		country: joi.string().min(3).max(20),
+		region: joi.string().min(3),
+		country: joi.string().min(3),
 		countryCode: joi.string().min(2),
 	}),
 	image: joi.string().min(3),
@@ -427,7 +427,7 @@ exports.schemaStoreValidation = (req, res, next) => {
 	next();
 };
 const schemaUpdateStore = joi.object({
-	name: joi.string().min(3).max(20),
+	name: joi.string().min(3),
 	description: joi.string().min(3).max(200),
 	policies: joi.object({
 		delivery: joi.bool(),
@@ -440,21 +440,21 @@ const schemaUpdateStore = joi.object({
 	}),
 	isActive: joi.bool(),
 	address: joi.object({
-		city: joi.string().min(3).max(20),
+		city: joi.string().min(3),
 		streetName: joi.string().min(3).max(40),
-		postalCode: joi.string().min(3).max(20),
-		country: joi.string().min(3).max(20),
-		countryCode: joi.string().min(2).max(20),
+		postalCode: joi.string().min(3),
+		country: joi.string().min(3),
+		countryCode: joi.string().min(2),
 		fullAdress: joi.string().min(3).max(40),
-		region: joi.string().min(3).max(20),
-		postalCode: joi.string().min(3).max(20),
+		region: joi.string().min(3),
+		postalCode: joi.string().min(3),
 	}),
 	location: joi.object({
 		type: joi.string().valid('Point'),
 		coordinates: joi.array().items().length(2),
 	}),
 
-	image: joi.string().min(3).max(20),
+	image: joi.string().min(3),
 });
 exports.schemaUpdateStoreValidation = (req, res, next) => {
 	if (typeof req.body.location === 'string') {

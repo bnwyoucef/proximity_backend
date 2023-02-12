@@ -17,4 +17,7 @@ router.get('/', verifyAdmin, UserController.getUsers);
 //get user by his id
 router.get('/find/:id', verifyTokenAndAutherization, UserController.getUser);
 
+router.get('/welcome/:id', verifyTokenAndAutherization , UserController.welcome);
+
+
 module.exports = router;

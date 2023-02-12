@@ -79,6 +79,30 @@ exports.getUser = async (req) => {
 		throw err;
 	}
 };
+
+
+//get user by his id
+exports.welcome = async (req) => {
+	try {	
+		const updatedUser = await User.findByIdAndUpdate(
+			req.params.id,
+			{
+				welcome: true ,
+			},
+			{ new: true }
+		);		
+
+		
+		const user = await User.findById(req.params.id);
+		const { password, ...others } = user._doc;
+
+		return others;
+		
+		
+	} catch (err) {
+		throw err;
+	}
+};
 //get all users
 exports.getUsers = async (req) => {
 	try {

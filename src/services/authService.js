@@ -55,11 +55,7 @@ exports.register = async (userInfo) => {
 						random +
 						' ' +
 						' your email is ' +
-						userInfo.email +
-						' your password is ' +
-						userInfo.password +
-						' ' +
-						''
+						userInfo.email 
 				);
 			}else if (newUser.phone) {
 				var phone_to = newUser.phone.substring(1) ;
@@ -138,6 +134,8 @@ exports.login = async (userInfo) => {
 								id: user._id,
 								email: user.email,
 								role: user.role,
+								username: user.username,
+								welcome : user.welcome ? user.welcome : false 
 							}
 						}
 					};
@@ -183,6 +181,7 @@ exports.verify = async (req) => {
 						id: user._id,
 						email: user.email,
 						role: user.role,
+						username: user.username,
 					}
 				}
 			};
