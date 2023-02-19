@@ -21,21 +21,41 @@ exports.updateProduct = async (req) => {
 		//test that the Strore with the entred id existe
 		if (!store) throw new Error('The store with the given ID was not found.');
 		//search the varient in the product
-		for (let i = 0; i < req.body.variantes.length; i++) {
-			const varient = req.body.variantes[i];
-			const varientInProduct = product.variants.find((v) => v._id == varient._id);
-			//test that the varient is in the product
-			//test the varient Id
-			if (!varientInProduct) throw new Error('The varient with the given ID' + varient._id + ' was not found.');
-			//update the varient
+		// for (let i = 0; i < req.body.variantes.length; i++) {
+		// 	const varient = req.body.variantes[i];
+		// 	const varientInProduct = product.variants.find((v) => v._id == varient._id);
+		// 	//test that the varient is in the product
+		// 	//test the varient Id
+		// 	if (!varientInProduct) throw new Error('The varient with the given ID' + varient._id + ' was not found.');
+		// 	//update the varient
 
-			varientInProduct.quantity = varient.quantity;
-			varientInProduct.price = varient.price;
-			//varientInProduct.img = varient.image;
-			varientInProduct.characterstics = varient.characterstics;
-			product.variants[i] = varientInProduct;
-		}
+		// 	varientInProduct.quantity = varient.quantity;
+		// 	varientInProduct.price = varient.price;
+		// 	//varientInProduct.img = varient.image;
+		// 	varientInProduct.characterstics = varient.characterstics;
+		// 	product.variants[i] = varientInProduct;
+		// }
 		//Update the product
+
+		let varientsImages = [];
+		for (let i = 0; i < req.body.variantes.length; i++) {
+			if (!req.files.varientsImages) {
+				throw new Error('No files were uploaded.');
+			}
+			const image = req.files.varientsImages[i];
+			//remove spaces from the name
+			image.name = image.name.replace(/\s/g, '');
+			const fileName = `${uuid.v4()}${image.name}`;
+			const uploadPath = path.resolve(__dirname, '..', '..', 'public', 'images', 'variantes', fileName);
+			const storagePath = `images/variantes/${fileName}`;
+			image.mv(uploadPath, function (err) {
+				if (err) return console.log(err);
+			});
+			req.body.variantes[i].img = storagePath;
+			varientsImages.push(storagePath);
+		}
+
+		product.variants =  req.body.variantes || product.variants ;
 		product.name = req.body.name || product.name;
 		product.price = req.body.price || product.price;
 		product.description = req.body.description || product.description;

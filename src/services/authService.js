@@ -161,9 +161,11 @@ exports.login = async (userInfo) => {
 //VERIFY
 exports.verify = async (req) => {
 	try {
+		console.log(req);
 		const user = await User.findOne({ email: req.email });
+		console.log(user) ;
 		if (!user) throw new Error('Wrong User Name');
-		if (user.verificationCode == req.verificationCode) {
+		if (user.verificationCode === req.verificationCode) {
 			user.isVerified = true;
 			user.save();
 			const token = jwt.sign({ id: user._id, role: user.role }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '7d' });
