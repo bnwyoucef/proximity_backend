@@ -4,6 +4,8 @@ const Category = require('../models/Category');
 const uuid = require('uuid');
 const path = require('path');
 const fileUpload = require('express-fileupload');
+const fs = require('fs');
+
 //Update product
 exports.updateProduct = async (req) => {
 	try {
@@ -37,25 +39,38 @@ exports.updateProduct = async (req) => {
 		// }
 		//Update the product
 
-		let varientsImages = [];
-		for (let i = 0; i < req.body.variantes.length; i++) {
-			if (!req.files.varientsImages) {
-				throw new Error('No files were uploaded.');
-			}
-			const image = req.files.varientsImages[i];
-			//remove spaces from the name
-			image.name = image.name.replace(/\s/g, '');
-			const fileName = `${uuid.v4()}${image.name}`;
-			const uploadPath = path.resolve(__dirname, '..', '..', 'public', 'images', 'variantes', fileName);
-			const storagePath = `images/variantes/${fileName}`;
-			image.mv(uploadPath, function (err) {
-				if (err) return console.log(err);
+		if(req.body.variantes && req.files.varientsImages) {
+			let varientsImages = [];
+			product.variants.forEach((variant , index) => {
+				fs.unlink("images/variantes/" + variant.img.split('/')[2] , (err) => {
+					if (err) {
+						console.log("Error when Delete File["+ index+ "].");
+					}
+				
+					console.log("Delete File["+ index+ "] successfully.");
+				});
 			});
-			req.body.variantes[i].img = storagePath;
-			varientsImages.push(storagePath);
+			for (let i = 0; i < req.body.variantes.length; i++) {
+				if (!req.files.varientsImages) {
+					throw new Error('No files were uploaded.');
+				}
+				const image = req.files.varientsImages[i];
+				//remove spaces from the name
+				image.name = image.name.replace(/\s/g, '');
+				const fileName = `${uuid.v4()}${image.name}`;
+				const uploadPath = path.resolve(__dirname, '..', '..', 'public', 'images', 'variantes', fileName);
+				const storagePath = `images/variantes/${fileName}`;
+				image.mv(uploadPath, function (err) {
+					if (err) return console.log(err);
+				});
+				req.body.variantes[i].img = storagePath;
+				varientsImages.push(storagePath);
+			}
+	
+			product.variants =  req.body.variantes  ;
+
 		}
 
-		product.variants =  req.body.variantes || product.variants ;
 		product.name = req.body.name || product.name;
 		product.price = req.body.price || product.price;
 		product.description = req.body.description || product.description;
