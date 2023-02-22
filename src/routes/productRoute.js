@@ -15,7 +15,7 @@ router.delete('/:id', verifySeller, ProductController.deleteProduct);
 //get Product
 router.get('/:id', ProductController.getProduct);
 //get all products for a store
-router.get('/store/:id', verifyToken, ProductController.searchProductStore);
+router.get('/store/:id', ProductController.searchProductStore);
 //get limit products for a store
 //router.get('/store/:id/limit/:limit', verifyToken, ProductController.getProductsForStoreLimit);
 //search product by his name
