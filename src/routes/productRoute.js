@@ -13,7 +13,7 @@ router.post('/', verifySeller, createProductSchemaValidation, ProductController.
 //delete Product
 router.delete('/:id', verifySeller, ProductController.deleteProduct);
 //get Product
-router.get('/:id', verifyToken, ProductController.getProduct);
+router.get('/:id', ProductController.getProduct);
 //get all products for a store
 router.get('/store/:id', verifyToken, ProductController.searchProductStore);
 //get limit products for a store
