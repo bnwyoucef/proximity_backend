@@ -110,6 +110,76 @@ const updateSchema = joi.object({
 		region: joi.string(),
 		apartmentNumber: joi.string(),
 	}),
+	policy: joi.object({
+		pickup: joi.object({
+			timeLimit: joi.number().required(),
+		}).allow(null),
+		delivery: joi.object({
+			zone: joi.object({
+				centerPoint: joi.object({
+					latitude: joi.number().required(),
+					longitude: joi.number().required(),
+				}).required(),
+				radius: joi.number().required(),
+			}).allow(null),
+			pricing: joi.object({
+				fixe: joi.number().allow(null).required(),
+				percentage: joi.number().allow(null).required(),
+				km: joi.number().allow(null).required(),
+			}).allow(null),
+		}).allow(null),
+		reservation: joi.object({
+			duration: joi.number().allow(null).required(),
+			payment: joi.object({
+				free: joi.boolean().allow(null).required(),
+				partial: joi.object({
+					fixe: joi.number().allow(null).required(),
+					percentage: joi.number().allow(null).required(),
+				}).allow(null),
+				total: joi.boolean().allow(null).required(),
+			}).allow(null),
+			cancelation: joi.object({
+				restrictions: joi.object({
+					fixe: joi.number().allow(null).required(),
+					percentage: joi.number().allow(null).required(),
+				}).allow(null),
+			}).allow(null),
+		}).allow(null),
+		return: joi.object({
+			duration: joi.number().allow(null).required(),
+			productStatus: joi.string().allow("").allow(null).required(),
+			refund: joi.object({
+				order: joi.object({
+					fixe: joi.number().allow(null).required(),
+					percentage: joi.number().allow(null).required(),
+				}).allow(null),
+				shipping: joi.object({
+					fixe: joi.number().allow(null).required(),
+					percentage: joi.number().allow(null).required(),
+				}).allow(null),
+				returnMethod: joi.string().allow("").allow(null).required(),
+			}).allow(null),
+		
+		}).allow(null),
+		order: joi.object({
+			validation: joi.object({
+				auto: joi.boolean().allow(null).required(),
+				manual: joi.boolean().allow(null).required(),
+			}).allow(null),
+			notification: joi.object({
+				realtime: joi.boolean().allow(null).required(),
+				time: joi.string().allow(null).required(),
+				perOrdersNbr: joi.number().allow(null).required(),
+				sendMode: joi.object({
+					mail: joi.boolean().allow(null).required(),
+					sms: joi.boolean().allow(null).required(),
+					popup: joi.boolean().allow(null).required(),
+					vibration: joi.boolean().allow(null).required(),
+					ringing: joi.boolean().allow(null).required(),
+				}).allow(null),
+			}).allow(null),
+		}).allow(null),
+	}).allow(null),
 	discountCode: joi.string().min(3),
 	companyName: joi.string().min(3),
 	shippingAdress: joi.object({
@@ -223,30 +293,32 @@ exports.schemaUpdateOfferValidation = (req, res, next) => {
 //order validation data
 const orderSchema = joi.object({
 	storeId: joi.string().required(),
-	email: joi.string().required(),
-	cardNumber: joi.string().required(),
-	expMonth: joi.string().required(),
-	expYear: joi.string().required(),
-	cvc: joi.string().required(),
-	way: joi.string().valid('total', 'partial', 'free', 'delivery'),
-	billingAdress: joi.object({
-		name: joi.string().min(3).max(40),
-		address: joi.string().min(3).max(200),
-		city: joi.string().min(3),
-		state: joi.string().min(3),
-		country: joi.string().min(3),
-		postalCode: joi.string().min(5).max(5),
-		phone: joi.string().min(3),
-		street1: joi.string().min(3).max(60),
-		street2: joi.string().min(3).max(60),
-	}),
-
-	shippingMethod: joi.string().min(3),
-	shippingPrice: joi.number().min(1).max(1000000),
-	shippingTax: joi.number().min(1).max(1000000),
-	shippingDiscount: joi.number().min(1).max(1000000),
-	shippingTotal: joi.number().min(1).max(1000000),
-	shippingStatus: joi.string().min(3),
+	clientId: joi.string().required(),
+	items : joi.array().items(
+		joi.object({
+			productId : joi.string().required() ,
+			variantId : joi.string().required() ,
+			policy : joi.object().allow(null) ,
+			price : joi.number().required().allow(null) ,
+			discountPrice : joi.number().required().allow(null) ,
+			quantity : joi.number().required() ,
+		})
+	) , 
+	paymentInfos : joi.object({
+		totalAmount : joi.number().required() ,
+		paymentAmount : joi.number().required() ,
+	}).required() ,
+	reservation : joi.boolean() ,
+	pickup : joi.boolean() ,
+	delivery : joi.object({
+		shippingAmount : joi.number().required() ,
+		nbrKm : joi.number() 
+	}) ,
+	canceled : joi.object({
+		byClient : joi.boolean().required() ,
+		motif : joi.string().required() ,
+	}) ,
+	status : joi.string() ,
 });
 exports.orderSchemaValidation = (req, res, next) => {
 	const { error } = orderSchema.validate(req.body);
@@ -283,6 +355,76 @@ const updateProductSchema = joi.object({
 			),
 		})
 	),
+	policy: joi.object({
+		pickup: joi.object({
+			timeLimit: joi.number().required(),
+		}).allow(null),
+		delivery: joi.object({
+			zone: joi.object({
+				centerPoint: joi.object({
+					latitude: joi.number().required(),
+					longitude: joi.number().required(),
+				}).required(),
+				radius: joi.number().required(),
+			}).allow(null),
+			pricing: joi.object({
+				fixe: joi.number().allow(null).required(),
+				percentage: joi.number().allow(null).required(),
+				km: joi.number().allow(null).required(),
+			}).allow(null),
+		}).allow(null),
+		reservation: joi.object({
+			duration: joi.number().allow(null).required(),
+			payment: joi.object({
+				free: joi.boolean().allow(null).required(),
+				partial: joi.object({
+					fixe: joi.number().allow(null).required(),
+					percentage: joi.number().allow(null).required(),
+				}).allow(null),
+				total: joi.boolean().allow(null).required(),
+			}).allow(null),
+			cancelation: joi.object({
+				restrictions: joi.object({
+					fixe: joi.number().allow(null).required(),
+					percentage: joi.number().allow(null).required(),
+				}).allow(null),
+			}).allow(null),
+		}).allow(null),
+		return: joi.object({
+			duration: joi.number().allow(null).required(),
+			productStatus: joi.string().allow("").allow(null).required(),
+			refund: joi.object({
+				order: joi.object({
+					fixe: joi.number().allow(null).required(),
+					percentage: joi.number().allow(null).required(),
+				}).allow(null),
+				shipping: joi.object({
+					fixe: joi.number().allow(null).required(),
+					percentage: joi.number().allow(null).required(),
+				}).allow(null),
+				returnMethod: joi.string().allow("").allow(null).required(),
+			}).allow(null),
+		
+		}).allow(null),
+		order: joi.object({
+			validation: joi.object({
+				auto: joi.boolean().allow(null).required(),
+				manual: joi.boolean().allow(null).required(),
+			}).allow(null),
+			notification: joi.object({
+				realtime: joi.boolean().allow(null).required(),
+				time: joi.string().allow(null).required(),
+				perOrdersNbr: joi.number().allow(null).required(),
+				sendMode: joi.object({
+					mail: joi.boolean().allow(null).required(),
+					sms: joi.boolean().allow(null).required(),
+					popup: joi.boolean().allow(null).required(),
+					vibration: joi.boolean().allow(null).required(),
+					ringing: joi.boolean().allow(null).required(),
+				}).allow(null),
+			}).allow(null),
+		}).allow(null),
+	}).allow(null),
 });
 exports.updateProductSchemaValidation = (req, res, next) => {
 	if (typeof req.body.variantes === 'string') {
@@ -321,6 +463,76 @@ const createProductSchema = joi.object({
 			),
 		})
 	),
+	policy: joi.object({
+		pickup: joi.object({
+			timeLimit: joi.number().required(),
+		}).allow(null),
+		delivery: joi.object({
+			zone: joi.object({
+				centerPoint: joi.object({
+					latitude: joi.number().required(),
+					longitude: joi.number().required(),
+				}).required(),
+				radius: joi.number().required(),
+			}).allow(null),
+			pricing: joi.object({
+				fixe: joi.number().allow(null).required(),
+				percentage: joi.number().allow(null).required(),
+				km: joi.number().allow(null).required(),
+			}).allow(null),
+		}).allow(null),
+		reservation: joi.object({
+			duration: joi.number().allow(null).required(),
+			payment: joi.object({
+				free: joi.boolean().allow(null).required(),
+				partial: joi.object({
+					fixe: joi.number().allow(null).required(),
+					percentage: joi.number().allow(null).required(),
+				}).allow(null),
+				total: joi.boolean().allow(null).required(),
+			}).allow(null),
+			cancelation: joi.object({
+				restrictions: joi.object({
+					fixe: joi.number().allow(null).required(),
+					percentage: joi.number().allow(null).required(),
+				}).allow(null),
+			}).allow(null),
+		}).allow(null),
+		return: joi.object({
+			duration: joi.number().allow(null).required(),
+			productStatus: joi.string().allow("").allow(null).required(),
+			refund: joi.object({
+				order: joi.object({
+					fixe: joi.number().allow(null).required(),
+					percentage: joi.number().allow(null).required(),
+				}).allow(null),
+				shipping: joi.object({
+					fixe: joi.number().allow(null).required(),
+					percentage: joi.number().allow(null).required(),
+				}).allow(null),
+				returnMethod: joi.string().allow("").allow(null).required(),
+			}).allow(null),
+		
+		}).allow(null),
+		order: joi.object({
+			validation: joi.object({
+				auto: joi.boolean().allow(null).required(),
+				manual: joi.boolean().allow(null).required(),
+			}).allow(null),
+			notification: joi.object({
+				realtime: joi.boolean().allow(null).required(),
+				time: joi.string().allow(null).required(),
+				perOrdersNbr: joi.number().allow(null).required(),
+				sendMode: joi.object({
+					mail: joi.boolean().allow(null).required(),
+					sms: joi.boolean().allow(null).required(),
+					popup: joi.boolean().allow(null).required(),
+					vibration: joi.boolean().allow(null).required(),
+					ringing: joi.boolean().allow(null).required(),
+				}).allow(null),
+			}).allow(null),
+		}).allow(null),
+	}).allow(null),
 });
 exports.createProductSchemaValidation = (req, res, next) => {
 	if (typeof req.body.variantes === 'string' && req.body.variantes != "") {
@@ -404,6 +616,76 @@ const schemaStore = joi.object({
 		country: joi.string().min(3),
 		countryCode: joi.string().min(2),
 	}),
+	policy: joi.object({
+		pickup: joi.object({
+			timeLimit: joi.number().required(),
+		}).allow(null),
+		delivery: joi.object({
+			zone: joi.object({
+				centerPoint: joi.object({
+					latitude: joi.number().required(),
+					longitude: joi.number().required(),
+				}).required(),
+				radius: joi.number().required(),
+			}).allow(null),
+			pricing: joi.object({
+				fixe: joi.number().allow(null).required(),
+				percentage: joi.number().allow(null).required(),
+				km: joi.number().allow(null).required(),
+			}).allow(null),
+		}).allow(null),
+		reservation: joi.object({
+			duration: joi.number().allow(null).required(),
+			payment: joi.object({
+				free: joi.boolean().allow(null).required(),
+				partial: joi.object({
+					fixe: joi.number().allow(null).required(),
+					percentage: joi.number().allow(null).required(),
+				}).allow(null),
+				total: joi.boolean().allow(null).required(),
+			}).allow(null),
+			cancelation: joi.object({
+				restrictions: joi.object({
+					fixe: joi.number().allow(null).required(),
+					percentage: joi.number().allow(null).required(),
+				}).allow(null),
+			}).allow(null),
+		}).allow(null),
+		return: joi.object({
+			duration: joi.number().allow(null).required(),
+			productStatus: joi.string().allow("").allow(null).required(),
+			refund: joi.object({
+				order: joi.object({
+					fixe: joi.number().allow(null).required(),
+					percentage: joi.number().allow(null).required(),
+				}).allow(null),
+				shipping: joi.object({
+					fixe: joi.number().allow(null).required(),
+					percentage: joi.number().allow(null).required(),
+				}).allow(null),
+				returnMethod: joi.string().allow("").allow(null).required(),
+			}).allow(null),
+		
+		}).allow(null),
+		order: joi.object({
+			validation: joi.object({
+				auto: joi.boolean().allow(null).required(),
+				manual: joi.boolean().allow(null).required(),
+			}).allow(null),
+			notification: joi.object({
+				realtime: joi.boolean().allow(null).required(),
+				time: joi.string().allow(null).required(),
+				perOrdersNbr: joi.number().allow(null).required(),
+				sendMode: joi.object({
+					mail: joi.boolean().allow(null).required(),
+					sms: joi.boolean().allow(null).required(),
+					popup: joi.boolean().allow(null).required(),
+					vibration: joi.boolean().allow(null).required(),
+					ringing: joi.boolean().allow(null).required(),
+				}).allow(null),
+			}).allow(null),
+		}).allow(null),
+	}).allow(null),
 	image: joi.string().min(3),
 });
 exports.schemaStoreValidation = (req, res, next) => {
@@ -449,6 +731,76 @@ const schemaUpdateStore = joi.object({
 		region: joi.string().min(3),
 		postalCode: joi.string().min(3),
 	}),
+	policy: joi.object({
+		pickup: joi.object({
+			timeLimit: joi.number().required(),
+		}).allow(null),
+		delivery: joi.object({
+			zone: joi.object({
+				centerPoint: joi.object({
+					latitude: joi.number().required(),
+					longitude: joi.number().required(),
+				}).required(),
+				radius: joi.number().required(),
+			}).allow(null),
+			pricing: joi.object({
+				fixe: joi.number().allow(null).required(),
+				percentage: joi.number().allow(null).required(),
+				km: joi.number().allow(null).required(),
+			}).allow(null),
+		}).allow(null),
+		reservation: joi.object({
+			duration: joi.number().allow(null).required(),
+			payment: joi.object({
+				free: joi.boolean().allow(null).required(),
+				partial: joi.object({
+					fixe: joi.number().allow(null).required(),
+					percentage: joi.number().allow(null).required(),
+				}).allow(null),
+				total: joi.boolean().allow(null).required(),
+			}).allow(null),
+			cancelation: joi.object({
+				restrictions: joi.object({
+					fixe: joi.number().allow(null).required(),
+					percentage: joi.number().allow(null).required(),
+				}).allow(null),
+			}).allow(null),
+		}).allow(null),
+		return: joi.object({
+			duration: joi.number().allow(null).required(),
+			productStatus: joi.string().allow("").allow(null).required(),
+			refund: joi.object({
+				order: joi.object({
+					fixe: joi.number().allow(null).required(),
+					percentage: joi.number().allow(null).required(),
+				}).allow(null),
+				shipping: joi.object({
+					fixe: joi.number().allow(null).required(),
+					percentage: joi.number().allow(null).required(),
+				}).allow(null),
+				returnMethod: joi.string().allow("").allow(null).required(),
+			}).allow(null),
+		
+		}).allow(null),
+		order: joi.object({
+			validation: joi.object({
+				auto: joi.boolean().allow(null).required(),
+				manual: joi.boolean().allow(null).required(),
+			}).allow(null),
+			notification: joi.object({
+				realtime: joi.boolean().allow(null).required(),
+				time: joi.string().allow(null).required(),
+				perOrdersNbr: joi.number().allow(null).required(),
+				sendMode: joi.object({
+					mail: joi.boolean().allow(null).required(),
+					sms: joi.boolean().allow(null).required(),
+					popup: joi.boolean().allow(null).required(),
+					vibration: joi.boolean().allow(null).required(),
+					ringing: joi.boolean().allow(null).required(),
+				}).allow(null),
+			}).allow(null),
+		}).allow(null),
+	}).allow(null),
 	location: joi.object({
 		type: joi.string().valid('Point'),
 		coordinates: joi.array().items().length(2),

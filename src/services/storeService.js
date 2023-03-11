@@ -150,10 +150,16 @@ exports.updateStoreRating = async (req) => {
 exports.getStore = async (req) => {
 	try {
 		console.log(req.params.id);
-		const store = await Store.findById(req.params.id);
+		let store = await Store.findById(req.params.id);
 		if (!store) {
 			throw new Error({ message: 'Store not found' });
 		} else {
+			if(!store.policy) {
+				const seller = await User.findById(store.sellerId) ;
+				if(seller) {
+					store.policy = seller.policy ;
+				}
+			}
 			return store;
 		}
 	} catch (err) {

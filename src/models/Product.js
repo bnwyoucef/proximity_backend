@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { policySchema } = require('./Policy');
 var ObjectId = require('mongodb').ObjectID;
 
 const productSchema = new mongoose.Schema(
@@ -99,6 +100,7 @@ const productSchema = new mongoose.Schema(
 				},
 			},
 		],
+		policy: policySchema,
 	},
 	{
 		timestamp: true,

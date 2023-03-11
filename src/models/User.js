@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { policySchema } = require('./Policy');
 var ObjectId = require('mongodb').ObjectID;
 
 const userSchema = new mongoose.Schema(
@@ -70,6 +71,7 @@ const userSchema = new mongoose.Schema(
 			region: { type: String },
 			fullAddress: { type: String },
 		},
+		policy: policySchema ,
 		shippingAdress: {
 			countryCode: { type: String },
 			country: { type: String },

@@ -5,6 +5,7 @@ const uuid = require('uuid');
 const path = require('path');
 const fileUpload = require('express-fileupload');
 const fs = require('fs');
+const Order = require('../models/Order');
 
 //Update product
 exports.updateProduct = async (req) => {
@@ -181,6 +182,41 @@ exports.deleteProduct = async (req) => {
 		if (product.sellerId != req.user.id) {
 			throw new Error('its not your product');
 		}
+
+		// delete images 
+
+		let images_to_delete = product.images ;
+		
+		if(product.variants) {
+			let variant_images =  product.variants.maps(el => el.img) ;
+			images_to_delete.push(...variant_images) ;
+		}
+
+		//check if any image exist in orders 
+
+		// get orders->products->image exit in images_to_delete
+
+		let orders = Order.find({products : {
+			image : { $in: images_to_delete }
+		}}) ;
+		if(orders && orders.length) {
+			orders.forEach(order => {
+				images_to_delete = images_to_delete.filter(el => order._doc.products.findIndex(prod => prod.image == el) != -1 )
+			});
+		}
+
+		images_to_delete.forEach(image => {
+			try {
+				if(image) {
+					fs.unlinkSync(path.resolve(__dirname, '..', '..', 'public')+"/"+image);
+				  
+					console.log("Delete File successfully.");
+				}
+			  } catch (error) {
+				console.log(error);
+			  }
+		});
+		
 		await Product.findByIdAndDelete(req.params.id);
 		const category = await Category.findById(product.categoryId);
 		if (category) {
@@ -199,18 +235,26 @@ exports.deleteProduct = async (req) => {
 //get product by id
 exports.getProduct = async (req) => {
 	try {
-		var sql = 'SELECT * FROM Products';
-		var params = [];
-		db.all(sql, params, (err, rows) => {
-			if (err) {
-				res.status(400).json({ error: err.message });
-				return;
+		console.log(req.params.id);
+		let product = await Product.findById(req.params.id);
+		if (!product) {
+			throw new Error({ message: 'Product not found' });
+		} else {
+			if(!product.policy) {
+				const store = await Store.findById(product.storeId) ;
+				if(store) {
+					if(store.policy) {
+						product.policy = store.policy ;
+					}else {
+						const seller = await User.findById(store.sellerId) ;
+						if(seller) {
+							product.policy = seller.policy ;
+						}	
+					}
+				}
 			}
-			res.json({
-				message: 'success',
-				data: rows,
-			});
-		});
+			return product;
+		}
 	} catch (err) {
 		throw err;
 	}

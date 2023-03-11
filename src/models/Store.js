@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const User = require('./User');
 const Product = require('./Product');
+const { policySchema } = require('./Policy');
 var ObjectId = require('mongodb').ObjectID;
 
 const storeSchema = new mongoose.Schema(
@@ -203,6 +204,7 @@ const storeSchema = new mongoose.Schema(
 			type: Number,
 			default: 0,
 		},
+		policy: policySchema,
 	},
 	{ timestamp: true, toJSON: { virtuals: true } }
 );
