@@ -22,12 +22,17 @@ exports.requestResetPassword = async (req) => {
 			const random = Math.floor(Math.random() * (9999 - 1000 + 1)) + 1000;
 
             let tokenResetPassword = await ResetPassword.findOne({userId : user._id}) ; 
+			
             if(!tokenResetPassword) {
                 tokenResetPassword = await new ResetPassword({
                     userId : user._id , 
                     token : random
                 }).save() ;
-            }
+            }else {
+				// await ResetPassword.updateOne({userId : user._id } , {token : random}) ;
+				tokenResetPassword.token = random ; 
+				await tokenResetPassword.save() ;
+			}
             
 			
 

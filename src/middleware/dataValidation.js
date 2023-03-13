@@ -124,7 +124,6 @@ const updateSchema = joi.object({
 			}).allow(null),
 			pricing: joi.object({
 				fixe: joi.number().allow(null).required(),
-				percentage: joi.number().allow(null).required(),
 				km: joi.number().allow(null).required(),
 			}).allow(null),
 		}).allow(null),
@@ -369,7 +368,6 @@ const updateProductSchema = joi.object({
 			}).allow(null),
 			pricing: joi.object({
 				fixe: joi.number().allow(null).required(),
-				percentage: joi.number().allow(null).required(),
 				km: joi.number().allow(null).required(),
 			}).allow(null),
 		}).allow(null),
@@ -477,7 +475,6 @@ const createProductSchema = joi.object({
 			}).allow(null),
 			pricing: joi.object({
 				fixe: joi.number().allow(null).required(),
-				percentage: joi.number().allow(null).required(),
 				km: joi.number().allow(null).required(),
 			}).allow(null),
 		}).allow(null),
@@ -630,7 +627,6 @@ const schemaStore = joi.object({
 			}).allow(null),
 			pricing: joi.object({
 				fixe: joi.number().allow(null).required(),
-				percentage: joi.number().allow(null).required(),
 				km: joi.number().allow(null).required(),
 			}).allow(null),
 		}).allow(null),
@@ -745,7 +741,6 @@ const schemaUpdateStore = joi.object({
 			}).allow(null),
 			pricing: joi.object({
 				fixe: joi.number().allow(null).required(),
-				percentage: joi.number().allow(null).required(),
 				km: joi.number().allow(null).required(),
 			}).allow(null),
 		}).allow(null),
