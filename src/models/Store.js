@@ -102,6 +102,7 @@ const storeSchema = new mongoose.Schema(
 			type: Boolean,
 			default: true,
 		},
+		policy: policySchema ,
 		policies: {
 			delivery: {
 				type: Boolean,
