@@ -1,17 +1,22 @@
 const { Schema, model } = require('mongoose');
 
 exports.policySchema = new Schema(
-	{
+	{ 
+    
+        workingTime : {
+            openTime: { type: String  , required : true , default : ""},
+            closeTime: { type: String , requied : true, default : ""} ,
+        },
         pickup: { 
-            timeLimit : { type: Number  , required : true} , 
+            timeLimit : { type: Number  , required : true, default : null} , 
         },
         delivery: {
             zone : {
                 centerPoint : {
-                    latitude : { type : Number , required : true } , 
-                    longitude : { type : Number , required : true } , 
+                    latitude : { type : Number , required : true , default : null} , 
+                    longitude : { type : Number , required : true  , default : null} , 
                 } , 
-                raduis : { type : Number , required : true } , 
+                raduis : { type : Number , required : true , default : null } , 
             } ,
             pricing : {
                 fixe : {type : Number , required : true , default : null} ,

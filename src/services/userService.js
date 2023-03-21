@@ -73,7 +73,7 @@ exports.getUser = async (req) => {
 		console.log('start');
 		const user = await User.findById(req.params.id);
 		const { password, ...others } = user._doc;
-
+		console.log(others);
 		return others;
 	} catch (err) {
 		throw err;
