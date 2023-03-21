@@ -102,54 +102,7 @@ const storeSchema = new mongoose.Schema(
 			type: Boolean,
 			default: true,
 		},
-		policies: {
-			delivery: {
-				type: Boolean,
-				required: true,
-				default: false,
-			},
-			selfPickUp: {
-				enum: ['total', 'partial', 'free'],
-				type: String,
-				default: 'total',
-			},
-			selfPickUpPrice: {
-				type: Number,
-				default: 0,
-			},
-
-			tax: {
-				type: Number,
-				required: true,
-				default: 0,
-			},
-			openWeekend: {
-				type: Boolean,
-				required: true,
-				default: false,
-			},
-			openNight: {
-				type: Boolean,
-				required: true,
-				default: false,
-			},
-			openTime: {
-				type: String,
-				required: true,
-				default: '08:00',
-			},
-			closeTime: {
-				type: String,
-				required: true,
-				default: '22:00',
-			},
-			openDay: {
-				type: Boolean,
-				required: true,
-				default: true,
-			},
-			//policies order and reservation product
-		},
+		policy: policySchema ,
 		offers: [
 			{
 				name: {
