@@ -4,56 +4,72 @@ exports.policySchema = new Schema(
 	{   
         
         workingTime : {
-        openTime: { type: String  , required : true , default : ""},
-        closeTime: { type: String , requied : true, default : ""} ,
-    },
+            type : {
+                openTime: { type: String  , required : true , default : ""},
+                closeTime: { type: String , requied : true, default : ""} ,
+            } , 
+            default: null,
+        },
         pickup: { 
-            timeLimit : { type: Number  , required : true, default : null} , 
+            type : {
+                timeLimit : { type: Number  , required : true, default : null} , 
+            } , 
+            default: null,
         },
         delivery: {
-            zone : {
-                centerPoint : {
-                    latitude : { type : Number , required : true , default : null} , 
-                    longitude : { type : Number , required : true  , default : null} , 
-                } , 
-                raduis : { type : Number , required : true , default : null } , 
+            type : {
+                zone : {
+                    centerPoint : {
+                        latitude : { type : Number , required : true , default : null} , 
+                        longitude : { type : Number , required : true  , default : null} , 
+                    } , 
+                    raduis : { type : Number , required : true , default : null } , 
+                } ,
+                pricing : {
+                    fixe : {type : Number , required : true , default : null} ,
+                    km : {type : Number , required : true , default : null} ,
+                } ,
+
             } ,
-            pricing : {
-                fixe : {type : Number , required : true , default : null} ,
-                km : {type : Number , required : true , default : null} ,
-            } ,
+            default: null,
         },
         reservation : {
-            duration : {type : Number , required : true , default : null} ,
-            payment : {
-                free : {type : Boolean , required : true , default : null} ,
-                partial : { 
-                    fixe : {type : Number , required : true , default : null} ,
-                    percentage : {type : Number , required : true , default : null} ,
+            type : {
+                duration : {type : Number , required : true , default : null} ,
+                payment : {
+                    free : {type : Boolean , required : true , default : null} ,
+                    partial : { 
+                        fixe : {type : Number , required : true , default : null} ,
+                        percentage : {type : Number , required : true , default : null} ,
+                    } ,
+                    total : {type : Boolean , required : true , default : null} ,
                 } ,
-                total : {type : Boolean , required : true , default : null} ,
-            } ,
-            cancelation : {
-                restrictions : {
-                    fixe : {type : Number , required : true , default : null} ,
-                    percentage : {type : Number , required : true , default : null} ,
-                }
-            } ,
+                cancelation : {
+                    restrictions : {
+                        fixe : {type : Number , required : true , default : null} ,
+                        percentage : {type : Number , required : true , default : null} ,
+                    }
+                } ,
+            } , 
+            default: null,
         } , 
         return : {
-            duration : {type : Number , required : true , default : null} ,
-            productStatus : {type : String , required : true , default : ""} ,
-            returnMethod : {type : String , required : true , default : ""} ,
-            refund : {
-                order : {
-                    fixe : {type : Number , required : true , default : null} ,
-                    percentage : {type : Number , required : true , default : null} ,
+            type : {
+                duration : {type : Number , required : true , default : null} ,
+                productStatus : {type : String , required : true , default : ""} ,
+                returnMethod : {type : String , required : true , default : ""} ,
+                refund : {
+                    order : {
+                        fixe : {type : Number , required : true , default : null} ,
+                        percentage : {type : Number , required : true , default : null} ,
+                    } , 
+                    shipping : {
+                        fixe : {type : Number , required : true , default : null} ,
+                        percentage : {type : Number , required : true , default : null} ,
+                    },
                 } , 
-                shipping : {
-                    fixe : {type : Number , required : true , default : null} ,
-                    percentage : {type : Number , required : true , default : null} ,
-                },
             } , 
+            default: null,
 
         } , 
         order : {
