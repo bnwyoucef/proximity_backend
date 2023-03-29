@@ -161,7 +161,19 @@ exports.getSellerStores = async (req) => {
 		if (!stores) {
 			throw new Error({ message: 'Stores not found' });
 		} else {
-			return stores;
+			let new_stores = [...stores] ; 
+			
+			const seller = await User.findById(req.user.id) ;
+
+			new_stores.map(element => {
+				if(!element.policy && seller) {
+						element.policy = seller.policy ;
+				}
+				return element ; 
+				
+			}) ;
+			console.log(new_stores);
+			return new_stores;
 		}
 	} catch (err) {
 		throw err;

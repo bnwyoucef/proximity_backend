@@ -111,6 +111,10 @@ const updateSchema = joi.object({
 		apartmentNumber: joi.string(),
 	}),
 	policy: joi.object({
+		workingTime: joi.object({
+			openTime: joi.number().required(),
+			closeTime: joi.number().required(),
+		}).allow(null),
 		pickup: joi.object({
 			timeLimit: joi.number().required(),
 		}).allow(null),
@@ -194,6 +198,10 @@ const updateSchema = joi.object({
 	proximityRange: joi.number().min(0).max(1000),
 });
 exports.updateSchemaValidation = (req, res, next) => {
+	if (typeof req.body.policy === 'string' && req.body.policy != "") {
+		req.body.policy = JSON.parse(req.body.policy);
+	}
+	
 	const { error } = updateSchema.validate(req.body);
 	if (error) {
 		console.log(error);
@@ -355,6 +363,10 @@ const updateProductSchema = joi.object({
 		})
 	),
 	policy: joi.object({
+		workingTime: joi.object({
+			openTime: joi.number().required(),
+			closeTime: joi.number().required(),
+		}).allow(null),
 		pickup: joi.object({
 			timeLimit: joi.number().required(),
 		}).allow(null),
@@ -428,6 +440,12 @@ exports.updateProductSchemaValidation = (req, res, next) => {
 	if (typeof req.body.variantes === 'string') {
 		req.body.variantes = JSON.parse(req.body.variantes);
 	}
+	
+	if (typeof req.body.policy === 'string' && req.body.policy != "") {
+		req.body.policy = JSON.parse(req.body.policy);
+	}
+
+	
 	const { error } = updateProductSchema.validate(req.body);
 	if (error) {
 		console.log(error);
@@ -462,6 +480,10 @@ const createProductSchema = joi.object({
 		})
 	),
 	policy: joi.object({
+		workingTime: joi.object({
+			openTime: joi.number().required(),
+			closeTime: joi.number().required(),
+		}).allow(null),
 		pickup: joi.object({
 			timeLimit: joi.number().required(),
 		}).allow(null),
@@ -543,6 +565,12 @@ exports.createProductSchemaValidation = (req, res, next) => {
 			req.files.varientsImages = [req.files.varientsImages] ;
 		}
 	}
+
+	
+	if (typeof req.body.policy === 'string' && req.body.policy != "") {
+		req.body.policy = JSON.parse(req.body.policy);
+	}
+
 	const { error } = createProductSchema.validate(req.body);
 	if (error) {
 		console.log(error);
@@ -605,6 +633,10 @@ const schemaStore = joi.object({
 		countryCode: joi.string().min(2),
 	}),
 	policy: joi.object({
+		workingTime: joi.object({
+			openTime: joi.number().required(),
+			closeTime: joi.number().required(),
+		}).allow(null),
 		pickup: joi.object({
 			timeLimit: joi.number().required(),
 		}).allow(null),
@@ -684,6 +716,12 @@ exports.schemaStoreValidation = (req, res, next) => {
 	if (typeof req.body.address === 'string') {
 		req.body.address = JSON.parse(req.body.address);
 	}
+	if (typeof req.body.policy === 'string' && req.body.policy != "") {
+		req.body.policy = JSON.parse(req.body.policy);
+	}
+	
+
+	
 	const { error } = schemaStore.validate(req.body);
 	if (error) {
 		console.log(error);
@@ -707,6 +745,10 @@ const schemaUpdateStore = joi.object({
 		postalCode: joi.string().min(3),
 	}),
 	policy: joi.object({
+		workingTime: joi.object({
+			openTime: joi.number().required(),
+			closeTime: joi.number().required(),
+		}).allow(null),
 		pickup: joi.object({
 			timeLimit: joi.number().required(),
 		}).allow(null),
@@ -788,6 +830,11 @@ exports.schemaUpdateStoreValidation = (req, res, next) => {
 	}
 	if (typeof req.body.address === 'string') {
 		req.body.address = JSON.parse(req.body.address);
+	}
+
+	
+	if (typeof req.body.policy === 'string' && req.body.policy != "") {
+		req.body.policy = JSON.parse(req.body.policy);
 	}
 	const { error } = schemaUpdateStore.validate(req.body);
 	if (error) {

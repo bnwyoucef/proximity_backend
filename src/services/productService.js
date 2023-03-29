@@ -6,6 +6,7 @@ const path = require('path');
 const fileUpload = require('express-fileupload');
 const fs = require('fs');
 const Order = require('../models/Order');
+const User = require('../models/User');
 
 //Update product
 exports.updateProduct = async (req) => {
@@ -235,9 +236,8 @@ exports.deleteProduct = async (req) => {
 //get product by id
 exports.getProduct = async (req) => {
 	try {
-		console.log(req.params.id);
 		let product = await Product.findById(req.params.id);
-		if (!product) {
+		if (product == null ) {
 			throw new Error({ message: 'Product not found' });
 		} else {
 			if(!product.policy) {
@@ -253,9 +253,12 @@ exports.getProduct = async (req) => {
 					}
 				}
 			}
+			console.log(product);
 			return product;
 		}
+		
 	} catch (err) {
+		console.log(err);
 		throw err;
 	}
 };
