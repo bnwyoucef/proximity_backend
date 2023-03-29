@@ -147,6 +147,7 @@ const updateSchema = joi.object({
 		return: joi.object({
 			duration: joi.number().allow(null).required(),
 			productStatus: joi.string().allow("").allow(null).required(),
+			returnMethod: joi.string().allow("").allow(null).required(),
 			refund: joi.object({
 				order: joi.object({
 					fixe: joi.number().allow(null).required(),
@@ -156,7 +157,6 @@ const updateSchema = joi.object({
 					fixe: joi.number().allow(null).required(),
 					percentage: joi.number().allow(null).required(),
 				}).allow(null),
-				returnMethod: joi.string().allow("").allow(null).required(),
 			}).allow(null),
 		
 		}).allow(null),
@@ -391,6 +391,7 @@ const updateProductSchema = joi.object({
 		return: joi.object({
 			duration: joi.number().allow(null).required(),
 			productStatus: joi.string().allow("").allow(null).required(),
+			returnMethod: joi.string().allow("").allow(null).required(),
 			refund: joi.object({
 				order: joi.object({
 					fixe: joi.number().allow(null).required(),
@@ -400,7 +401,6 @@ const updateProductSchema = joi.object({
 					fixe: joi.number().allow(null).required(),
 					percentage: joi.number().allow(null).required(),
 				}).allow(null),
-				returnMethod: joi.string().allow("").allow(null).required(),
 			}).allow(null),
 		
 		}).allow(null),
@@ -498,6 +498,7 @@ const createProductSchema = joi.object({
 		return: joi.object({
 			duration: joi.number().allow(null).required(),
 			productStatus: joi.string().allow("").allow(null).required(),
+			returnMethod: joi.string().allow("").allow(null).required(),
 			refund: joi.object({
 				order: joi.object({
 					fixe: joi.number().allow(null).required(),
@@ -507,7 +508,6 @@ const createProductSchema = joi.object({
 					fixe: joi.number().allow(null).required(),
 					percentage: joi.number().allow(null).required(),
 				}).allow(null),
-				returnMethod: joi.string().allow("").allow(null).required(),
 			}).allow(null),
 		
 		}).allow(null),
@@ -589,15 +589,6 @@ const schemaStore = joi.object({
 	name: joi.string().min(2).required(),
 	description: joi.string().min(3).max(200).required(),
 	sellerId: joi.string().required(),
-	policies: joi.object({
-		delivery: joi.bool(),
-		selfPickUp: joi.string().valid('total', 'partial', 'free').required(),
-		selfPickUpPrice: joi.number(),
-		tax: joi.number(),
-		openWeekend: joi.bool(),
-		openTime: joi.string(),
-		closeTime: joi.string(),
-	}),
 	location: joi
 		.object({
 			type: joi.string().valid('Point').required(),
@@ -649,6 +640,7 @@ const schemaStore = joi.object({
 		}).allow(null),
 		return: joi.object({
 			duration: joi.number().allow(null).required(),
+			returnMethod: joi.string().allow("").allow(null).required(),
 			productStatus: joi.string().allow("").allow(null).required(),
 			refund: joi.object({
 				order: joi.object({
@@ -659,7 +651,6 @@ const schemaStore = joi.object({
 					fixe: joi.number().allow(null).required(),
 					percentage: joi.number().allow(null).required(),
 				}).allow(null),
-				returnMethod: joi.string().allow("").allow(null).required(),
 			}).allow(null),
 		
 		}).allow(null),
@@ -693,10 +684,6 @@ exports.schemaStoreValidation = (req, res, next) => {
 	if (typeof req.body.address === 'string') {
 		req.body.address = JSON.parse(req.body.address);
 	}
-	if (typeof req.body.policies === 'string') {
-		req.body.policies = JSON.parse(req.body.policies);
-	}
-
 	const { error } = schemaStore.validate(req.body);
 	if (error) {
 		console.log(error);
@@ -707,15 +694,7 @@ exports.schemaStoreValidation = (req, res, next) => {
 const schemaUpdateStore = joi.object({
 	name: joi.string().min(3),
 	description: joi.string().min(3).max(200),
-	policies: joi.object({
-		delivery: joi.bool(),
-		selfPickUp: joi.string().valid('total', 'partial', 'free').required(),
-		selfPickUpPrice: joi.number(),
-		tax: joi.number(),
-		openWeekend: joi.bool(),
-		openTime: joi.string(),
-		closeTime: joi.string(),
-	}),
+	
 	isActive: joi.bool(),
 	address: joi.object({
 		city: joi.string().min(3),
@@ -764,6 +743,7 @@ const schemaUpdateStore = joi.object({
 		return: joi.object({
 			duration: joi.number().allow(null).required(),
 			productStatus: joi.string().allow("").allow(null).required(),
+			returnMethod: joi.string().allow("").allow(null).required(),
 			refund: joi.object({
 				order: joi.object({
 					fixe: joi.number().allow(null).required(),
@@ -773,7 +753,6 @@ const schemaUpdateStore = joi.object({
 					fixe: joi.number().allow(null).required(),
 					percentage: joi.number().allow(null).required(),
 				}).allow(null),
-				returnMethod: joi.string().allow("").allow(null).required(),
 			}).allow(null),
 		
 		}).allow(null),
@@ -809,9 +788,6 @@ exports.schemaUpdateStoreValidation = (req, res, next) => {
 	}
 	if (typeof req.body.address === 'string') {
 		req.body.address = JSON.parse(req.body.address);
-	}
-	if (typeof req.body.policies === 'string') {
-		req.body.policies = JSON.parse(req.body.policies);
 	}
 	const { error } = schemaUpdateStore.validate(req.body);
 	if (error) {

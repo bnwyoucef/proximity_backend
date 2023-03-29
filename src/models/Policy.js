@@ -8,13 +8,11 @@ exports.policySchema = new Schema(
                 openTime: { type: String  , required : true , default : ""},
                 closeTime: { type: String , requied : true, default : ""} ,
             } , 
-            default: null,
         },
         pickup: { 
             type : {
                 timeLimit : { type: Number  , required : true, default : null} , 
             } , 
-            default: null,
         },
         delivery: {
             type : {
@@ -31,7 +29,6 @@ exports.policySchema = new Schema(
                 } ,
 
             } ,
-            default: null,
         },
         reservation : {
             type : {
@@ -51,7 +48,6 @@ exports.policySchema = new Schema(
                     }
                 } ,
             } , 
-            default: null,
         } , 
         return : {
             type : {
@@ -69,7 +65,6 @@ exports.policySchema = new Schema(
                     },
                 } , 
             } , 
-            default: null,
 
         } , 
         order : {

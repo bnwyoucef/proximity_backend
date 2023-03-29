@@ -19,9 +19,6 @@ exports.createStore = async (req) => {
 		if (typeof req.body.address === 'string') {
 			req.body.address = JSON.parse(req.body.address);
 		}
-		if (typeof req.body.policies === 'string') {
-			req.body.policies = JSON.parse(req.body.policies);
-		}
 		console.log(req.body);
 		let image;
 
@@ -57,16 +54,7 @@ exports.createStore = async (req) => {
 				country: req.body.address.country,
 				countryCode: req.body.address.countryCode,
 			},
-			policies: {
-				delivery: req.body.policies.delivery,
-				selfPickUp: req.body.policies.selfPickUp,
-				selfPickUpPrice: req.body.policies.selfPickUpPrice,
-				tax: req.body.policies.tax,
-				openWeekend: req.body.policies.openWeekend,
-				openTime: req.body.policies.openTime,
-				closeTime: req.body.policies.closeTime,
-			},
-
+			policy : req.body.policy , 
 			location: {
 				type: 'Point',
 
