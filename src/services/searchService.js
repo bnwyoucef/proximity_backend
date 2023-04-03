@@ -64,6 +64,7 @@ exports.searchProduct = async (req) => {
 			req.query.limit = 10;
 		}
 
+		console.log([parseFloat(req.query.langitude), parseFloat(req.query.latitude) , parseFloat(req.query.radius) ]);
 		//get the nearest stores
 		const stores = await Store.aggregate([
 			{

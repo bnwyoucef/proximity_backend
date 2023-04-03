@@ -8,6 +8,7 @@ const Payment = require('../models/Payment');
 const Bill = require('../models/Bill');
 const Order = require('../models/Order');
 const { check } = require('prettier');
+const { default: mongoose } = require('mongoose');
 
 //create order
 exports.createOrder = async (req) => {
@@ -135,6 +136,33 @@ exports.createOrder = async (req) => {
 	}
 };
 
+
+//create order
+exports.createOrderDirectly = async (req) => {
+	try {
+		let order = req.body ; 
+		if(typeof order.items === "string") {
+			order.items = JSON.parse(order.items) ; 
+		}else {
+			order.items = [] ; 
+		}
+
+		if(typeof order.paymentInfos === "string") {
+			order.paymentInfos = JSON.parse(order.paymentInfos) ; 
+		}
+		//create order 
+
+		console.log(order) ;
+		const new_order = new Order({...order}) ; 
+
+		await new_order.save() ;
+		
+	} catch (error) {
+		console.log(error) ;
+		
+	}
+};
+
 //get the order by id
 exports.getOrder = async (req) => {
 	try {
@@ -147,6 +175,7 @@ exports.getOrder = async (req) => {
 		throw err;
 	}
 };
+
 //get order by user id
 exports.getOrders = async (req) => {
 	try {
@@ -219,3 +248,193 @@ exports.getOrdersByPaymentId = async (req) => {
 		throw err;
 	}
 };
+
+
+
+//get pre Order items
+exports.getPreOrderItems = async (req) => {
+	try {
+		var PreOrder = {
+			storeId : null , 
+			cartId : null , 
+			storeName : "" ,
+			maxDeliveryFixe : 0.0 ,
+			maxDeliveryKm : 0.0 , 
+			storeAdresse : [] , // location
+			items : [] , // array of preOrderItem
+		}
+
+		var preOrderItem =  {
+			productId : null  ,
+			variantId : null , 
+			name : "" , 
+			characterstics : [] ,
+			discount : 0.0 , 
+			image : "" , 
+			price : 0.0 , 
+			quantity : 0 ,
+			policy : null 
+			// policies
+			// reservationPolicy : false ,  
+			// deliveryPolicy : false ,  
+			// pickupPolicy : false ,  
+			// // percentage
+			// reservationP : 0.0 ,   
+		}
+
+		// check cart !!
+		var cart = await Cart.findById(req.body.cartId);
+		if (!cart) {
+			 cart = await Cart.findOne({userId : req.body.clientId , });
+			if (!cart) {
+				throw new Error('cart not found');
+			}
+		}
+
+		PreOrder.cartId = req.body.cartId ; 
+
+		// check store 
+		// pas du store au niveau du backend 
+
+		// check items and get current values 
+		var items = [] ; 
+		if(typeof req.body.items === "string" && req.body.items != "" ) {
+			items = JSON.parse(req.body.items);
+		} ;
+		if(items.length) {
+
+			// check if all items in cart 
+			var itemIds = items.map(el => el.variantId) ;
+			console.log(cart);
+
+			var filterItems = cart.items.filter(el => itemIds.includes(el.variantId)  ) ;
+
+			if(filterItems.length !== items.length) {
+				throw new Error('Order without same items of the cart');
+			}
+
+			// get first variant and store 
+			var firstProduct = await Product.findOne({ 'variants._id': items[0].variantId }) ; 
+			if(!firstProduct) {
+				throw new Error('Store not found');
+			}
+			var store = await Store.findById(firstProduct.storeId) ; 
+			if(!store) {
+				throw new Error('Store not found');
+			}
+			PreOrder.storeId = store._id.toString() ; 
+			PreOrder.storeName = store.name ; 
+			PreOrder.storeAdresse = store.location ; 
+		}else {
+			throw new Error('items not found');
+		}
+
+		items  = await asyncMapPreOrderItems(items, myAsyncFuncPreOrderItems);
+
+		//get max delivery pricing 
+
+		var maxDeliveryKm = items.reduce((max, item) => {
+			return item.deliveryP > max ? item.deliveryP : max;
+		  }, 0.0);
+		PreOrder.maxDeliveryKm = maxDeliveryKm ; 
+
+		var maxDeliveryFixe = items.reduce((max, item) => {
+			return item.deliveryFixe > max ? item.deliveryFixe : max;
+		  }, 0.0);
+		PreOrder.maxDeliveryFixe = maxDeliveryFixe ; 
+		  
+		PreOrder.items = JSON.stringify(items) ;
+
+		console.log(PreOrder);
+		return PreOrder;
+	} catch (err) {
+		console.log(err);
+		throw err;
+	}
+};
+
+
+async function asyncMapPreOrderItems(array, asyncFunc) {
+	const promises = array.map(asyncFunc);
+	return Promise.all(promises);
+  }
+  
+// Example usage
+async function myAsyncFuncPreOrderItems(element) {
+	var returnedItem = {
+		error : "Product not found"
+	} ;
+	try {
+		// get the item 
+	
+		var product = await Product.findOne({ "variants._id": mongoose.Types.ObjectId(element.variantId) }) ; 
+		if(product) {
+			var productVariant = product.variants.find((item) => item._id.toString() ===  element.variantId ) ;
+			if(productVariant) {
+				// check disponibilité 	
+				if(productVariant.quantity != parseInt(element.orderQuantity)) {
+					returnedItem = {
+						error : "Product not disponible"
+					}
+				}
+				// get item policy
+				if(!product.policy) {
+					product.policy = null ;
+					let store = await Store.findById(product.storeId) ;
+					if(!(store && store.policy)) {
+							let seller = await User.findById(product.sellerId) ;
+							console.log(seller._id);
+							if(seller && seller.policy) {
+								product.policy = seller.policy ;
+							}else {
+								product.policy = null
+							}
+					}else {
+						product.policy = store.policy  ;
+					}
+				}
+				console.log(productVariant.characterstics);
+				returnedItem = {
+					id : productVariant._id ,
+					productId : product._id , 
+					variantId : productVariant._id , 
+					name : product.name ,
+					characterstics : productVariant.characterstics ,
+					image : productVariant.img , 
+					price : productVariant.price , 
+					quantity : parseInt(element.orderQuantity) , 
+					discount : product.discount , 
+					reservationPolicy: product.policy && product.policy.reservation && product.policy.reservation.payment ,
+					deliveryPolicy:  product.policy && product.policy.delivery && product.policy.delivery.pricing ,
+					pickupPolicy:  product.policy && product.policy.pickup && product.policy.pickup.timeLimit ,
+					reservation: false,
+					delivery: !(product.policy && product.policy.pickup && product.policy.pickup.timeLimit != null) ,
+					pickup: product.policy && product.policy.pickup && product.policy.pickup.timeLimit != null ,
+					reservationP: product.policy && product.policy.reservation && product.policy.reservation.payment && !product.policy.reservation.payment.free ?
+								 product.policy.reservation.payment.total ? 1 
+								 : product.policy.reservation.payment.partial && product.policy.reservation.payment.partial.percentage ? product.policy.reservation.payment.partial.percentage / 100 
+								 : product.policy.reservation.payment.partial && product.policy.reservation.payment.partial.fixe ? product.policy.reservation.payment.partial.fixe : 0.0
+								 : 0.0 ,
+					deliveryP: product.policy && product.policy.delivery && product.policy.delivery.pricing && product.policy.delivery.pricing.km ?
+								product.policy.delivery.pricing.km
+								: 0.0 ,
+					deliveryFixe: product.policy && product.policy.delivery && product.policy.delivery.pricing && product.policy.delivery.pricing.fixe ?
+								product.policy.delivery.pricing.fixe
+								: 0.0 ,
+				}
+
+			}
+
+		}
+		return returnedItem ; 
+		
+	} catch (error) {
+		console.log(error);
+		return {
+			error : "Product Not found"
+		}
+	}
+	
+}
+
+  

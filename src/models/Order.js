@@ -14,6 +14,30 @@ const orderSchema = new mongoose.Schema(
 			required: true,
 			ref: 'Store',
 		},
+		pickupPerson : {
+			type : {
+				name : {type : String, required: true } ,
+				nif : {type : String, required: true } ,
+			} , 
+			default : null
+		} ,
+		deliveryAddresse : {
+			type: {
+				type: String,
+				enum: ['Point'],
+			},
+			coordinates: [
+				{
+					type: Number,
+				},
+				{
+					type: Number,
+				},
+			],
+		},
+		distance : {
+			type : Number , default : null 
+		} ,
 		items: [
 			{
 				productId: { type: String, required: true },
@@ -21,7 +45,7 @@ const orderSchema = new mongoose.Schema(
 				name: { type: String, required: true },
 				image: { type: String, required: true },
 				price: { type: Number, required: true },
-				discountPrice: { type: Number, required: true },
+				discount: { type: Number, required: true },
 				quantity: { type: Number, required: true, default: 1 },
 				policy: policySchema,
 				
@@ -33,15 +57,15 @@ const orderSchema = new mongoose.Schema(
 
 		paymentInfos : {
 			totalAmount: { type: Number, required: true },
-			paymentAmount: { type: Number, required: true },
+			deliveryAmount: { type: Number, required: true },
+			reservationAmount: { type: Number, required: true },
 			paymentMethodeId: { type: Number, required: true, },
 			card : {
+				cardNumber : { type: String, required: true },
 				ccv: { type: String, required: true },
-				secretCode: { type: String, required: true },
-				exp_month: { type: Number, required: true, },
-				exp_year: { type: Number, required: true, },
+				expdate: { type: String, required: true, },
 				name: { type: String, required: true },
-				country: { type: String, required: true },
+				postalCode: { type: String, required: true },
 				address_city: { type: String, required: true },
 				address_line1: { type: String, required: true },
 				address_line2: { type: String, required: true },
@@ -50,13 +74,13 @@ const orderSchema = new mongoose.Schema(
 		reservation : { type : Boolean , required : true , default : null } ,
 		pickUp : { type : Boolean , required : true , default : null } , 
 
-		delivery : {
-			shippingAmount: { type: Number, required: true },
-			nbrKm: { type: Number },
-		} ,
+		delivery : { type : Boolean , required : true , default : null } , 
+
+		timeLimit :  { type : Number ,  default : null }  ,
+
 		canceled : {
-			byClient: { type: Boolean, required: true },
-			motif: { type: String, required: true },
+			byClient: { type: Boolean },
+			motif: { type: String },
 		} ,
 		status: { type: String, required: true, enum: [
 														'Pending', 

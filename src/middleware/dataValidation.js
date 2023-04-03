@@ -112,8 +112,8 @@ const updateSchema = joi.object({
 	}),
 	policy: joi.object({
 		workingTime: joi.object({
-			openTime: joi.number().required(),
-			closeTime: joi.number().required(),
+			openTime: joi.string().required(),
+			closeTime: joi.string().required(),
 		}).allow(null),
 		pickup: joi.object({
 			timeLimit: joi.number().required(),
@@ -364,8 +364,8 @@ const updateProductSchema = joi.object({
 	),
 	policy: joi.object({
 		workingTime: joi.object({
-			openTime: joi.number().required(),
-			closeTime: joi.number().required(),
+			openTime: joi.string().required(),
+			closeTime: joi.string().required(),
 		}).allow(null),
 		pickup: joi.object({
 			timeLimit: joi.number().required(),
@@ -481,8 +481,8 @@ const createProductSchema = joi.object({
 	),
 	policy: joi.object({
 		workingTime: joi.object({
-			openTime: joi.number().required(),
-			closeTime: joi.number().required(),
+			openTime: joi.string().required(),
+			closeTime: joi.string().required(),
 		}).allow(null),
 		pickup: joi.object({
 			timeLimit: joi.number().required(),
@@ -634,8 +634,8 @@ const schemaStore = joi.object({
 	}),
 	policy: joi.object({
 		workingTime: joi.object({
-			openTime: joi.number().required(),
-			closeTime: joi.number().required(),
+			openTime: joi.string().required(),
+			closeTime: joi.string().required(),
 		}).allow(null),
 		pickup: joi.object({
 			timeLimit: joi.number().required(),
@@ -724,9 +724,11 @@ exports.schemaStoreValidation = (req, res, next) => {
 	
 	const { error } = schemaStore.validate(req.body);
 	if (error) {
-		console.log(error);
+		console.log("error");
+		console.log(error.details[0].message);
 		return res.status(400).send(error.details[0].message);
 	}
+	console.log("next");
 	next();
 };
 const schemaUpdateStore = joi.object({
@@ -746,8 +748,8 @@ const schemaUpdateStore = joi.object({
 	}),
 	policy: joi.object({
 		workingTime: joi.object({
-			openTime: joi.number().required(),
-			closeTime: joi.number().required(),
+			openTime: joi.string().required(),
+			closeTime: joi.string().required(),
 		}).allow(null),
 		pickup: joi.object({
 			timeLimit: joi.number().required(),

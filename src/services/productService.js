@@ -175,12 +175,15 @@ exports.addProduct = async (req) => {
 };
 //delete product
 exports.deleteProduct = async (req) => {
+	console.log(req.params);
 	try {
-		const product = await Product.findById(req.params.id);
+		let product = await Product.findById(req.params.id);
 		if (!product) {
+			console.log("makach");
 			throw new Error('Product not found');
 		}
 		if (product.sellerId != req.user.id) {
+			console.log("khatik");
 			throw new Error('its not your product');
 		}
 
@@ -189,7 +192,7 @@ exports.deleteProduct = async (req) => {
 		let images_to_delete = product.images ;
 		
 		if(product.variants) {
-			let variant_images =  product.variants.maps(el => el.img) ;
+			let variant_images =  product.variants.map(el => el.img) ;
 			images_to_delete.push(...variant_images) ;
 		}
 
@@ -230,6 +233,7 @@ exports.deleteProduct = async (req) => {
 		}
 		return { message: 'Product deleted successfully' };
 	} catch (err) {
+		console.log(err);
 		throw err;
 	}
 };

@@ -1,7 +1,7 @@
 var OrderService = require('../services/orderService');
 exports.createOrder = async (req, res) => {
 	try {
-		const order = await OrderService.createOrder(req);
+		const order = await OrderService.createOrderDirectly(req);
 		res.send(order);
 	} catch (err) {
 		res.status(500).send(err.message);
@@ -10,6 +10,14 @@ exports.createOrder = async (req, res) => {
 exports.getOrders = async (req, res) => {
 	try {
 		const orders = await OrderService.getOrders(req);
+		res.send(orders);
+	} catch (err) {
+		res.status(500).send(err.message);
+	}
+};
+exports.getPreOrderItems = async (req, res) => {
+	try {
+		const orders = await OrderService.getPreOrderItems(req);
 		res.send(orders);
 	} catch (err) {
 		res.status(500).send(err.message);

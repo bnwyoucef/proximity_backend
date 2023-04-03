@@ -5,8 +5,9 @@ const { orderSchemaValidation } = require('../middleware/dataValidation');
 const { verifyToken } = require('../middleware/verifyToken');
 
 //creat an order for a user
-router.post('/', verifyToken, orderSchemaValidation, OrderController.createOrder);
-
+router.post('/', verifyToken , OrderController.createOrder);
+// get pre order
+router.post('/preOrder', verifyToken,  OrderController.getPreOrderItems);
 //get the order by id
 router.get('/:id', verifyToken, OrderController.getOrder);
 //get order by user id

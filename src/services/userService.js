@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const fs = require('fs');
 
 const CryptoJS = require('crypto-js');
 const uuid = require('uuid');
@@ -30,6 +31,18 @@ exports.updateUser = async (req) => {
 exports.updateUserImage = async(req) => {
 	
 	try {
+		const user = await User.findById(req.params.id) ; 
+
+		try {
+			if(user && user.profileImage) {
+				fs.unlinkSync(path.resolve(__dirname, '..', '..', 'public')+"/"+user.profileImage);
+			  
+				console.log("Delete File successfully.");
+			}
+		  } catch (error) {
+			console.log(error);
+		  }
+		
 		
 		const image = req.files.image;
 		//remove spaces from name

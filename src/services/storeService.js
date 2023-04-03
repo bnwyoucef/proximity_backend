@@ -19,7 +19,7 @@ exports.createStore = async (req) => {
 		if (typeof req.body.address === 'string') {
 			req.body.address = JSON.parse(req.body.address);
 		}
-		console.log(req.body);
+		console.log(req.body.policy);
 		let image;
 
 		if (!req.files || Object.keys(req.files).length === 0) {
@@ -58,13 +58,14 @@ exports.createStore = async (req) => {
 			location: {
 				type: 'Point',
 
-				coordinates: [parseFloat(req.body.location.coordinates[0]), parseFloat(req.body.location.coordinates[1])],
+				coordinates: [parseFloat(req.body.location.coordinates[1]), parseFloat(req.body.location.coordinates[0])],
 			},
 		});
 
 		const store = await newStore.save();
 		return store;
 	} catch (err) {
+		console.log(err);
 		throw err;
 	}
 };
@@ -187,7 +188,7 @@ exports.getStoresByLocation = async (req) => {
 				$near: {
 					$geometry: {
 						type: 'Point',
-						coordinates: [parseFloat(req.body.location.coordinates[0]), parseFloat(req.body.location.coordinates[1])],
+						coordinates: [parseFloat(req.body.location.coordinates[1]), parseFloat(req.body.location.coordinates[0])],
 					},
 					$maxDistance: parseFloat(req.body.location.maxDistance),
 				},
