@@ -140,28 +140,48 @@ exports.createOrder = async (req) => {
 //create order
 exports.createOrderDirectly = async (req) => {
 	try {
-		let order = req.body ; 
-		if(typeof order.items === "string") {
-			order.items = JSON.parse(order.items) ; 
+		let orders = req.body.orders ; 
+		console.log(orders);
+		if(typeof orders === "string") {
+			orders = JSON.parse(orders) ; 
 		}else {
-			order.items = [] ; 
+			orders = [] ; 
 		}
 
-		if(typeof order.paymentInfos === "string") {
-			order.paymentInfos = JSON.parse(order.paymentInfos) ; 
-		}
-		//create order 
-
-		console.log(order) ;
-		const new_order = new Order({...order}) ; 
-
-		await new_order.save() ;
+		console.log(orders) ;
+		
+		orders  = await asyncMapCreateOrder(orders, myAsyncFuncCreateOrder);
+		
+		console.log(orders) ;
 		
 	} catch (error) {
 		console.log(error) ;
 		
 	}
 };
+
+
+async function asyncMapCreateOrder(array, asyncFunc) {
+	const promises = array.map(asyncFunc);
+	return Promise.all(promises);
+  }
+  
+// Example usage
+async function myAsyncFuncCreateOrder(element) {
+	try {
+		
+		const new_order = new Order({...element}) ; 
+		await new_order.save() ;
+		return new_order ; 
+		
+	} catch (error) {
+		console.log(error);
+		return null
+	}
+	
+}
+
+  
 
 //get the order by id
 exports.getOrder = async (req) => {
@@ -201,17 +221,86 @@ exports.getOrdersByStore = async (req) => {
 	}
 };
 //get order by status
-exports.getOrdersByStatus = async (req) => {
+exports.getOrdersPickUpByStatus = async (req) => {
 	try {
-		const order = await Order.find({ status: req.params.status });
+		let  order = await Order.find({ pickUp : true ,  status: req.params.status });
 		if (!order) {
 			throw new Error('order not found');
 		}
+
+		order  = await asyncMapOrder(order, myAsyncFuncOrder);
+		console.log(order);
 		return order;
 	} catch (err) {
 		throw err;
 	}
 };
+
+
+exports.getOrdersDeliveryByStatus = async (req) => {
+	try {
+		let  order = await Order.find({ delivery : true ,  status: req.params.status });
+		if (!order) {
+			throw new Error('order not found');
+		}
+
+		order  = await asyncMapOrder(order, myAsyncFuncOrder);
+		console.log(order);
+		return order;
+	} catch (err) {
+		throw err;
+	}
+};
+exports.getOrdersReservationByStatus = async (req) => {
+	try {
+		let  order = await Order.find({ reservation : true ,  status: req.params.status });
+		if (!order) {
+			throw new Error('order not found');
+		}
+
+		order  = await asyncMapOrder(order, myAsyncFuncOrder);
+		console.log(order);
+		return order;
+	} catch (err) {
+		throw err;
+	}
+};
+
+
+async function asyncMapOrder(array, asyncFunc) {
+	const promises = array.map(asyncFunc);
+	return Promise.all(promises);
+  }
+  
+// Example usage
+async function myAsyncFuncOrder(element) {
+	var returnedItem = {...element._doc , store : null , seller : null} ;
+	try {
+		
+		// get stores (name, addresse )
+		
+		var store = await Store.findById(returnedItem.storeId);
+		if (store) {
+			let {name , address , location , ...others} = store ; 
+			returnedItem.store = {name , address , location} ;
+			// get sellers (phone)
+			var seller = await User.findById(store.sellerId);
+			if (seller) {
+				let {phone , email  , ...others} = seller ; 
+				returnedItem.seller = {phone , email } ;
+			}
+		}
+
+		return returnedItem ; 
+		
+	} catch (error) {
+		console.log(error);
+		return {...element._doc , store : null , seller : null}
+	}
+	
+}
+
+  
 //get order by shipping status
 exports.getOrdersByShippingStatus = async (req) => {
 	try {

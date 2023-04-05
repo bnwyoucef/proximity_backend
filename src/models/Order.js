@@ -34,6 +34,41 @@ const orderSchema = new mongoose.Schema(
 					type: Number,
 				},
 			],
+			
+			address: {
+				city: {
+					type: String,
+					// required: true,
+				},
+				streetName: {
+					type: String,
+					//required: true,
+				},
+				postalCode: {
+					type: String,
+					//required: true,
+				},
+				country: {
+					type: String,
+					//required: true,
+				},
+				fullAdress: {
+					type: String,
+					//required: true,
+				},
+				region: {
+					type: String,
+					//required: true,
+				},
+				countryCode: {
+					type: String,
+					//required: true,
+				},
+				phone: {
+					type: String,
+					//required: true,
+				},
+			},
 		},
 		distance : {
 			type : Number , default : null 
@@ -46,6 +81,7 @@ const orderSchema = new mongoose.Schema(
 				image: { type: String, required: true },
 				price: { type: Number, required: true },
 				discount: { type: Number, required: true },
+				reservation: { type: Number},
 				quantity: { type: Number, required: true, default: 1 },
 				policy: policySchema,
 				

@@ -15,7 +15,9 @@ router.get('/user/:id', verifyToken, OrderController.getOrders);
 //get order by store id
 router.get('/store/:id', verifyToken, OrderController.getOrdersByStore);
 //get order by status
-router.get('/status/:status', verifyToken, OrderController.getOrdersByStatus);
+router.get('/pickup/status/:status', verifyToken, OrderController.getOrdersPickUpByStatus);
+router.get('/delivery/status/:status', verifyToken, OrderController.getOrdersDeliveryByStatus);
+router.get('/reservation/status/:status', verifyToken, OrderController.getOrdersReservationByStatus);
 //get order by shipping status
 router.get('/shippingStatus/:shippingStatus', verifyToken, OrderController.getOrdersByShippingStatus);
 //get order by payment status

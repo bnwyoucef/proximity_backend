@@ -40,9 +40,29 @@ exports.getOrdersByStore = async (req, res) => {
 	}
 };
 
-exports.getOrdersByStatus = async (req, res) => {
+exports.getOrdersPickUpByStatus = async (req, res) => {
 	try {
-		const orders = await OrderService.getOrdersByStatus(req);
+		const orders = await OrderService.getOrdersPickUpByStatus(req);
+		res.send(orders);
+	} catch (err) {
+		res.status(500).send(err.message);
+	}
+};
+
+
+
+exports.getOrdersDeliveryByStatus = async (req, res) => {
+	try {
+		const orders = await OrderService.getOrdersDeliveryByStatus(req);
+		res.send(orders);
+	} catch (err) {
+		res.status(500).send(err.message);
+	}
+};
+
+exports.getOrdersReservationByStatus = async (req, res) => {
+	try {
+		const orders = await OrderService.getOrdersReservationByStatus(req);
 		res.send(orders);
 	} catch (err) {
 		res.status(500).send(err.message);
