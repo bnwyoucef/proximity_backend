@@ -40,6 +40,14 @@ exports.getOrdersByStore = async (req, res) => {
 	}
 };
 
+exports.getOrdersByStatus = async (req, res) => {
+	try {
+		const orders = await OrderService.getOrdersByStatus(req);
+		res.send(orders);
+	} catch (err) {
+		res.status(500).send(err.message);
+	}
+};
 exports.getOrdersPickUpByStatus = async (req, res) => {
 	try {
 		const orders = await OrderService.getOrdersPickUpByStatus(req);

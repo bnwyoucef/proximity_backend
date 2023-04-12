@@ -220,16 +220,69 @@ exports.getOrdersByStore = async (req) => {
 		throw err;
 	}
 };
+
 //get order by status
-exports.getOrdersPickUpByStatus = async (req) => {
+exports.getOrdersByStatus = async (req) => {
 	try {
-		let  order = await Order.find({ pickUp : true ,  status: req.params.status });
-		if (!order) {
-			throw new Error('order not found');
+		let order = [] ; 
+		if(req.params.id) {
+			let user = await User.findById(req.params.id) ; 
+			if(user && user.role == "user") {
+				order = await Order.find({ clientId : req.params.id ,   status: req.params.status });
+			}else if(user && user.role == "seller") {
+				// get stores ids 
+				let stores = await Store.find({sellerId : req.params.id}) ; 
+				if (stores && stores.length ) {
+					stores = stores.map(el => el._doc._id) ;
+				}else {
+					stores = [] ; 
+				}
+		
+				order = await Order.find({ storeId : {$in : stores } ,  status: req.params.status });
+
+			}
+			if (!order) {
+				throw new Error('order not found');
+			}
+	
+			order  = await asyncMapOrder(order, myAsyncFuncOrder);
+			console.log(order);
+
 		}
 
-		order  = await asyncMapOrder(order, myAsyncFuncOrder);
-		console.log(order);
+		return order;
+	} catch (err) {
+		throw err;
+	}
+};
+exports.getOrdersPickUpByStatus = async (req) => {
+	try {
+		let order = [] ; 
+		if(req.params.id) {
+			let user = await User.findById(req.params.id) ; 
+			if(user && user.role == "user") {
+				order = await Order.find({ clientId : req.params.id ,  pickUp : true ,  status: req.params.status });
+			}else if(user && user.role == "seller") {
+				// get stores ids 
+				let stores = await Store.find({sellerId : req.params.id}) ; 
+				if (stores && stores.length ) {
+					stores = stores.map(el => el._doc._id) ;
+				}else {
+					stores = [] ; 
+				}
+		
+				order = await Order.find({ storeId : {$in : stores } , pickUp : true ,  status: req.params.status });
+
+			}
+			if (!order) {
+				throw new Error('order not found');
+			}
+	
+			order  = await asyncMapOrder(order, myAsyncFuncOrder);
+			console.log(order);
+
+		}
+
 		return order;
 	} catch (err) {
 		throw err;
@@ -239,13 +292,31 @@ exports.getOrdersPickUpByStatus = async (req) => {
 
 exports.getOrdersDeliveryByStatus = async (req) => {
 	try {
-		let  order = await Order.find({ delivery : true ,  status: req.params.status });
-		if (!order) {
-			throw new Error('order not found');
-		}
+		let order = [] ; 
+		if(req.params.id) {
+			let user = await User.findById(req.params.id) ; 
+			if(user && user.role == "user") {
+				order = await Order.find({ clientId : req.params.id ,  delivery : true ,  status: req.params.status });
+			}else if(user && user.role == "seller") {
+				// get stores ids 
+				let stores = await Store.find({sellerId : req.params.id}) ; 
+				if (stores && stores.length ) {
+					stores = stores.map(el => el._doc._id) ;
+				}else {
+					stores = [] ; 
+				}
+		
+				order = await Order.find({ storeId : {$in : stores } , delivery : true ,  status: req.params.status });
 
-		order  = await asyncMapOrder(order, myAsyncFuncOrder);
-		console.log(order);
+			}
+			if (!order) {
+				throw new Error('order not found');
+			}
+	
+			order  = await asyncMapOrder(order, myAsyncFuncOrder);
+			console.log(order);
+
+		}
 		return order;
 	} catch (err) {
 		throw err;
@@ -253,13 +324,31 @@ exports.getOrdersDeliveryByStatus = async (req) => {
 };
 exports.getOrdersReservationByStatus = async (req) => {
 	try {
-		let  order = await Order.find({ reservation : true ,  status: req.params.status });
-		if (!order) {
-			throw new Error('order not found');
-		}
+		let order = [] ; 
+		if(req.params.id) {
+			let user = await User.findById(req.params.id) ; 
+			if(user && user.role == "user") {
+				order = await Order.find({ clientId : req.params.id ,  reservation : true ,  status: req.params.status });
+			}else if(user && user.role == "seller") {
+				// get stores ids 
+				let stores = await Store.find({sellerId : req.params.id}) ; 
+				if (stores && stores.length ) {
+					stores = stores.map(el => el._doc._id) ;
+				}else {
+					stores = [] ; 
+				}
+		
+				order = await Order.find({ storeId : {$in : stores } , reservation : true ,  status: req.params.status });
 
-		order  = await asyncMapOrder(order, myAsyncFuncOrder);
-		console.log(order);
+			}
+			if (!order) {
+				throw new Error('order not found');
+			}
+	
+			order  = await asyncMapOrder(order, myAsyncFuncOrder);
+			console.log(order);
+
+		}
 		return order;
 	} catch (err) {
 		throw err;
@@ -274,15 +363,15 @@ async function asyncMapOrder(array, asyncFunc) {
   
 // Example usage
 async function myAsyncFuncOrder(element) {
-	var returnedItem = {...element._doc , store : null , seller : null} ;
+	var returnedItem = {...element._doc , store : null , seller : null , client : null } ;
 	try {
 		
 		// get stores (name, addresse )
 		
 		var store = await Store.findById(returnedItem.storeId);
 		if (store) {
-			let {name , address , location , ...others} = store ; 
-			returnedItem.store = {name , address , location} ;
+			let {name , address , location , image , ...others} = store ; 
+			returnedItem.store = {name , address , location , image} ;
 			// get sellers (phone)
 			var seller = await User.findById(store.sellerId);
 			if (seller) {
@@ -290,12 +379,15 @@ async function myAsyncFuncOrder(element) {
 				returnedItem.seller = {phone , email } ;
 			}
 		}
+		
+		var user = await User.findById(element.clientId);
+		returnedItem.user = user ; 
 
 		return returnedItem ; 
 		
 	} catch (error) {
 		console.log(error);
-		return {...element._doc , store : null , seller : null}
+		return {...element._doc , store : null , seller : null , client : null}
 	}
 	
 }
@@ -374,7 +466,8 @@ exports.getPreOrderItems = async (req) => {
 		// check cart !!
 		var cart = await Cart.findById(req.body.cartId);
 		if (!cart) {
-			 cart = await Cart.findOne({userId : req.body.clientId , });
+			console.log(req.body.clientId);
+			 cart = await Cart.findOne({userId : mongoose.Types.ObjectId(req.body.clientId) , });
 			if (!cart) {
 				throw new Error('cart not found');
 			}

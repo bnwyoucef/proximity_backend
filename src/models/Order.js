@@ -21,7 +21,7 @@ const orderSchema = new mongoose.Schema(
 			} , 
 			default : null
 		} ,
-		deliveryAddresse : {
+		deliveryLocation : {
 			type: {
 				type: String,
 				enum: ['Point'],
@@ -34,40 +34,39 @@ const orderSchema = new mongoose.Schema(
 					type: Number,
 				},
 			],
-			
-			address: {
-				city: {
-					type: String,
-					// required: true,
-				},
-				streetName: {
-					type: String,
-					//required: true,
-				},
-				postalCode: {
-					type: String,
-					//required: true,
-				},
-				country: {
-					type: String,
-					//required: true,
-				},
-				fullAdress: {
-					type: String,
-					//required: true,
-				},
-				region: {
-					type: String,
-					//required: true,
-				},
-				countryCode: {
-					type: String,
-					//required: true,
-				},
-				phone: {
-					type: String,
-					//required: true,
-				},
+		},
+		deliveryAddresse : {
+			city: {
+				type: String,
+				// required: true,
+			},
+			streetName: {
+				type: String,
+				//required: true,
+			},
+			postalCode: {
+				type: String,
+				//required: true,
+			},
+			country: {
+				type: String,
+				//required: true,
+			},
+			fullAdress: {
+				type: String,
+				//required: true,
+			},
+			region: {
+				type: String,
+				//required: true,
+			},
+			countryCode: {
+				type: String,
+				//required: true,
+			},
+			phone: {
+				type: String,
+				//required: true,
 			},
 		},
 		distance : {

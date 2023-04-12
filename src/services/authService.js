@@ -4,6 +4,9 @@ var User = require('../models/User');
 const { sendMail } = require('../middleware/email');
 
 var axios = require('axios');
+const Product = require('../models/Product');
+const Cart = require('../models/Cart');
+const Offer = require('../models/Offer');
 
 
 exports.register = async (userInfo) => {
@@ -42,6 +45,9 @@ exports.register = async (userInfo) => {
 			verificationCode: random,
 		});
 		newUser.password = CryptoJS.AES.encrypt(newUser.password, process.env.ACCESS_TOKEN_SECRET).toString();
+
+		
+
 		try {
 			if(newUser.email) {
 				sendMail(
@@ -89,6 +95,20 @@ exports.register = async (userInfo) => {
 			throw err;
 		}
 		const savedUser = await newUser.save();
+		
+		let cartItems = [] ; 
+
+		if(userInfo.role == "user" &&  typeof userInfo.cart === "string" && userInfo.cart != "" )  {
+			cartItems = JSON.parse(userInfo.cart) ; 
+		}
+
+		cartItems = cartItems.map((el) => {return {...el , userId : savedUser._id  }}) ;
+
+		
+		console.log('cart Items', cartItems);
+		cartItems =  await asyncMapAddToCart(cartItems, myAsyncFuncAddToCart);
+		
+
 		return savedUser;
 	} catch (err) {
 		throw err;
@@ -268,3 +288,132 @@ exports.resend_verification_code = async (userInfo) => {
 		throw err;
 	}
 };
+
+
+async function asyncMapAddToCart(array, asyncFunc) {
+	const promises = array.map(asyncFunc);
+	return Promise.all(promises);
+  }
+  
+// Example usage
+async function myAsyncFuncAddToCart(element) {
+	try {
+		console.log('req.body', element.productId);
+		const product = await Product.findOne({ _id: element.productId }).populate('storeId');
+		if (!product || product.deleted) throw new Error('Product does not exist 1');
+		//check if the varient exist
+		const variant = product.variants.find((variant) => variant.id === element.variantId);
+		if (!variant || !variant.available || !variant.quantity) throw new Error('variant is not available any more ');
+
+		//check the quantity of the variant
+		if (variant.quantity <= element.quantity) {
+			element.quantity = variant.quantity;
+		}
+
+		//update the variant price
+		//get the price of varient
+		let priceVariant = 0.0;
+		priceVariant = variant.price;
+		let discountvar = 0;
+		let discountQuantity = 0;
+		let offerExist = false;
+
+		//update the price of varient
+
+		//check if the product is an offer
+
+		if (product.offer) {
+			console.log('fih offer');
+			const offer = await Offer.findOne({ _id: product.offer });
+			if (offer) {
+				offerContent = offer.toObject();
+			}
+			//check if offer still active
+			if (offer && offer.active && offer.offerStock && !offer.offerDeleted) {
+				//check the discount type of offer
+				offerExist = true;
+				if (offer.offerStock <= element.quantity) {
+					discountQuantity = offer.offerStock;
+				} else {
+					discountQuantity = element.quantity;
+				}
+				//update discount
+
+				//calculate the product number of offer
+				if (offer.discountType == 'percentage') {
+					console.log('percentage');
+					discountvar = (offer.offerDiscount / 100) * variant.price;
+					//update price variant
+				} else {
+					discountvar = offer.offerDiscount;
+				}
+			} else {
+				discountvar = 0;
+				priceVariant = variant.price;
+				discountQuantity = 0;
+			}
+		} else {
+			discountvar = 0;
+			priceVariant = variant.price;
+			discountQuantity = 0;
+		}
+		const cart = await Cart.findOne({ userId: element.userId });
+		console.log('cart', cart);
+		if (!cart) {
+			const newCart = new Cart({
+				userId: element.userId,
+				items: [
+					{
+						productId: element.productId,
+						variantId: element.variantId,
+						quantity: element.quantity,
+						discount: discountvar,
+						discountQuantity: discountQuantity,
+						price: priceVariant,
+						totalPrice: priceVariant * element.quantity - discountQuantity * discountvar,
+					},
+				],
+			});
+
+			await newCart.save();
+			console.log('new cart', newCart);
+			return newCart;
+		} else {
+			console.log('cart exist');
+			console.log(discountvar);
+			console.log(priceVariant);
+			console.log(discountQuantity);
+			console.log('fffffffffffffffffffff');
+			//check if the product variant is already in the cart
+			const isProductInCart = cart.items.find((item) => item.variantId == element.variantId);
+			if (isProductInCart) {
+				const index = cart.items.findIndex((item) => item.variantId == element.variantId);
+				cart.items[index].quantity = element.quantity;
+				//update discountQuantity
+				cart.items[index].discountQuantity = discountQuantity;
+				cart.items[index].discount = discountvar;
+
+				cart.items[index].totalPrice = variant.price * cart.items[index].quantity - cart.items[index].discountQuantity * cart.items[index].discount;
+
+				//cart.items[index].totalDiscount = cart.items[index].totalDiscount + cart.items[index].discount * cart.items[index].quantity;
+				//cart.items[index].totalPayable = cart.items[index].totalPriceAllProducts - cart.items[index].totalDiscount;
+			} else {
+				cart.items.push({
+					productId: element.productId,
+					quantity: element.quantity,
+					discount: discountvar,
+					variantId: element.variantId,
+					discountQuantity: discountQuantity,
+					price: priceVariant,
+					totalPrice: priceVariant * element.quantity - discountQuantity * discountvar,
+				});
+			}
+			await cart.save();
+			return cart;
+		}
+	} catch (err) {
+	}
+	return null ;
+	
+}
+

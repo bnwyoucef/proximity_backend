@@ -9,6 +9,7 @@ const userSchema = joi.object({
 	password: joi.string().min(6).required(),
 	password_confirmation: joi.string().min(6).required(),
 	role: joi.string().valid('user', 'admin', 'seller').required(),
+	cart: joi.string().allow(null).allow(""),
 });
 exports.userSchemaValidation = (req, res, next) => {
 	const { error } = userSchema.validate(req.body);
