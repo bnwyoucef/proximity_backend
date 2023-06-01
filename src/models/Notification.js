@@ -11,12 +11,10 @@ const NotificationSchema = new mongoose.Schema(
 		orderId: {
 			type: mongoose.Schema.Types.ObjectId,
 			ref: 'Store',
-			required: true,
 		},
 		offerId: {
 			type: mongoose.Schema.Types.ObjectId,
 			ref: 'Offer',
-			required: true,
 			unique: true,
 		},
 		seend : { type : Boolean ,  default : false }  ,
