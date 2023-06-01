@@ -141,18 +141,19 @@ exports.createOrder = async (req) => {
 exports.createOrderDirectly = async (req) => {
 	try {
 		let orders = req.body.orders ; 
-		console.log(orders);
 		if(typeof orders === "string") {
 			orders = JSON.parse(orders) ; 
 		}else {
 			orders = [] ; 
 		}
 
-		console.log(orders) ;
 		
 		orders  = await asyncMapCreateOrder(orders, myAsyncFuncCreateOrder);
 		
-		console.log(orders) ;
+
+		if(req.body.orderId) {
+			await Order.findByIdAndDelete(req.body.orderId) ;
+		}
 		
 	} catch (error) {
 		console.log(error) ;
@@ -220,6 +221,155 @@ exports.getOrdersByStore = async (req) => {
 		throw err;
 	}
 };
+//update order status
+exports.UpdateOrdersStatus = async (req) => {
+	try {
+		if(req.params.id) {
+			let user = await User.findById(req.params.id) ; 
+			if(user && user.role == "seller") {
+				// get stores ids 
+				let orderStatus = [
+					'Pending', 
+					'InPreparation',  
+					'LoadingDelivery', 
+					'OnTheWay', 
+					'Delivered', 
+					'AwaitingRecovery', 
+					'Recovered', 
+					'Reserved', 
+					'WaitingForReturn', 
+					'Returned', 	
+					'UnderRefund' ,
+					'Refunded', 
+					'succeeded'
+				]
+				if(req.body.status && orderStatus.includes(req.body.status)) {
+					let order = await Order.findByIdAndUpdate(
+						req.body.orderId , 
+						{status : req.body.status}
+						);
+					if (!order) {
+						throw new Error('Order not found');
+					}
+				}else {
+					throw new Error('Status Error');
+				}
+			}else{
+				throw new Error('Permission denied');
+			}
+		}
+
+		return true;
+	} catch (err) {
+		throw err;
+	}
+};
+
+
+exports.ReturnOrders = async (req) => {
+	try {
+		if(req.body.userId) {
+			let user = await User.findById( mongoose.Types.ObjectId(req.body.userId)) ; 
+			let order = await Order.findById( mongoose.Types.ObjectId(req.body.orderId) ) ; 
+			if (!order) {
+				throw new Error('Order not found');
+			}
+
+			let returnItems = req.body.returnItems ; 
+			if(typeof returnItems === "string") {
+				returnItems = JSON.parse(returnItems) ; 
+			}else {
+				returnItems = [] ; 
+			}
+
+			if(returnItems.length == 0 ) {
+				throw new Error('you must select the products concerned');
+			}
+
+
+			let store = null ; 
+			if(order) {
+				store = await Store.findById(order.storeId) ; 
+			}
+			if(user && order && store && (user._id.equals(order.clientId) || user._id.equals(store.sellerId) ) ) {
+				// get stores ids 
+					let orderItems = [...order.items] ; 
+					// let orderNewItems = [] ;
+					
+					order.items.forEach(item => {
+						console.log(item) ;
+						console.log(item._doc.variantId) ;
+						let index = returnItems.findIndex(el => el.variantId ==  item._doc.variantId ) ;
+						if(index !== -1) {
+							let return_item = returnItems[returnItems.findIndex(el => el.variantId ==  item._doc.variantId )] ;
+							console.log(return_item.quantity > item.quantity) ;
+							if(return_item.quantity > item._doc.quantity) {
+								throw new Error('The quantity of the returned produt must be less than the quantity in the order');
+							}
+							// if(return_item.quantity !== item._doc.quantity) {
+							// 	let new_item = {...item._doc , quantity : item._doc.quantity - return_item.quantity }
+							// 	orderNewItems.push(new_item) ; 
+							// }
+						}else {
+							// orderNewItems.push(item._doc) ;
+						}
+					}) ;
+
+					// console.log(orderNewItems) ; 
+					console.log(returnItems) ;
+
+					await Order.findByIdAndUpdate(
+						mongoose.Types.ObjectId(req.body.orderId) , 
+						{
+							// items : orderNewItems , 
+							returnItems : returnItems , 
+							returnMotif :  req.body.motif , 
+							return : true , 
+							// status : "Pending" 
+						}
+						);
+					
+			}else{
+				throw new Error('Permission denied');
+			}
+		}
+
+		return true;
+	} catch (err) {
+		throw err;
+	}
+};
+
+
+exports.CancelOrders = async (req) => {
+	try {
+		if(req.body.userId) {
+			let user = await User.findById( mongoose.Types.ObjectId(req.body.userId)) ; 
+			let order = await Order.findById( mongoose.Types.ObjectId(req.body.orderId) ) ; 
+			if (!order) {
+				throw new Error('Order not found');
+			}
+			let store = null ; 
+			if(order) {
+				store = await Store.findById(order.storeId) ; 
+			} 
+			if(user && order && store && (user._id.equals(order.clientId) || user._id.equals(store.sellerId) ) ) {
+				// get stores ids 
+					let order = await Order.findByIdAndUpdate(
+						req.body.orderId , 
+						{canceled : true , canceledBy : {userId : user._id , motif : req.body.motif }}
+						);
+					
+			}else{
+				throw new Error('Permission denied');
+			}
+		}
+
+		return true;
+	} catch (err) {
+		throw err;
+	}
+};
 
 //get order by status
 exports.getOrdersByStatus = async (req) => {
@@ -246,7 +396,6 @@ exports.getOrdersByStatus = async (req) => {
 			}
 	
 			order  = await asyncMapOrder(order, myAsyncFuncOrder);
-			console.log(order);
 
 		}
 
@@ -261,7 +410,38 @@ exports.getOrdersPickUpByStatus = async (req) => {
 		if(req.params.id) {
 			let user = await User.findById(req.params.id) ; 
 			if(user && user.role == "user") {
-				order = await Order.find({ clientId : req.params.id ,  pickUp : true ,  status: req.params.status });
+				if(req.params.status == "Canceled") {
+					order = await Order.find({ 
+						clientId : req.params.id , 
+						canceled : true  , 
+						return : {$ne : true}  ,  
+						pickUp : req.params.type != "all" ? (req.params.type && req.params.type == "pickup")  : { $exists: true } ,  
+						delivery : req.params.type != "all" ? (req.params.type && req.params.type == "delivery")  : { $exists: true } ,  
+						reservation : req.params.type != "all" ? (req.params.type && req.params.type == "reservation")  : { $exists: true }  ,  
+						
+						refund : {$ne : true}  
+					});
+
+				}else if(req.params.status == "Returned") {
+					order = await Order.find({ 
+						clientId : req.params.id , 
+						return : true  , 
+					});
+
+				}else {
+					order = await Order.find({ 
+						clientId : req.params.id ,  
+						pickUp : req.params.type != "all" ? (req.params.type && req.params.type == "pickup")  : { $exists: true } ,  
+						delivery : req.params.type != "all" ? (req.params.type && req.params.type == "delivery")  : { $exists: true } ,  
+						reservation : req.params.type != "all" ? (req.params.type && req.params.type == "reservation")  : { $exists: true }  ,  
+						status: req.params.status != "all" ? req.params.status : { $exists: true } , 
+						canceled : {$ne : true}  , 
+						items: { $ne: [] } ,
+						// return : {$ne : true}  , 
+						refund : {$ne : true}  
+					});
+
+				}
 			}else if(user && user.role == "seller") {
 				// get stores ids 
 				let stores = await Store.find({sellerId : req.params.id}) ; 
@@ -270,8 +450,38 @@ exports.getOrdersPickUpByStatus = async (req) => {
 				}else {
 					stores = [] ; 
 				}
+				
+				if(req.params.status == "Canceled") {
+					order = await Order.find({ 
+						storeId : {$in : stores } , 
+						canceled : true  , 
+						return : {$ne : true}  ,  
+						pickUp : req.params.type != "all" ? (req.params.type && req.params.type == "pickup")  : { $exists: true } ,  
+						delivery : req.params.type != "all" ? (req.params.type && req.params.type == "delivery")  : { $exists: true } ,  
+						reservation : req.params.type != "all" ? (req.params.type && req.params.type == "reservation")  : { $exists: true }  ,  
+						
+						refund : {$ne : true}  
+					});
+
+				}else if(req.params.status == "Returned") {
+					order = await Order.find({ 
+						storeId : {$in : stores } , 
+						return : true  , 
+					});
+
+				}else {
+					order = await Order.find({ 
+						storeId : {$in : stores } , 
+						pickUp : req.params.type != "all" ? (req.params.type && req.params.type == "pickup")  : { $exists: true } ,  
+						delivery : req.params.type != "all" ? (req.params.type && req.params.type == "delivery")  : { $exists: true } ,  
+						reservation : req.params.type != "all" ? (req.params.type && req.params.type == "reservation")  : { $exists: true }  ,  
+						status: req.params.status != "all" ? req.params.status : { $exists: true }, 
+						canceled : {$ne : true}  , 
+						// return : {$ne : true}  , 
+						refund : {$ne : true}  
+					});
+				}
 		
-				order = await Order.find({ storeId : {$in : stores } , pickUp : true ,  status: req.params.status });
 
 			}
 			if (!order) {
@@ -279,12 +489,12 @@ exports.getOrdersPickUpByStatus = async (req) => {
 			}
 	
 			order  = await asyncMapOrder(order, myAsyncFuncOrder);
-			console.log(order);
-
+			console.log(order) ;
 		}
 
 		return order;
 	} catch (err) {
+		console.log(err) ;
 		throw err;
 	}
 };
@@ -314,7 +524,6 @@ exports.getOrdersDeliveryByStatus = async (req) => {
 			}
 	
 			order  = await asyncMapOrder(order, myAsyncFuncOrder);
-			console.log(order);
 
 		}
 		return order;
@@ -346,7 +555,6 @@ exports.getOrdersReservationByStatus = async (req) => {
 			}
 	
 			order  = await asyncMapOrder(order, myAsyncFuncOrder);
-			console.log(order);
 
 		}
 		return order;
@@ -367,13 +575,13 @@ async function myAsyncFuncOrder(element) {
 	try {
 		
 		// get stores (name, addresse )
-		
+		var seller = null ; 
 		var store = await Store.findById(returnedItem.storeId);
 		if (store) {
 			let {name , address , location , image , ...others} = store ; 
 			returnedItem.store = {name , address , location , image} ;
 			// get sellers (phone)
-			var seller = await User.findById(store.sellerId);
+			seller = await User.findById(store.sellerId);
 			if (seller) {
 				let {phone , email  , ...others} = seller ; 
 				returnedItem.seller = {phone , email } ;
@@ -383,6 +591,15 @@ async function myAsyncFuncOrder(element) {
 		var user = await User.findById(element.clientId);
 		returnedItem.user = user ; 
 
+		if(returnedItem.canceled == true && returnedItem.canceledBy != null && returnedItem.canceledBy.userId != null ) {
+			var canceledByItem = {...returnedItem.canceledBy , image : "" , name : ""} ;
+			if(canceledByItem.userId.equals(seller._id) ) {
+				canceledByItem = {...canceledByItem , image : store.image , name : store.name} ;
+			}else {
+				canceledByItem = {...canceledByItem , image : user.profileImage , name : user.username} ;
+			}
+			returnedItem.canceledBy = canceledByItem ;
+		}
 		return returnedItem ; 
 		
 	} catch (error) {
@@ -466,7 +683,6 @@ exports.getPreOrderItems = async (req) => {
 		// check cart !!
 		var cart = await Cart.findById(req.body.cartId);
 		if (!cart) {
-			console.log(req.body.clientId);
 			 cart = await Cart.findOne({userId : mongoose.Types.ObjectId(req.body.clientId) , });
 			if (!cart) {
 				throw new Error('cart not found');
@@ -487,7 +703,6 @@ exports.getPreOrderItems = async (req) => {
 
 			// check if all items in cart 
 			var itemIds = items.map(el => el.variantId) ;
-			console.log(cart);
 
 			var filterItems = cart.items.filter(el => itemIds.includes(el.variantId)  ) ;
 
@@ -527,7 +742,6 @@ exports.getPreOrderItems = async (req) => {
 		  
 		PreOrder.items = JSON.stringify(items) ;
 
-		console.log(PreOrder);
 		return PreOrder;
 	} catch (err) {
 		console.log(err);
@@ -565,7 +779,6 @@ async function myAsyncFuncPreOrderItems(element) {
 					let store = await Store.findById(product.storeId) ;
 					if(!(store && store.policy)) {
 							let seller = await User.findById(product.sellerId) ;
-							console.log(seller._id);
 							if(seller && seller.policy) {
 								product.policy = seller.policy ;
 							}else {
@@ -575,7 +788,6 @@ async function myAsyncFuncPreOrderItems(element) {
 						product.policy = store.policy  ;
 					}
 				}
-				console.log(productVariant.characterstics);
 				returnedItem = {
 					id : productVariant._id ,
 					productId : product._id , 
@@ -619,4 +831,84 @@ async function myAsyncFuncPreOrderItems(element) {
 	
 }
 
-  
+  //get pre Order items
+exports.getPreReservationItems = async (req) => {
+	try {
+		var PreOrder = {
+			storeId : null , 
+			cartId : null , 
+			storeName : "" ,
+			maxDeliveryFixe : 0.0 ,
+			maxDeliveryKm : 0.0 , 
+			storeAdresse : [] , // location
+			items : [] , // array of preOrderItem
+		}
+
+		var preOrderItem =  {
+			productId : null  ,
+			variantId : null , 
+			name : "" , 
+			characterstics : [] ,
+			discount : 0.0 , 
+			image : "" , 
+			price : 0.0 , 
+			quantity : 0 ,
+			policy : null 
+			// policies
+			// reservationPolicy : false ,  
+			// deliveryPolicy : false ,  
+			// pickupPolicy : false ,  
+			// // percentage
+			// reservationP : 0.0 ,   
+		}
+
+		// check cart !!
+		var order = await Order.findById(req.body.orderId);
+		if (!order) {
+			throw new Error('order not found');
+		}
+
+		// check store 
+		// pas du store au niveau du backend 
+
+		// check items and get current values 
+		var items = order.items.map((el) => {return {...el._doc , orderQuantity : el._doc.quantity} ;}) ;
+		if(items.length) {
+			// get first variant and store 
+			var firstProduct = await Product.findOne({ 'variants._id': items[0].variantId }) ; 
+			if(!firstProduct) {
+				throw new Error('Store not found');
+			}
+			var store = await Store.findById(firstProduct.storeId) ; 
+			if(!store) {
+				throw new Error('Store not found');
+			}
+			PreOrder.storeId = store._id.toString() ; 
+			PreOrder.storeName = store.name ; 
+			PreOrder.storeAdresse = store.location ; 
+		}else {
+			throw new Error('items not found');
+		}
+
+		items  = await asyncMapPreOrderItems(items, myAsyncFuncPreOrderItems);
+
+		//get max delivery pricing 
+
+		var maxDeliveryKm = items.reduce((max, item) => {
+			return item.deliveryP > max ? item.deliveryP : max;
+		  }, 0.0);
+		PreOrder.maxDeliveryKm = maxDeliveryKm ; 
+
+		var maxDeliveryFixe = items.reduce((max, item) => {
+			return item.deliveryFixe > max ? item.deliveryFixe : max;
+		  }, 0.0);
+		PreOrder.maxDeliveryFixe = maxDeliveryFixe ; 
+		  
+		PreOrder.items = JSON.stringify(items) ;
+
+		return PreOrder;
+	} catch (err) {
+		console.log(err);
+		throw err;
+	}
+};

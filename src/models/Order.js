@@ -83,12 +83,54 @@ const orderSchema = new mongoose.Schema(
 				reservation: { type: Number},
 				quantity: { type: Number, required: true, default: 1 },
 				policy: policySchema,
+
+				refund : {
+					order : {
+						fixe : {type : Number ,  default : null} ,
+						percentage : {type : Number ,  default : null} ,
+					} , 
+					shipping : {
+						fixe : {type : Number ,  default : null} ,
+						percentage : {type : Number ,  default : null} ,
+					},
+				} , 
 				
 			},
 			{
 				timestamp: true,
 			},
 		],
+
+		
+		returnItems: [
+			{
+				productId: { type: String, required: true },
+				variantId: { type: String, required: true },
+				name: { type: String, required: true },
+				image: { type: String, required: true },
+				price: { type: Number, required: true },
+				discount: { type: Number, required: true },
+				quantity: { type: Number, required: true, default: 1 },
+				orderQuantity: { type: Number, required: true, default: 1 },
+				policy: policySchema,
+
+				refund : {
+					order : {
+						fixe : {type : Number ,  default : null} ,
+						percentage : {type : Number ,  default : null} ,
+					} , 
+					shipping : {
+						fixe : {type : Number ,  default : null} ,
+						percentage : {type : Number ,  default : null} ,
+					},
+				} , 
+				
+			},
+			{
+				timestamp: true,
+			},
+		],
+		returnMotif :{ type: String ,  default : null },
 
 		paymentInfos : {
 			totalAmount: { type: Number, required: true },
@@ -110,27 +152,33 @@ const orderSchema = new mongoose.Schema(
 		pickUp : { type : Boolean , required : true , default : null } , 
 
 		delivery : { type : Boolean , required : true , default : null } , 
+		
+
+		return : { type : Boolean ,  default : null } , 
+		
+
+		refund : { type : Boolean ,  default : null } , 
 
 		timeLimit :  { type : Number ,  default : null }  ,
 
-		canceled : {
-			byClient: { type: Boolean },
+		canceled : { type : Boolean ,  default : null } , 
+		canceledBy : {
+			userId: { type: mongoose.Schema.Types.ObjectId },
 			motif: { type: String },
 		} ,
 		status: { type: String, required: true, enum: [
 														'Pending', 
-														'In preparation',  
-														'Loading delivery', 
-														'On the way', 
-														'delivered', 
-														'Awaiting Recovery', 
+														'InPreparation',  
+														'LoadingDelivery', 
+														'OnTheWay', 
+														'Delivered', 
+														'AwaitingRecovery', 
 														'Recovered', 
-														'Awaiting finalization', 
-														'Return processing', 
-														'Waiting for return', 
-														'Under refund' ,
+														'Reserved', 
+														'WaitingForReturn', 
+														'Returned', 	
+														'UnderRefund' ,
 														'Refunded', 
-														'Canceled', 
 														'succeeded'
 													], default: 'Pending' }, 
 	},

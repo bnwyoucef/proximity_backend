@@ -56,6 +56,30 @@ exports.getOrdersPickUpByStatus = async (req, res) => {
 		res.status(500).send(err.message);
 	}
 };
+exports.UpdateOrdersStatus = async (req, res) => {
+	try {
+		const orders = await OrderService.UpdateOrdersStatus(req);
+		res.send(orders);
+	} catch (err) {
+		res.status(500).send(err.message);
+	}
+};
+exports.CancelOrders = async (req, res) => {
+	try {
+		const orders = await OrderService.CancelOrders(req);
+		res.send(orders);
+	} catch (err) {
+		res.status(500).send(err.message);
+	}
+};
+exports.ReturnOrders = async (req, res) => {
+	try {
+		const orders = await OrderService.ReturnOrders(req);
+		res.send(orders);
+	} catch (err) {
+		res.status(500).send(err.message);
+	}
+};
 
 
 
@@ -88,6 +112,14 @@ exports.getOrdersByShippingStatus = async (req, res) => {
 exports.getOrdersByPaymentStatus = async (req, res) => {
 	try {
 		const orders = await OrderService.getOrdersByPaymentStatus(req);
+		res.send(orders);
+	} catch (err) {
+		res.status(500).send(err.message);
+	}
+};
+exports.getPreReservationItems = async (req, res) => {
+	try {
+		const orders = await OrderService.getPreReservationItems(req);
 		res.send(orders);
 	} catch (err) {
 		res.status(500).send(err.message);
