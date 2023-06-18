@@ -263,7 +263,7 @@ const schemaGetOffers = joi.object({
 	storeId: joi.string().required(),
 });
 exports.schemaGetOffersValidation = (req, res, next) => {
-	const { error } = schemaGetOffers.validate(req.body);
+	const { error } = schemaGetOffers.validate({ storeId: req.params.storeId });
 	if (error) {
 		console.log(error);
 		return res.status(400).send(error.details[0].message);
@@ -459,7 +459,7 @@ exports.updateProductSchemaValidation = (req, res, next) => {
 const createProductSchema = joi.object({
 	name: joi.string().min(3).required(),
 	price: joi.number().min(1).required(),
-	description: joi.string().min(3).max(200),
+	description: joi.string().min(3).max(800),
 	image: joi.string().min(3).max(200),
 	categoryId: joi.string(),
 	subcategory: joi.string().min(3),
@@ -468,6 +468,10 @@ const createProductSchema = joi.object({
 	sellerId: joi.string(),
 	storeId: joi.string().required(),
 	images: joi.array().items(joi.string().min(3).max(200)),
+	characteristics: joi.object().pattern(
+		joi.string(),
+		joi.array().items(joi.string().min(1)),
+	  ),
 	variantes: joi.array().items(
 		joi.object({
 			price: joi.number().min(1).required(),
@@ -582,6 +586,7 @@ exports.createProductSchemaValidation = (req, res, next) => {
 
 //search validation data
 const schemaSearchStore = joi.object({
+
 	langitude: joi.number().required(),
 	latitude: joi.number().required(),
 	radius: joi.number().required(),
@@ -616,7 +621,7 @@ exports.schemaSearchProductValidation = (req, res, next) => {
 
 const schemaStore = joi.object({
 	name: joi.string().min(2).required(),
-	description: joi.string().min(3).max(200).required(),
+	description: joi.string().min(3).max(800).required(),
 	sellerId: joi.string().required(),
 	location: joi
 		.object({
@@ -629,9 +634,32 @@ const schemaStore = joi.object({
 		streetName: joi.string().min(3),
 		postalCode: joi.string().min(2).max(5),
 		fullAdress: joi.string().min(3),
-		region: joi.string().min(3),
+		region: joi.string().allow(null),
 		country: joi.string().min(3),
 		countryCode: joi.string().min(2),
+	}),
+	//* working time 
+	workingTime: joi.object({
+		option: joi.string().min(1).required(),
+		fixedHours: joi.array().items(
+			joi.object({
+				openTime: joi.string().allow(null).required(),
+				closeTime: joi.string().allow(null).required(),
+			
+			})
+
+		), 
+		customizedHours: joi.object().allow(null).pattern(
+			  joi.string(),
+			  joi.array().items(
+				joi.object({
+					openTime: joi.string().allow(null).required(),
+					closeTime: joi.string().allow(null).required(),
+				})
+			  )
+			),
+		  
+		
 	}),
 	policy: joi.object({
 		workingTime: joi.object({
@@ -720,7 +748,11 @@ exports.schemaStoreValidation = (req, res, next) => {
 	if (typeof req.body.policy === 'string' && req.body.policy != "") {
 		req.body.policy = JSON.parse(req.body.policy);
 	}
-	
+	if (typeof req.body.workingTime === 'string' && req.body.workingTime != "") {
+		req.body.workingTime = JSON.parse(req.body.workingTime);
+		console.log("ff");
+		console.log(req.body.workingTime);
+	}
 
 	
 	const { error } = schemaStore.validate(req.body);
@@ -824,6 +856,28 @@ const schemaUpdateStore = joi.object({
 		type: joi.string().valid('Point'),
 		coordinates: joi.array().items().length(2),
 	}),
+	workingTime: joi.object({
+		option: joi.string().min(1).required(),
+		fixedHours: joi.array().items(
+			joi.object({
+				openTime: joi.string().allow(null).required(),
+				closeTime: joi.string().allow(null).required(),
+			
+			})
+
+		), 
+		customizedHours: joi.object().allow(null).pattern(
+			  joi.string(),
+			  joi.array().items(
+				joi.object({
+					openTime: joi.string().allow(null).required(),
+					closeTime: joi.string().allow(null).required(),
+				})
+			  )
+			),
+		  
+		
+	}),
 
 	image: joi.string().min(3),
 });
@@ -838,6 +892,11 @@ exports.schemaUpdateStoreValidation = (req, res, next) => {
 	
 	if (typeof req.body.policy === 'string' && req.body.policy != "") {
 		req.body.policy = JSON.parse(req.body.policy);
+	}
+	if (typeof req.body.workingTime === 'string' && req.body.workingTime != "") {
+		req.body.workingTime = JSON.parse(req.body.workingTime);
+		console.log("ff");
+		console.log(req.body.workingTime);
 	}
 	const { error } = schemaUpdateStore.validate(req.body);
 	if (error) {

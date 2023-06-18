@@ -8,6 +8,10 @@ const productSchema = new mongoose.Schema(
 			type: String,
 			required: true,
 		},
+		quantity: {
+			type: Number,
+			default: 1,
+		},
 		description: { type: String, required: true },
 		price: { type: Number, required: true },
 		categoryId: {
@@ -31,7 +35,6 @@ const productSchema = new mongoose.Schema(
 				},
 				quantity: {
 					type: Number,
-					required: true,
 					default: 1,
 				},
 				img: {
@@ -85,6 +88,10 @@ const productSchema = new mongoose.Schema(
 			type: mongoose.Schema.Types.ObjectId,
 			ref: 'Offer',
 		},
+		
+		 
+		
+
 		reports: [
 			{
 				idUser: {
@@ -106,7 +113,7 @@ const productSchema = new mongoose.Schema(
 		timestamp: true,
 		toJSON: { virtuals: true },
 	}
-);
+);/*
 productSchema.virtual('quantity').get(function () {
 	const variants = this.variants;
 	return variants.reduce(function (total, currentValue) {
@@ -125,7 +132,7 @@ productSchema.virtual('PriceMax').get(function () {
 	return variants.reduce(function (prev, curr) {
 		return prev.price > curr.price ? prev : curr;
 	}).price;
-});
+});*/
 //virtual array of all the images of the product
 productSchema.virtual('imagesss').get(function () {
 	if (this.images != null) {
@@ -137,6 +144,16 @@ productSchema.virtual('imagesss').get(function () {
 		});
 	}
 });
+productSchema.virtual('discounted').get(function () {
+	if (this.offer) {
+		console.log('Disount')
+	
+	  return this.offer.discount;
+	  
+	} else {
+	  return this.price;
+	}
+  });
 //virtual array for all the images of the variants
 productSchema.virtual('variantImages').get(function () {
 	if (this.variants != null) {

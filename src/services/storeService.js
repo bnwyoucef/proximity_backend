@@ -10,6 +10,8 @@ const Payment = require('../models/Payment');
 const Bill = require('../models/Bill');
 const Order = require('../models/Order');
 const StoreRate = require('../models/StoreRate');
+const fs = require('fs');
+
 //createStore
 exports.createStore = async (req) => {
 	try {
@@ -44,6 +46,7 @@ exports.createStore = async (req) => {
 			sellerId: req.user.id,
 			name: req.body.name,
 			description: req.body.description,
+			workingTime:  req.body.workingTime ,
 			image: storagePath,
 			address: {
 				city: req.body.address.city,
@@ -71,8 +74,8 @@ exports.createStore = async (req) => {
 };
 //updateStore
 exports.updateStore = async (req) => {
-	try {
-		console.log(req.body);
+	
+try {
 		const store = await Store.findById(req.params.id);
 		if (!Store) {
 			throw new Error({ message: 'Store not found' });
@@ -80,17 +83,57 @@ exports.updateStore = async (req) => {
 			if (store.sellerId != req.user.id) {
 				throw new Error({ message: 'You are not authorized to update this store' });
 			} else {
-				const updatedStore = await Store.findByIdAndUpdate(
-					req.params.id,
-					{
-						$set: req.body,
-					},
-					{ new: true }
-				);
+				let image = null ;
+				let updatedStore = null ;
+				
+				if (req.files && Object.keys(req.files).length !== 0) {	
+					image = req.files.image;
+					const fileName = `${uuid.v4()}${image.name}`;
+					const uploadPath = path.resolve(__dirname, '..', '..', 'public', 'images', 'stores', fileName);
+					const storagePath = `images/stores/${fileName}`;
+					console.log(storagePath, 'storagePath');
+		
+					// Use the mv() method to place the file somewhere on your server
+		
+					image.mv(uploadPath, function (err) {
+						if (err) throw err;
+					});
+		
+					if(store.image != null && store.image != "") {
+						fs.unlinkSync(path.resolve(__dirname, '..', '..', 'public')+"/"+store.image);
+					}
+		
+		
+					 updatedStore = await Store.findByIdAndUpdate(
+						req.params.id,
+						{
+							$set: {
+								...req.body , 
+								image : storagePath 
+							},
+						},
+						{ new: true }
+					);
+				}else {
+					console.log("im here");
+					console.log(req.body);
+					 updatedStore = await Store.findByIdAndUpdate(
+						req.params.id,
+						{
+							$set: req.body,
+						},
+						{ new: true }
+					);
+		
+				}
+		
+		
+		
 				return updatedStore;
 			}
 		}
 	} catch (err) {
+		console.log(err) ;
 		throw err;
 	}
 };

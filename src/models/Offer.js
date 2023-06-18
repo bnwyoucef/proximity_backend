@@ -18,7 +18,6 @@ const OfferSchema = new mongoose.Schema(
 			type: mongoose.Schema.Types.ObjectId,
 			ref: 'Product',
 			required: true,
-			unique: true,
 		},
 		offerDiscount: {
 			type: Number,
@@ -32,13 +31,14 @@ const OfferSchema = new mongoose.Schema(
 		},
 		offerExpiration: {
 			type: Date,
-			required: true,
+			
 			default: Date.now() + 86400000,
 		},
 		offerStatus: {
 			type: String,
+			default:'active',
 
-			enum: ['pending', 'accepted', 'rejected', ''],
+			enum: ['pending', 'active', 'rejected', 'expired'],
 		},
 		offerDeleted: {
 			type: Boolean,
@@ -47,15 +47,15 @@ const OfferSchema = new mongoose.Schema(
 		},
 		offerName: {
 			type: String,
-			required: true,
+			
 		},
 		offerImage: {
 			type: String,
-			required: true,
+
 		},
 		offerDescription: {
 			type: String,
-			required: true,
+		
 		},
 		discountType: {
 			type: String,

@@ -9,6 +9,7 @@ const Bill = require('../models/Bill');
 const Order = require('../models/Order');
 const { check } = require('prettier');
 const { default: mongoose } = require('mongoose');
+const { localSendNotification } = require('./notificationsService');
 
 //create order
 exports.createOrder = async (req) => {
@@ -172,7 +173,27 @@ async function myAsyncFuncCreateOrder(element) {
 	try {
 		
 		const new_order = new Order({...element}) ; 
-		await new_order.save() ;
+		const order = await new_order.save() ;
+
+		// send notifications 
+
+		// get seller id 
+		const store = await Store.findById(element.storeId)
+
+		let data = {
+			owner_id : [
+				// order.clientId ,
+				store.sellerId
+			] , 
+			type : "order" , // order or offer
+			sub_type : order.pickUp ? "Pickup" : order.delivery ? "Delivery" : "Reservation" , // for the icon
+			id : order._id // get order or offer and go to the page 
+		};
+
+		let title = "New Order" ; 
+		let content = "You have recived a new order [ "+order._id+" ]" ;
+
+		await localSendNotification(title , content , data) ;
 		return new_order ; 
 		
 	} catch (error) {
@@ -191,7 +212,8 @@ exports.getOrder = async (req) => {
 		if (!order) {
 			throw new Error('order not found');
 		}
-		return order;
+		
+		return myAsyncFuncOrder(order);
 	} catch (err) {
 		throw err;
 	}
@@ -221,13 +243,108 @@ exports.getOrdersByStore = async (req) => {
 		throw err;
 	}
 };
+
+//update item policy for testing 
+
+exports.UpdatePolicy = async () => {
+	let order = await Order.findByIdAndUpdate(
+		"6430877d2e63b8a9ea099ef6" , 
+		{
+			items : [
+				{
+					productId : "643083232e63b8a9ea099bc3" ,
+					variantId : "643083232e63b8a9ea099bc4" ,
+					name : "Iphone 13 Pro Max ( Gold , 128 GB )" ,
+					image : "images/variantes/6e9ed41e-f333-4766-9aae-787c064e59961000003476.jpg" ,
+					price : 1500 ,
+					discount : 0 ,
+					quantity : 1 ,
+					policy : {
+					"workingTime": {
+					  "openTime": "09:00",
+					  "closeTime": "18:00"
+					},
+					"pickup": {
+					  "timeLimit": 10
+					},
+					"delivery": {
+					  "zone": {
+						"centerPoint": {
+						  "latitude": 48.86626614116967,
+						  "longitude": 2.3502199351787567
+						},
+						"radius": 10
+					  },
+					  "pricing": {
+						"fixe": null,
+						"km": 2
+					  },
+					},
+					"reservation": {
+					  "duration": 10,
+					  "payment": {
+						"free": false,
+						"partial": {
+						  "fixe": null,
+						  "percentage": 20
+						},
+						"total": null
+					  },
+					  "cancelation": {
+						"restrictions": {
+						  "fixe": null,
+						  "percentage": null
+						}
+					  },
+					},
+					"return": {
+					  "duration": 29,
+					  "productStatus": "un petit text pour décrire le status du retour",
+					  "returnMethod": "un petit text pour décrire la methode du retour",
+					  "refund": {
+						"order": {
+						  "fixe": null,
+						  "percentage": null
+						},
+						"shipping": {
+						  "fixe": null,
+						  "percentage": null
+						}
+					  }
+					  
+					},
+					"order": {
+					  "validation": {
+						"auto": false,
+						"manual": true
+					  },
+					  "notification": {
+						"realtime": true,
+						"time": null,
+						"perOrdersNbr": null,
+						"sendMode": {
+						  "mail": true,
+						  "sms": true,
+						  "popup": true,
+						  "vibration": true,
+						  "ringing": null
+						}
+					  }
+					}
+				  }
+				}
+			]
+		}
+	) ; 
+	return order  ; 
+}
+
 //update order status
 exports.UpdateOrdersStatus = async (req) => {
 	try {
 		if(req.params.id) {
 			let user = await User.findById(req.params.id) ; 
 			if(user && user.role == "seller") {
-				// get stores ids 
 				let orderStatus = [
 					'Pending', 
 					'InPreparation',  
@@ -242,18 +359,65 @@ exports.UpdateOrdersStatus = async (req) => {
 					'UnderRefund' ,
 					'Refunded', 
 					'succeeded'
-				]
-				if(req.body.status && orderStatus.includes(req.body.status)) {
-					let order = await Order.findByIdAndUpdate(
-						req.body.orderId , 
-						{status : req.body.status}
-						);
-					if (!order) {
-						throw new Error('Order not found');
-					}
-				}else {
-					throw new Error('Status Error');
+				] ;
+
+				// get stores ids 
+				// To DO
+
+				//return orders 
+				let order = null ;
+
+				switch (req.body.status) {
+					case "WaitingForReturn":
+						order = await Order.findByIdAndUpdate(
+							req.body.orderId , 
+							{waitingforReturn : true}
+							);				
+						break;
+					case "Returned":
+						// add products quantities and refund methode 
+
+						order = await Order.findByIdAndUpdate(
+							req.body.orderId , 
+							{returned : true}
+							);
+						break;
+				
+					default:
+						if(req.body.status && orderStatus.includes(req.body.status)) {
+							order = await Order.findByIdAndUpdate(
+								req.body.orderId , 
+								{status : req.body.status}
+								);
+						}else {
+							throw new Error('Status Error');
+						}
+						break;
 				}
+
+				
+
+				
+				if (!order) {
+					throw new Error('Order not found');
+				}else {
+					let data = {
+						owner_id : [
+							order.clientId 
+						] , 
+						type : "order" , // order or offer
+						sub_type : order.refund ? "Refund" : order.return ? "Return" : order.reservation ? "Reservation" : order.delivery ? "Delivery" :  "Pickup" , // for the icon
+						id : order._id // get order or offer and go to the page 
+					};
+	
+					let title = "Order Updated" ; 
+					let content = "Your order has been updated [ "+order._id+" ]" ;
+	
+					await localSendNotification(title , content , data) ;
+					
+
+				}
+				
 			}else{
 				throw new Error('Permission denied');
 			}
@@ -328,6 +492,135 @@ exports.ReturnOrders = async (req) => {
 							// status : "Pending" 
 						}
 						);
+
+				// get seller id 
+				let data = {
+					owner_id : [
+						// order.clientId ,
+						store.sellerId
+					] , 
+					type : "order" , // order or offer
+					sub_type : "Return" , // for the icon
+					id : order._id // get order or offer and go to the page 
+				};
+
+				let title = "Return Request" ; 
+				let content = "You have recived a new return request [ "+order._id+" ]" ;
+
+				await localSendNotification(title , content , data) ;
+					
+			}else{
+				throw new Error('Permission denied');
+			}
+		}
+
+		
+
+		return true;
+	} catch (err) {
+		throw err;
+	}
+};
+
+
+exports.RefundOrders = async (req) => {
+	try {
+		if(req.body.userId) {
+			let user = await User.findById( mongoose.Types.ObjectId(req.body.userId)) ; 
+			let order = await Order.findById( mongoose.Types.ObjectId(req.body.orderId) ) ; 
+			if (!order) {
+				throw new Error('Order not found');
+			}
+
+			let returnItems = req.body.returnItems ; 
+			if(typeof returnItems === "string") {
+				returnItems = JSON.parse(returnItems) ; 
+			}else {
+				returnItems = [] ; 
+			}
+
+			if(returnItems.items.length == 0 ) {
+				throw new Error('you must select the products concerned');
+			}
+
+			returnItems.items.forEach(element => {
+				element.policy = JSON.parse(element.policy) ; 
+			});
+
+			console.log(returnItems) ;
+
+			let store = null ; 
+			if(order) {
+				store = await Store.findById(order.storeId) ; 
+			}
+			if(user && order && store && (user._id.equals(order.clientId) || user._id.equals(store.sellerId) ) ) {
+				// get stores ids 
+					let orderItems = [...order.items] ; 
+					// let orderNewItems = [] ;
+					
+					order.items.forEach(item => {
+						console.log(item) ;
+						console.log(item._doc.variantId) ;
+						let index = returnItems.items.findIndex(el => el.variantId ==  item._doc.variantId ) ;
+						if(index !== -1) {
+							let return_item = returnItems.items[returnItems.items.findIndex(el => el.variantId ==  item._doc.variantId )] ;
+							console.log(return_item.quantity > item.quantity) ;
+							if(return_item.quantity > item._doc.quantity) {
+								throw new Error('The quantity of the returned produt must be less than the quantity in the order');
+							}
+							// if(return_item.quantity !== item._doc.quantity) {
+							// 	let new_item = {...item._doc , quantity : item._doc.quantity - return_item.quantity }
+							// 	orderNewItems.push(new_item) ; 
+							// }
+						}else {
+							// orderNewItems.push(item._doc) ;
+						}
+					}) ;
+
+					console.log("orderNewItems") ; 
+					console.log(returnItems.items) ;
+					let updatedOrder = null ; 
+					if(returnItems.total > 0) {
+						updatedOrder = await Order.findByIdAndUpdate(
+							mongoose.Types.ObjectId(req.body.orderId) , 
+							{
+								returnedItems : returnItems.items , 
+								refundPaymentInfos : {
+									totalAmount: returnItems.total ,
+									deliveryAmount: 0,
+									paymentMethodeId: 1,
+									card : returnItems.card ,
+								} ,
+								returned : true , 
+								refund : true 
+							}
+							);
+					}else {
+						updatedOrder = await Order.findByIdAndUpdate(
+							mongoose.Types.ObjectId(req.body.orderId) , 
+							{
+								returnedItems : returnItems.items , 
+								returned : true , 
+							}
+							);
+
+					}
+
+					console.log(updatedOrder) ; 
+
+				let data = {
+					owner_id : [
+						order.clientId 
+					] , 
+					type : "order" , // order or offer
+					sub_type : "Refund" , // for the icon
+					id : order._id // get order or offer and go to the page 
+				};
+
+				let title = "Refund" ; 
+				let content = "Your return request has been processed [ "+order._id+" ]" ;
+
+				await localSendNotification(title , content , data) ;
 					
 			}else{
 				throw new Error('Permission denied');
@@ -359,6 +652,22 @@ exports.CancelOrders = async (req) => {
 						req.body.orderId , 
 						{canceled : true , canceledBy : {userId : user._id , motif : req.body.motif }}
 						);
+					if(order) {
+						let data = {
+							owner_id : [
+								user._id.equals(order.clientId) ? order.clientId : store.sellerId
+							] , 
+							type : "order" , // order or offer
+							sub_type : "Cancel" , // for the icon
+							id : order._id // get order or offer and go to the page 
+						};
+		
+						let title = "Order Canceled" ; 
+						let content = "Your order has been canceled [ "+order._id+" ]" ;
+		
+						await localSendNotification(title , content , data) ;
+						
+					}
 					
 			}else{
 				throw new Error('Permission denied');
@@ -410,11 +719,11 @@ exports.getOrdersPickUpByStatus = async (req) => {
 		if(req.params.id) {
 			let user = await User.findById(req.params.id) ; 
 			if(user && user.role == "user") {
-				if(req.params.status == "Canceled") {
+				 if(req.params.status == "Canceled") {
 					order = await Order.find({ 
 						clientId : req.params.id , 
 						canceled : true  , 
-						return : {$ne : true}  ,  
+						return : req.params.type != "all" ? (req.params.type && req.params.type == "return")  : { $exists: true }  ,  
 						pickUp : req.params.type != "all" ? (req.params.type && req.params.type == "pickup")  : { $exists: true } ,  
 						delivery : req.params.type != "all" ? (req.params.type && req.params.type == "delivery")  : { $exists: true } ,  
 						reservation : req.params.type != "all" ? (req.params.type && req.params.type == "reservation")  : { $exists: true }  ,  
@@ -422,11 +731,30 @@ exports.getOrdersPickUpByStatus = async (req) => {
 						refund : {$ne : true}  
 					});
 
-				}else if(req.params.status == "Returned") {
-					order = await Order.find({ 
-						clientId : req.params.id , 
-						return : true  , 
-					});
+				}else if(req.params.type == "refund") {
+						order = await Order.find({ 
+							clientId : req.params.id , 
+							refund : true  , 
+							canceled : {$ne : true}  , 
+						});
+				}else if(req.params.type == "return") {
+					if(req.params.status == "all") {
+						order = await Order.find({ 
+							clientId : req.params.id , 
+							return : true  , 
+							canceled : {$ne : true}  , 
+						});
+
+					}else {
+						order = await Order.find({ 
+							clientId : req.params.id , 
+							return : true  , 
+							waitingforReturn :req.params.status == "pending" ? {$ne : true } : true , 
+							returned :   req.params.status == "returned" ? true  : {$ne : true } , 
+							canceled : {$ne : true}  , 
+						});
+
+					}
 
 				}else {
 					order = await Order.find({ 
@@ -455,7 +783,7 @@ exports.getOrdersPickUpByStatus = async (req) => {
 					order = await Order.find({ 
 						storeId : {$in : stores } , 
 						canceled : true  , 
-						return : {$ne : true}  ,  
+						return : req.params.type != "all" ? (req.params.type && req.params.type == "return")  : { $exists: true }  ,  
 						pickUp : req.params.type != "all" ? (req.params.type && req.params.type == "pickup")  : { $exists: true } ,  
 						delivery : req.params.type != "all" ? (req.params.type && req.params.type == "delivery")  : { $exists: true } ,  
 						reservation : req.params.type != "all" ? (req.params.type && req.params.type == "reservation")  : { $exists: true }  ,  
@@ -463,11 +791,31 @@ exports.getOrdersPickUpByStatus = async (req) => {
 						refund : {$ne : true}  
 					});
 
-				}else if(req.params.status == "Returned") {
+				}else if(req.params.type == "refund") {
 					order = await Order.find({ 
 						storeId : {$in : stores } , 
-						return : true  , 
+						refund : true  , 
+						canceled : {$ne : true}  , 
 					});
+				}else if(req.params.type == "return") {
+					console.log("i'm here") ;
+					if(req.params.status == "all") {
+						order = await Order.find({ 
+							storeId : {$in : stores } , 
+							return : true  , 
+							canceled : {$ne : true}  , 
+						});
+
+					}else {
+						order = await Order.find({ 
+							storeId : {$in : stores } , 
+							return : true  , 
+							waitingforReturn :req.params.status == "pending" ? {$ne : true } : true , 
+							returned :   req.params.status == "returned" ? true  : {$ne : true } , 
+							canceled : {$ne : true}  , 
+						});
+
+					}
 
 				}else {
 					order = await Order.find({ 

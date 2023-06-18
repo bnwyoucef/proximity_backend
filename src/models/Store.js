@@ -157,9 +157,46 @@ const storeSchema = new mongoose.Schema(
 			type: Number,
 			default: 0,
 		},
-		policy: policySchema,
+		workingTime: {
+
+			type : {
+				option: {
+					type: String,
+					default: "",
+				},
+				fixedHours: [{
+					openTime: {
+						type: String,
+						required: true,
+					},
+					closeTime: {
+						type: String,
+						required: true,
+					},
+				}],
+				customizedHours: {
+					type: Map,
+					of: [{
+						openTime: {
+							type: String,
+							required: true,
+						},
+						closeTime: {
+							type: String,
+							required: true,
+						},
+					}],
+				
+			},
+
+			} , 
+			required: false,
+			
+		},
+		
 	},
-	{ timestamp: true, toJSON: { virtuals: true } }
+	{ timestamps: true,},
+	//{ timestamp: true, toJSON: { virtuals: true } }
 );
 //virtual image url
 storeSchema.virtual('imageUrl').get(function () {

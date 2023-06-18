@@ -4,6 +4,7 @@ const { orderSchemaValidation } = require('../middleware/dataValidation');
 
 const { verifyToken } = require('../middleware/verifyToken');
 
+
 //creat an order for a user
 router.post('/', verifyToken , OrderController.createOrder);
 //Update an order
@@ -12,6 +13,7 @@ router.post('/update/:id', verifyToken , OrderController.UpdateOrdersStatus);
 router.post('/cancel', verifyToken , OrderController.CancelOrders);
 //return an order
 router.post('/return', verifyToken , OrderController.ReturnOrders);
+router.post('/refund', verifyToken , OrderController.RefundOrders);
 // get pre order
 router.post('/preOrder', verifyToken,  OrderController.getPreOrderItems);
 // get pre Reeservation

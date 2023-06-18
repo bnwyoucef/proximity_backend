@@ -3,6 +3,7 @@ const Notification = require('../models/Notification');
 const OneSignal = require('@onesignal/node-onesignal');
 
 const https = require("https") ; 
+const User = require("../models/User");
 
 const app_key_provider = {
     getToken() {
@@ -21,6 +22,63 @@ exports.createNotification = async (req) => {
 
 //send notification
 exports.sendNotification = async (req) => {
+	try {
+		console.log(req.body) ;
+		const user_key_provider = {
+			getToken() {
+				return ONE_SIGNAL_CONFIG.USER_AUTH;
+			}
+		};
+		const app_key_provider = {
+			getToken() {
+				return ONE_SIGNAL_CONFIG.API_KEY;
+			}
+		};
+		const configuration = OneSignal.createConfiguration({
+			authMethods: {
+				user_key: {
+					tokenProvider: user_key_provider
+				},
+				app_key: {
+					tokenProvider: app_key_provider
+				}
+			}
+		});
+		const client = new OneSignal.DefaultApi(configuration);
+
+		const notification = new OneSignal.Notification();
+		notification.app_id = ONE_SIGNAL_CONFIG.APP_ID;
+		notification.included_segments = ['Subscribed Users'];
+		notification.data = {
+				owner_id : [
+					"6430802a2e63b8a9ea099b7a"
+				] , 
+				type : "order" , // order or offer
+				sub_type : "Return" , // for the icon
+				id : "6430877d2e63b8a9ea099ef6" // get order or offer and go to the page 
+			};
+		notification.contents = {
+			en: "Abdennour has requested a return" ,
+			fr: "Abdennour has requested a return"
+		};
+		notification.headings = {
+		  en: "Return Request" ,
+		  fr: "Return Request"
+		}
+		await client.createNotification(notification).then(res => {
+			console.log("success") ; 
+			console.log(res) ;
+		}).catch(err => {
+			console.log("error") ; 
+			console.log(err) ;
+		});
+		
+	} catch (error) {
+		throw Error(error);
+	}
+};
+
+exports.localSendNotification = async ( title , content , data , ) => {
 	try {
 		const user_key_provider = {
 			getToken() {
@@ -47,14 +105,47 @@ exports.sendNotification = async (req) => {
 		const notification = new OneSignal.Notification();
 		notification.app_id = ONE_SIGNAL_CONFIG.APP_ID;
 		notification.included_segments = ['Subscribed Users'];
-		notification.data = {type : "order" , id : "order_id" };
+		if (data != null) {
+			notification.data = data ;
+			console.log("data.owner_id") ;
+			console.log(data.owner_id) ;
+			console.log(data.owner_id.length) ;
+			for (let index = 0; index < data.owner_id.length; index++) {
+				const element = data.owner_id[index].toString();
+				console.log(element) ; 
+				let notification = new Notification({
+					owner_id : element ,
+					title : title , 
+					content : content , 
+					id : data.id , 
+					type : data.type , 
+					sub_type : data.sub_type , 
+					seend : false  , 
+					seendInList : false ,
+				}) ;
+
+				await notification.save() ; 
+				console.log(notification) ; 
+				
+			}
+		}
+
+
+		// notification.data = {
+		// 		owner_id : [
+		// 			"6430802a2e63b8a9ea099b7a"
+		// 		] , 
+		// 		type : "order" , // order or offer
+		// 		sub_type : "Return" , // for the icon
+		// 		id : "6430877d2e63b8a9ea099ef6" // get order or offer and go to the page 
+		// 	};
 		notification.contents = {
-			en: req.body.message ,
-			fr: req.body.message
+			en: content ,
+			fr: content
 		};
 		notification.headings = {
-		  en: "Proximity App" ,
-		  fr: "Proximity App Fransh"
+		  en: title ,
+		  fr: title
 		}
 		await client.createNotification(notification).then(res => {
 			console.log("success") ; 
@@ -63,38 +154,68 @@ exports.sendNotification = async (req) => {
 			console.log("error") ; 
 			console.log(err) ;
 		});
-
-
-		// var headers = {
-		// 	"Content-Type" : "application/json; charset=utf-8" , 
-		// 	"Authorization" : "Basic "+ONE_SIGNAL_CONFIG.API_KEY , 
-		// } ; 
-
-		// var options = {
-		// 	host : "onesignal.com" , 
-		// 	port : 443 , 
-		// 	path : "/api/v1/notifications" , 
-		// 	method : "POST" , 
-		// 	headers : headers
-		// } ;
-
-		// var req = http.request(options , function(res) {
-		// 	 res.on("data" , (data) => {
-		// 		console.log(JSON.parse(data)) ;
-		// 	 }) ; 
-
-		// } ) ;
 		
 	} catch (error) {
 		throw Error(error);
 	}
 };
 
-//update notification
+exports.updateNotificationsUser = async (req) => {
+	try {
+		console.log(req.body);
+		const user = await User.findById(req.params.id);
+		if (!user) {
+			throw new Error({ message: 'User not found' });
+		} else {
+			const updatedNotifications = await Notification.updateMany(
+				{owner_id : user._id},
+				{
+					$set: req.body,
+				},
+				{ new: true }
+			);
+			return updatedNotifications;
+		}
+	} catch (err) {
+		throw err;
+	}
+};
+
 exports.updateNotification = async (req) => {
 	try {
-		
-	} catch (error) {
-		throw Error(error);
+		console.log(req.body);
+		if (!req.params.id) {
+			throw new Error({ message: 'notification not found' });
+		} else {
+			const updatedNotifications = await Notification.findByIdAndUpdate(
+				req.params.id,
+				{
+					$set: req.body,
+				},
+				{ new: true }
+			);
+			return updatedNotifications;
+		}
+	} catch (err) {
+		throw err;
+	}
+};
+
+exports.getUserNotifications = async (req) => {
+	try {
+		console.log(req.params);
+		const user = await User.findById(req.params.id);
+		console.log(user);
+		if (!user) {
+			throw new Error({ message: 'User not found' });
+		} else {
+			const notifications = await Notification.find(
+				{owner_id : user._id}
+			);
+			console.log(notifications);
+			return notifications;
+		}
+	} catch (err) {
+		throw err;
 	}
 };

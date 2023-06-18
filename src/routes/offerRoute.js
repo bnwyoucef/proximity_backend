@@ -13,7 +13,7 @@ const { verifyToken, verifySeller } = require('../middleware/verifyToken');
 router.post('/create', verifySeller, schemaOfferValidation, OfferController.createOffer);
 //get all offers for a store
 
-router.get('/all', verifyToken, schemaGetOffersValidation, OfferController.getOffers);
+router.get('/all/:storeId', verifyToken,schemaGetOffersValidation, OfferController.getOffers);
 
 //get offer by id
 
@@ -23,6 +23,6 @@ router.get('/:id', verifyToken, schemaGetOfferByIdValidation, OfferController.ge
 
 router.put('/update/:id', verifyToken, schemaUpdateOfferValidation, OfferController.updateOffer);
 //delete offer
-router.delete('/delete/:id', verifySeller, OfferController.deleteOffer);
+router.delete('/delete/:id', OfferController.deleteOffer);
 
 module.exports = router;

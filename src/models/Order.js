@@ -102,6 +102,8 @@ const orderSchema = new mongoose.Schema(
 		],
 
 		
+		return : { type : Boolean ,  default : null } , 
+
 		returnItems: [
 			{
 				productId: { type: String, required: true },
@@ -112,25 +114,58 @@ const orderSchema = new mongoose.Schema(
 				discount: { type: Number, required: true },
 				quantity: { type: Number, required: true, default: 1 },
 				orderQuantity: { type: Number, required: true, default: 1 },
-				policy: policySchema,
-
-				refund : {
-					order : {
-						fixe : {type : Number ,  default : null} ,
-						percentage : {type : Number ,  default : null} ,
-					} , 
-					shipping : {
-						fixe : {type : Number ,  default : null} ,
-						percentage : {type : Number ,  default : null} ,
-					},
-				} , 
-				
+				policy: policySchema,	
 			},
 			{
 				timestamp: true,
 			},
 		],
+
+		returnedItems: [
+			{
+				productId: { type: String, required: true },
+				variantId: { type: String, required: true },
+				name: { type: String, required: true },
+				image: { type: String, required: true },
+				price: { type: Number, required: true },
+				discount: { type: Number, required: true },
+				quantity: { type: Number, required: true, default: 1 },
+				orderQuantity: { type: Number, required: true, default: 1 },
+				policy: policySchema,	
+			},
+			{
+				timestamp: true,
+			},
+		],
+
+		refundPaymentInfos : {
+			type : {
+				
+			totalAmount: { type: Number, required: true },
+			deliveryAmount: { type: Number, required: true },
+			paymentMethodeId: { type: Number, required: true, },
+			card : {
+				type : {
+					cardNumber : { type: String, required: true },
+					ccv: { type: String, required: true },
+					expdate: { type: String, required: true, },
+					name: { type: String, required: true },
+					postalCode: { type: String, required: true },
+					address_city: { type: String, required: true },
+					address_line1: { type: String, required: true },
+					address_line2: { type: String, default: "" },
+				}
+			} 
+			} ,   
+			
+			default : null 
+		} ,
 		returnMotif :{ type: String ,  default : null },
+		
+		waitingforReturn :{ type: Boolean ,  default : null },
+		
+		returned :{ type: Boolean ,  default : null },
+		
 
 		paymentInfos : {
 			totalAmount: { type: Number, required: true },
@@ -145,7 +180,7 @@ const orderSchema = new mongoose.Schema(
 				postalCode: { type: String, required: true },
 				address_city: { type: String, required: true },
 				address_line1: { type: String, required: true },
-				address_line2: { type: String, required: true },
+				address_line2: { type: String, default: ""},
 			} ,
 		} ,
 		reservation : { type : Boolean , required : true , default : null } ,
@@ -154,7 +189,6 @@ const orderSchema = new mongoose.Schema(
 		delivery : { type : Boolean , required : true , default : null } , 
 		
 
-		return : { type : Boolean ,  default : null } , 
 		
 
 		refund : { type : Boolean ,  default : null } , 

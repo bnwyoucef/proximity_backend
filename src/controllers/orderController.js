@@ -80,6 +80,16 @@ exports.ReturnOrders = async (req, res) => {
 		res.status(500).send(err.message);
 	}
 };
+exports.RefundOrders = async (req, res) => {
+	try {
+		const orders = await OrderService.RefundOrders(req);
+		res.send(orders);
+	} catch (err) {
+		res.status(500).send(err.message);
+	}
+};
+
+
 
 
 
@@ -120,6 +130,16 @@ exports.getOrdersByPaymentStatus = async (req, res) => {
 exports.getPreReservationItems = async (req, res) => {
 	try {
 		const orders = await OrderService.getPreReservationItems(req);
+		res.send(orders);
+	} catch (err) {
+		res.status(500).send(err.message);
+	}
+};
+
+
+exports.UpdatePolicy = async (req, res) => {
+	try {
+		const orders = await OrderService.UpdatePolicy();
 		res.send(orders);
 	} catch (err) {
 		res.status(500).send(err.message);

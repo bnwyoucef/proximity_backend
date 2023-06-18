@@ -41,7 +41,7 @@ exports.updateProduct = async (req) => {
 		// }
 		//Update the product
 
-		if(req.body.variantes && req.files.varientsImages) {
+		if(req.body.variantes && req.files && req.files.varientsImages) {
 			let varientsImages = [];
 			product.variants.forEach((variant , index) => {
 				fs.unlink("images/variantes/" + variant.img.split('/')[2] , (err) => {
@@ -73,6 +73,12 @@ exports.updateProduct = async (req) => {
 
 		}
 
+		if(req.body.variantes && req.body.variantes.length == 1 && product.variants != null && product.variants.length == 1 && req.body.variantes[0].characterstics[0].value ==  req.body.name ) {
+			product.variants[0].price = req.body.price ; 
+			product.variants[0].quantity = req.body.quantity ; 
+			product.variants[0].img =  product.images[0] ;
+		}
+
 		product.name = req.body.name || product.name;
 		product.price = req.body.price || product.price;
 		product.description = req.body.description || product.description;
@@ -81,10 +87,12 @@ exports.updateProduct = async (req) => {
 		product.images = req.body.images || product.images;
 		product.storeId = req.body.storeId || product.storeId;
 		product.categoryId = req.body.categoryId || product.categoryId;
+		product.policy = req.body.policy || product.policy;
 		//save the product with previos varients
 		await product.save();
 		return product;
 	} catch (error) {
+		console.log(error) ;
 		throw error;
 	}
 };
@@ -143,7 +151,6 @@ exports.addProduct = async (req) => {
 			req.body.variantes[i].img = storagePath;
 			varientsImages.push(storagePath);
 		}
-		
 		console.log("abdou")
 
 		const newProduct = new Product({
@@ -159,6 +166,7 @@ exports.addProduct = async (req) => {
 			variants: req.body.variantes,
 			priceMin: req.body.priceMin,
 			priceMax: req.body.priceMax,
+			policy : req.body.policy
 		});
 		const savedProduct = await newProduct.save();
 		//add the product to the store

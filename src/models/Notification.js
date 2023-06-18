@@ -3,28 +3,28 @@ const mongoose = require('mongoose');
 
 const NotificationSchema = new mongoose.Schema(
 	{
-		userId: {
+		owner_id: {
 			type: mongoose.Schema.Types.ObjectId,
 			ref: 'User',
 			required: true,
 		},
-		orderId: {
-			type: mongoose.Schema.Types.ObjectId,
-			ref: 'Store',
-		},
-		offerId: {
-			type: mongoose.Schema.Types.ObjectId,
-			ref: 'Offer',
-			unique: true,
-		},
-		seend : { type : Boolean ,  default : false }  ,
+		title: {type: String, required: true },
+		content: {type: String, required: true },
+		id: {type: String, required: true },
 		type: { type: String, required: true, enum: [
-														'Order', 
-														'Return',  
-														'Refund', 
-														'Reservation', 
-														'Offer', 
+														'order', 
+														'offer', 
 													], default: '' }, 
+		sub_type: { type: String, required: true, enum: [
+														'Delivery', 
+														'Pickup',  
+														'Reservation', 
+														'Return', 
+														'Refund', 
+														'Cancel' 
+													], default: 'Cancel' }, 
+		seend : { type : Boolean ,  default : false }  ,
+		seendInList : { type : Boolean ,  default : false }
 	},
 	{
 		timestamp: true,
