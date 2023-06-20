@@ -8,10 +8,6 @@ const productSchema = new mongoose.Schema(
 			type: String,
 			required: true,
 		},
-		quantity: {
-			type: Number,
-			default: 1,
-		},
 		description: { type: String, required: true },
 		price: { type: Number, required: true },
 		categoryId: {
@@ -35,6 +31,7 @@ const productSchema = new mongoose.Schema(
 				},
 				quantity: {
 					type: Number,
+					required: true,
 					default: 1,
 				},
 				img: {

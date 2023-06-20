@@ -120,17 +120,8 @@ const updateSchema = joi.object({
 			timeLimit: joi.number().required(),
 		}).allow(null),
 		delivery: joi.object({
-			zone: joi.object({
-				centerPoint: joi.object({
-					latitude: joi.number().required(),
-					longitude: joi.number().required(),
-				}).required(),
-				radius: joi.number().required(),
-			}).allow(null),
-			pricing: joi.object({
-				fixe: joi.number().allow(null).required(),
-				km: joi.number().allow(null).required(),
-			}).allow(null),
+			delivery: 
+					 joi.boolean().required().allow(null),
 		}).allow(null),
 		reservation: joi.object({
 			duration: joi.number().allow(null).required(),
@@ -166,10 +157,6 @@ const updateSchema = joi.object({
 		
 		}).allow(null),
 		order: joi.object({
-			validation: joi.object({
-				auto: joi.boolean().allow(null).required(),
-				manual: joi.boolean().allow(null).required(),
-			}).allow(null),
 			notification: joi.object({
 				realtime: joi.boolean().allow(null).required(),
 				time: joi.string().allow(null).required(),
@@ -372,17 +359,8 @@ const updateProductSchema = joi.object({
 			timeLimit: joi.number().required(),
 		}).allow(null),
 		delivery: joi.object({
-			zone: joi.object({
-				centerPoint: joi.object({
-					latitude: joi.number().required(),
-					longitude: joi.number().required(),
-				}).required(),
-				radius: joi.number().required(),
-			}).allow(null),
-			pricing: joi.object({
-				fixe: joi.number().allow(null).required(),
-				km: joi.number().allow(null).required(),
-			}).allow(null),
+			delivery: 
+					 joi.boolean().required().allow(null),
 		}).allow(null),
 		reservation: joi.object({
 			duration: joi.number().allow(null).required(),
@@ -493,17 +471,8 @@ const createProductSchema = joi.object({
 			timeLimit: joi.number().required(),
 		}).allow(null),
 		delivery: joi.object({
-			zone: joi.object({
-				centerPoint: joi.object({
-					latitude: joi.number().required(),
-					longitude: joi.number().required(),
-				}).required(),
-				radius: joi.number().required(),
-			}).allow(null),
-			pricing: joi.object({
-				fixe: joi.number().allow(null).required(),
-				km: joi.number().allow(null).required(),
-			}).allow(null),
+			delivery: 
+					 joi.boolean().required().allow(null),
 		}).allow(null),
 		reservation: joi.object({
 			duration: joi.number().allow(null).required(),
@@ -670,17 +639,8 @@ const schemaStore = joi.object({
 			timeLimit: joi.number().required(),
 		}).allow(null),
 		delivery: joi.object({
-			zone: joi.object({
-				centerPoint: joi.object({
-					latitude: joi.number().required(),
-					longitude: joi.number().required(),
-				}).required(),
-				radius: joi.number().required(),
-			}).allow(null),
-			pricing: joi.object({
-				fixe: joi.number().allow(null).required(),
-				km: joi.number().allow(null).required(),
-			}).allow(null),
+			delivery: 
+					 joi.boolean().required().allow(null),
 		}).allow(null),
 		reservation: joi.object({
 			duration: joi.number().allow(null).required(),
@@ -788,17 +748,8 @@ const schemaUpdateStore = joi.object({
 			timeLimit: joi.number().required(),
 		}).allow(null),
 		delivery: joi.object({
-			zone: joi.object({
-				centerPoint: joi.object({
-					latitude: joi.number().required(),
-					longitude: joi.number().required(),
-				}).required(),
-				radius: joi.number().required(),
-			}).allow(null),
-			pricing: joi.object({
-				fixe: joi.number().allow(null).required(),
-				km: joi.number().allow(null).required(),
-			}).allow(null),
+			delivery: 
+					 joi.boolean().required().allow(null),
 		}).allow(null),
 		reservation: joi.object({
 			duration: joi.number().allow(null).required(),

@@ -26,10 +26,8 @@ const NotificationSchema = new mongoose.Schema(
 		seend : { type : Boolean ,  default : false }  ,
 		seendInList : { type : Boolean ,  default : false }
 	},
-	{
-		timestamp: true,
-		toJSON: { virtuals: true },
-	}
+
+	{ timestamps: true }
 );
 
 module.exports = mongoose.model('Notification', NotificationSchema);

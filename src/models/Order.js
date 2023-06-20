@@ -140,22 +140,7 @@ const orderSchema = new mongoose.Schema(
 
 		refundPaymentInfos : {
 			type : {
-				
-			totalAmount: { type: Number, required: true },
-			deliveryAmount: { type: Number, required: true },
-			paymentMethodeId: { type: Number, required: true, },
-			card : {
-				type : {
-					cardNumber : { type: String, required: true },
-					ccv: { type: String, required: true },
-					expdate: { type: String, required: true, },
-					name: { type: String, required: true },
-					postalCode: { type: String, required: true },
-					address_city: { type: String, required: true },
-					address_line1: { type: String, required: true },
-					address_line2: { type: String, default: "" },
-				}
-			} 
+				totalAmount: { type: Number, required: true },
 			} ,   
 			
 			default : null 
@@ -169,28 +154,22 @@ const orderSchema = new mongoose.Schema(
 
 		paymentInfos : {
 			totalAmount: { type: Number, required: true },
-			deliveryAmount: { type: Number, required: true },
-			reservationAmount: { type: Number, required: true },
 			paymentMethodeId: { type: Number, required: true, },
 			card : {
-				cardNumber : { type: String, required: true },
-				ccv: { type: String, required: true },
-				expdate: { type: String, required: true, },
+				cardNumber : { type: String,  default : null },
+				ccv: { type: String, default : null },
+				expdate: { type: String, default : null},
 				name: { type: String, required: true },
+				phone: { type: String, required: true },
 				postalCode: { type: String, required: true },
 				address_city: { type: String, required: true },
 				address_line1: { type: String, required: true },
 				address_line2: { type: String, default: ""},
 			} ,
 		} ,
-		reservation : { type : Boolean , required : true , default : null } ,
 		pickUp : { type : Boolean , required : true , default : null } , 
-
 		delivery : { type : Boolean , required : true , default : null } , 
 		
-
-		
-
 		refund : { type : Boolean ,  default : null } , 
 
 		timeLimit :  { type : Number ,  default : null }  ,
@@ -216,6 +195,6 @@ const orderSchema = new mongoose.Schema(
 														'succeeded'
 													], default: 'Pending' }, 
 	},
-	{ timestamp: true }
+	{ timestamps: true }
 );
 module.exports = mongoose.model('Order', orderSchema);

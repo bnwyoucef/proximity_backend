@@ -106,14 +106,13 @@ exports.localSendNotification = async ( title , content , data , ) => {
 		notification.app_id = ONE_SIGNAL_CONFIG.APP_ID;
 		notification.included_segments = ['Subscribed Users'];
 		if (data != null) {
-			notification.data = data ;
 			console.log("data.owner_id") ;
 			console.log(data.owner_id) ;
 			console.log(data.owner_id.length) ;
 			for (let index = 0; index < data.owner_id.length; index++) {
 				const element = data.owner_id[index].toString();
 				console.log(element) ; 
-				let notification = new Notification({
+				let savedNotification = new Notification({
 					owner_id : element ,
 					title : title , 
 					content : content , 
@@ -124,8 +123,10 @@ exports.localSendNotification = async ( title , content , data , ) => {
 					seendInList : false ,
 				}) ;
 
-				await notification.save() ; 
+				savedNotification = await savedNotification.save() ; 
 				console.log(notification) ; 
+				
+				notification.data = {...data , notification_id : savedNotification._id} ;
 				
 			}
 		}
@@ -203,16 +204,13 @@ exports.updateNotification = async (req) => {
 
 exports.getUserNotifications = async (req) => {
 	try {
-		console.log(req.params);
 		const user = await User.findById(req.params.id);
-		console.log(user);
 		if (!user) {
 			throw new Error({ message: 'User not found' });
 		} else {
 			const notifications = await Notification.find(
 				{owner_id : user._id}
-			);
-			console.log(notifications);
+			).sort({createdAt : -1});
 			return notifications;
 		}
 	} catch (err) {

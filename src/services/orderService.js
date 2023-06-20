@@ -171,6 +171,14 @@ async function asyncMapCreateOrder(array, asyncFunc) {
 // Example usage
 async function myAsyncFuncCreateOrder(element) {
 	try {
+
+		element.items.forEach(el => {
+			if(typeof el.policy === 'string' && el.policy != "" ) {
+				el.policy = JSON.parse(el.policy) ; 
+			}
+			console.log(el.policy) ; 
+			
+		});
 		
 		const new_order = new Order({...element}) ; 
 		const order = await new_order.save() ;
@@ -587,9 +595,6 @@ exports.RefundOrders = async (req) => {
 								returnedItems : returnItems.items , 
 								refundPaymentInfos : {
 									totalAmount: returnItems.total ,
-									deliveryAmount: 0,
-									paymentMethodeId: 1,
-									card : returnItems.card ,
 								} ,
 								returned : true , 
 								refund : true 
@@ -729,21 +734,21 @@ exports.getOrdersPickUpByStatus = async (req) => {
 						reservation : req.params.type != "all" ? (req.params.type && req.params.type == "reservation")  : { $exists: true }  ,  
 						
 						refund : {$ne : true}  
-					});
+					}).sort({createdAt : -1});
 
 				}else if(req.params.type == "refund") {
 						order = await Order.find({ 
 							clientId : req.params.id , 
 							refund : true  , 
 							canceled : {$ne : true}  , 
-						});
+						}).sort({createdAt : -1});
 				}else if(req.params.type == "return") {
 					if(req.params.status == "all") {
 						order = await Order.find({ 
 							clientId : req.params.id , 
 							return : true  , 
 							canceled : {$ne : true}  , 
-						});
+						}).sort({createdAt : -1});
 
 					}else {
 						order = await Order.find({ 
@@ -752,7 +757,7 @@ exports.getOrdersPickUpByStatus = async (req) => {
 							waitingforReturn :req.params.status == "pending" ? {$ne : true } : true , 
 							returned :   req.params.status == "returned" ? true  : {$ne : true } , 
 							canceled : {$ne : true}  , 
-						});
+						}).sort({createdAt : -1});
 
 					}
 
@@ -767,7 +772,7 @@ exports.getOrdersPickUpByStatus = async (req) => {
 						items: { $ne: [] } ,
 						// return : {$ne : true}  , 
 						refund : {$ne : true}  
-					});
+					}).sort({createdAt : -1});
 
 				}
 			}else if(user && user.role == "seller") {
@@ -789,14 +794,14 @@ exports.getOrdersPickUpByStatus = async (req) => {
 						reservation : req.params.type != "all" ? (req.params.type && req.params.type == "reservation")  : { $exists: true }  ,  
 						
 						refund : {$ne : true}  
-					});
+					}).sort({createdAt : -1});
 
 				}else if(req.params.type == "refund") {
 					order = await Order.find({ 
 						storeId : {$in : stores } , 
 						refund : true  , 
 						canceled : {$ne : true}  , 
-					});
+					}).sort({createdAt : -1});
 				}else if(req.params.type == "return") {
 					console.log("i'm here") ;
 					if(req.params.status == "all") {
@@ -804,7 +809,7 @@ exports.getOrdersPickUpByStatus = async (req) => {
 							storeId : {$in : stores } , 
 							return : true  , 
 							canceled : {$ne : true}  , 
-						});
+						}).sort({createdAt : -1});
 
 					}else {
 						order = await Order.find({ 
@@ -813,7 +818,7 @@ exports.getOrdersPickUpByStatus = async (req) => {
 							waitingforReturn :req.params.status == "pending" ? {$ne : true } : true , 
 							returned :   req.params.status == "returned" ? true  : {$ne : true } , 
 							canceled : {$ne : true}  , 
-						});
+						}).sort({createdAt : -1});
 
 					}
 
@@ -827,7 +832,7 @@ exports.getOrdersPickUpByStatus = async (req) => {
 						canceled : {$ne : true}  , 
 						// return : {$ne : true}  , 
 						refund : {$ne : true}  
-					});
+					}).sort({createdAt : -1});
 				}
 		
 
@@ -1146,23 +1151,16 @@ async function myAsyncFuncPreOrderItems(element) {
 					price : productVariant.price , 
 					quantity : parseInt(element.orderQuantity) , 
 					discount : product.discount , 
-					reservationPolicy: product.policy && product.policy.reservation && product.policy.reservation.payment ,
-					deliveryPolicy:  product.policy && product.policy.delivery && product.policy.delivery.pricing ,
+					reservationPolicy: false ,
+					deliveryPolicy:  product.policy && product.policy.delivery && product.policy.delivery.delivery ,
 					pickupPolicy:  product.policy && product.policy.pickup && product.policy.pickup.timeLimit ,
 					reservation: false,
 					delivery: !(product.policy && product.policy.pickup && product.policy.pickup.timeLimit != null) ,
 					pickup: product.policy && product.policy.pickup && product.policy.pickup.timeLimit != null ,
-					reservationP: product.policy && product.policy.reservation && product.policy.reservation.payment && !product.policy.reservation.payment.free ?
-								 product.policy.reservation.payment.total ? 1 
-								 : product.policy.reservation.payment.partial && product.policy.reservation.payment.partial.percentage ? product.policy.reservation.payment.partial.percentage / 100 
-								 : product.policy.reservation.payment.partial && product.policy.reservation.payment.partial.fixe ? product.policy.reservation.payment.partial.fixe : 0.0
-								 : 0.0 ,
-					deliveryP: product.policy && product.policy.delivery && product.policy.delivery.pricing && product.policy.delivery.pricing.km ?
-								product.policy.delivery.pricing.km
-								: 0.0 ,
-					deliveryFixe: product.policy && product.policy.delivery && product.policy.delivery.pricing && product.policy.delivery.pricing.fixe ?
-								product.policy.delivery.pricing.fixe
-								: 0.0 ,
+					reservationP:  0.0 ,
+					deliveryP:  0.0 ,
+					deliveryFixe:  0.0 ,
+					policy : product.policy
 				}
 
 			}

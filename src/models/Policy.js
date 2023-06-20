@@ -16,20 +16,13 @@ exports.policySchema = new Schema(
         },
         delivery: {
             type : {
-                zone : {
-                    centerPoint : {
-                        latitude : { type : Number ,  default : null} , 
-                        longitude : { type : Number ,  default : null} , 
-                    } , 
-                    radius : { type : Number ,  default : null } , 
-                } ,
-                pricing : {
-                    fixe : {type : Number ,  default : null} ,
-                    km : {type : Number ,  default : null} ,
-                } ,
-
+                delivery : {
+                    
+                    type : Boolean,  default : null } , 
+                }
+        
             } ,
-        },
+        
         reservation : {
             type : {
                 duration : {type : Number ,  default : null} ,
@@ -69,10 +62,7 @@ exports.policySchema = new Schema(
         } , 
         order : {
             type : {
-            validation : {
-                auto :{type : Boolean ,  default : null} , 
-                manual :{type : Boolean ,  default : null} , 
-            } ,
+            
             notification : {
                 realtime :{type : Boolean ,  default : null} , 
                 time :{type : Number ,  default : null} , 

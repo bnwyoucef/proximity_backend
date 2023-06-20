@@ -75,17 +75,16 @@ exports.searchProduct = async (req) => {
 					},
 					key: 'location',
 					distanceField: 'dist.calculated',
-					maxDistance: parseFloat(req.query.radius),
+					maxDistance: 200000,
 					spherical: true,
-					includeLocs: 'dist.location',
 				},
 			},
 		]);
-		console.log(stores);
+		console.log(stores.length);
 		//get the products by nearest stores
 		//search for the products in those stores
 		const products = await Product.find({
-			store: {
+			storeId: {
 				$in: stores.map((store) => store._id),
 			},
 			name: {
