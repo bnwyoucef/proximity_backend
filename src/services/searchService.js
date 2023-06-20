@@ -77,16 +77,23 @@ exports.searchProduct = async (req) => {
 					distanceField: 'dist.calculated',
 					maxDistance: 200000,
 					spherical: true,
-				},
+				}
 			},
+			{
+				$match: {
+				  isActive: true
+				}
+			  }
 		]);
-		console.log(stores.length);
+		
+		const storesNot = await Store.find({isActive : {$ne : true}});
+		
 		//get the products by nearest stores
 		//search for the products in those stores
 		const products = await Product.find({
 			storeId: {
-				$in: stores.map((store) => store._id),
-			},
+				$in: stores.map((store) => store._id)
+			} , 
 			name: {
 				$regex: req.query.name ? req.query.name  : "",
 				$options: 'i',
