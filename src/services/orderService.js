@@ -588,7 +588,8 @@ exports.RefundOrders = async (req) => {
 					console.log("orderNewItems") ; 
 					console.log(returnItems.items) ;
 					let updatedOrder = null ; 
-					if(returnItems.total > 0) {
+					console.log(returnItems.total) ;
+					if(parseFloat(returnItems.total) > 0.0) {
 						updatedOrder = await Order.findByIdAndUpdate(
 							mongoose.Types.ObjectId(req.body.orderId) , 
 							{
