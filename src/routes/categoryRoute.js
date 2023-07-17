@@ -7,10 +7,13 @@ const fileUpload = require('express-fileupload');
 const path = require('path');
 
 //get All Categories
-router.get('/', verifyToken, CategoryController.getCategories);
+router.get('/',  CategoryController.getCategories);
 
 //get Category by id with all products
 router.get('/:id', verifyToken, CategoryController.getCategoryById);
+//get Category by id with all products
+router.get('/storeCategory/:id', verifyToken, CategoryController.getCategoryByStoreCategoryId);
+router.post('/storeCategory/', verifyToken, CategoryController.getCategoryByStoreCategoryIds);
 
 router.post('/', verifySeller, createCategorySchemaValidation, CategoryController.createCategory);
 

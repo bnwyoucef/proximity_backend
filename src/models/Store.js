@@ -117,7 +117,7 @@ const storeSchema = new mongoose.Schema(
 				image: {
 					type: String,
 				},
-				timestamp: {
+				timestamps: {
 					type: Date,
 					required: true,
 					default: Date.now(),
@@ -194,10 +194,47 @@ const storeSchema = new mongoose.Schema(
 			required: false,
 			
 		},
+		storeCategorieIds: [
+			{
+				type: mongoose.Schema.Types.ObjectId,
+				ref: 'StoreCategory',
+			},
+		],
+		productCategorieIds: [
+			{
+				categoryId : {
+					type: mongoose.Schema.Types.ObjectId,
+					ref: 'Category',
+				} , 
+				subCategories : [
+					{
+						type: mongoose.Schema.Types.ObjectId,
+						ref: 'Category.subCategories',
+					}
+				]
+			},
+		],
+		storeRayons: [
+			{
+				name: {
+					type: String,
+					required: true,
+				}
+			},
+		],
+		templateId: {
+			type: Number,
+			default: 1,
+		},
+		
+		activated : {
+			type: Boolean,
+			default: false,
+		},
 		
 	},
 	{ timestamps: true,},
-	//{ timestamp: true, toJSON: { virtuals: true } }
+	//{ timestamps: true, toJSON: { virtuals: true } }
 );
 //virtual image url
 storeSchema.virtual('imageUrl').get(function () {

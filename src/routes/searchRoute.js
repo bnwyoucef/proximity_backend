@@ -4,7 +4,7 @@ const { schemaSearchStoreValidation, schemaSearchProductValidation } = require('
 const { verifyToken } = require('../middleware/verifyToken');
 
 //search the nearest stores
-router.get('/', verifyToken, schemaSearchStoreValidation, SearchController.searchStore);
+router.get('/',   SearchController.searchStore);
 //search product by nearest store
 router.get('/product' , SearchController.searchProduct);
 

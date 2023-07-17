@@ -3,33 +3,31 @@ const Product = require('./Product');
 
 const categorySchema = new mongoose.Schema(
 	{
+		storeCategoryId : {
+			type: mongoose.Schema.Types.ObjectId,
+			ref: 'StoreCategory',
+		} , 
 		name: {
 			type: String,
 			required: true,
-			unique: true,
 		},
-		description: {
-			type: String,
-		},
-		image: {
-			type: String,
-			//	required: true,
-		},
-		productIds: [
+		
+		confirmed : { type : Boolean ,  default : false } , 
+		
+		subCategories: [
 			{
-				type: mongoose.Schema.Types.ObjectId,
-				ref: 'Product',
+				name: {
+					type: String,
+					required: true,
+				},
+				confirmed : { type : Boolean ,  default : false } , 
+			},
+			{
+				timestamps: true,
 			},
 		],
 	},
-	{ timestamp: true, toJSON: { virtuals: true } }
+	{ timestamps: true, toJSON: { virtuals: true } }
 );
 
-//virtual image url
-categorySchema.virtual('imageUrl').get(function () {
-	if (this.image != null) {
-		return `${process.env.App_URL}/${this.image}`;
-	}
-	return `${process.env.App_URL}/images/default.jpg`;
-});
 module.exports = mongoose.model('Category', categorySchema);

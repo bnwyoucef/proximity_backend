@@ -26,6 +26,7 @@ const orderRoute = require('./routes/orderRoute');
 const searchRoute = require('./routes/searchRoute');
 const resetPasswordRoute = require('./routes/resetPasswordRoute');
 const notificationRoute = require('./routes/notificationRoute');
+const storeCategoryRoute = require('./routes/storeCategoryRoute');
 //const adminRoute = require('./routes/admin');*/
 app.use(helmet());
 app.use(fileUpload());
@@ -45,6 +46,7 @@ app.use('/api/order', orderRoute);
 app.use('/api/search', searchRoute);
 app.use('/api/password-reset', resetPasswordRoute);
 app.use('/api/notification', notificationRoute);
+app.use('/api/storeCategory', storeCategoryRoute);
 
 mongoose
 	.connect(process.env.MONGO_URL)

@@ -15,7 +15,7 @@ const itemSchema = new Schema(
 		totalPrice: { type: Number, required: true, default: 0 },
 	},
 	{
-		timestamp: true,
+		timestamps: true,
 	}
 );
 
@@ -38,7 +38,7 @@ const cartSchema = new Schema(
 			default: 0,
 		},
 	},
-	{ timestamp: true, toJSON: { virtuals: true } }
+	{ timestamps: true, toJSON: { virtuals: true } }
 );
 cartSchema.virtual('totaleQuantity').get(function () {
 	const items = this.items;

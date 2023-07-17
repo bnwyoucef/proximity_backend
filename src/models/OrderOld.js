@@ -39,7 +39,7 @@ const orderSchema = new mongoose.Schema(
 				discount: { type: Number, required: true },
 			},
 			{
-				timestamp: true,
+				timestamps: true,
 			},
 		],
 
@@ -69,6 +69,6 @@ const orderSchema = new mongoose.Schema(
 		total: { type: Number, required: true, default: 0 },
 		status: { type: String, required: true, enum: ['pending', 'succeeded', 'cancelled', 'delivered'], default: 'pending' },
 	},
-	{ timestamp: true }
+	{ timestamps: true }
 );
 // module.exports = mongoose.model('Order', orderSchema);

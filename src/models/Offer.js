@@ -64,7 +64,7 @@ const OfferSchema = new mongoose.Schema(
 		},
 	},
 	{
-		timestamp: true,
+		timestamps: true,
 		toJSON: { virtuals: true },
 	}
 );

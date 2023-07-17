@@ -17,6 +17,26 @@ exports.getCategoryById = async (req, res) => {
 		res.status(500).send(err.message);
 	}
 };
+exports.getCategoryByStoreCategoryId = async (req, res) => {
+	try {
+		const category = await CategoryService.getCategoryByStoreCategoryId(req);
+		res.send(category);
+	} catch (err) {
+		res.status(500).send(err.message);
+	}
+};
+
+
+exports.getCategoryByStoreCategoryIds = async (req, res) => {
+	try {
+		const category = await CategoryService.getCategoryByStoreCategoryIds(req);
+		res.send(category);
+	} catch (err) {
+		res.status(500).send(err.message);
+	}
+};
+
+
 
 exports.createCategory = async (req, res) => {
 	try {

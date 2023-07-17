@@ -29,7 +29,7 @@ const BillSchema = new mongoose.Schema(
 				discount: { type: Number, required: true },
 			},
 			{
-				timestamp: true,
+				timestamps: true,
 			},
 		],
 		origin: {
@@ -86,7 +86,7 @@ const BillSchema = new mongoose.Schema(
 		},
 	},
 	{
-		timestamp: true,
+		timestamps: true,
 		toJSON: { virtuals: true },
 	}
 );

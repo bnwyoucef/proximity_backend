@@ -3,27 +3,34 @@ const Store = require('../models/Store');
 const User = require('../models/User');
 //search the nearest stores
 exports.searchStore = async (req) => {
-	try {
-		const stores = await Store.aggregate([
-			{
-				$geoNear: {
-					near: {
-						type: 'Point',
-						coordinates: [parseFloat(req.query.langitude), parseFloat(req.query.latitude)],
-					},
-					key: 'location',
-					distanceField: 'dist.calculated',
-					maxDistance: parseFloat(req.query.radius),
-					spherical: true,
-					includeLocs: 'dist.location',
-				},
-			},
-		]);
+    try {
+        const stores = await Store.aggregate([
+            {
+                $geoNear: {
+                    near: {
+                        type: 'Point',
+                        coordinates: [parseFloat(req.query.langitude), parseFloat(req.query.latitude)],
+                    },
+                    key: 'location',
+                    distanceField: 'dist.calculated',
+    				maxDistance: 200000,
+                    spherical: true,
+                    includeLocs: 'dist.location',
+                },
+            },{
+                $match: {
+                  isActive: true,
+                 name: { $regex: req.query.name, $options: 'i' }, 
+         
+                   
+                }
+              }
+        ]);
 
-		return stores;
-	} catch (err) {
-		throw err;
-	}
+        return stores;
+    } catch (err) {
+        throw err;
+    }
 };
 
 async function asyncMap(array, asyncFunc) {
@@ -85,9 +92,7 @@ exports.searchProduct = async (req) => {
 				}
 			  }
 		]);
-		
-		const storesNot = await Store.find({isActive : {$ne : true}});
-		
+				
 		//get the products by nearest stores
 		//search for the products in those stores
 		const products = await Product.find({

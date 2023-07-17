@@ -5,7 +5,7 @@ const { verifyToken, verifySeller, verifyTokenAndAutherization } = require('../m
 const { schemaStoreValidation, schemaUpdateStoreValidation , schemaUpdateStoreRatingValidation } = require('../middleware/dataValidation');
 //////
 
-router.post('/createStore', verifyToken, schemaStoreValidation, StoreController.createStore);
+router.post('/createStore', verifyToken, schemaStoreValidation ,  StoreController.createStore);
 
 router.put('/:id', verifySeller, schemaUpdateStoreValidation, StoreController.updateStore);
 router.get('/seller/:id', verifyToken, StoreController.getSellerStores);

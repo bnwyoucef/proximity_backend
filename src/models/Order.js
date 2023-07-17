@@ -97,7 +97,7 @@ const orderSchema = new mongoose.Schema(
 				
 			},
 			{
-				timestamp: true,
+				timestamps: true,
 			},
 		],
 
@@ -117,7 +117,7 @@ const orderSchema = new mongoose.Schema(
 				policy: policySchema,	
 			},
 			{
-				timestamp: true,
+				timestamps: true,
 			},
 		],
 
@@ -134,7 +134,7 @@ const orderSchema = new mongoose.Schema(
 				policy: policySchema,	
 			},
 			{
-				timestamp: true,
+				timestamps: true,
 			},
 		],
 

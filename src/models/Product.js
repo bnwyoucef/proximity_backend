@@ -107,7 +107,7 @@ const productSchema = new mongoose.Schema(
 		policy: policySchema,
 	},
 	{
-		timestamp: true,
+		timestamps: true,
 		toJSON: { virtuals: true },
 	}
 );/*

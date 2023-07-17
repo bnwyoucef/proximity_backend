@@ -102,7 +102,7 @@ const paymentSchema = new mongoose.Schema(
 				required: true,
 			},
 		},
-		timestamp: {
+		timestamps: {
 			type: Date,
 			required: true,
 			default: Date.now(),
@@ -112,6 +112,6 @@ const paymentSchema = new mongoose.Schema(
 			required: true,
 		},
 	},
-	{ timestamp: true }
+	{ timestamps: true }
 );
 module.exports = mongoose.model('Payment', paymentSchema);
