@@ -151,7 +151,7 @@ exports.addProduct = async (req) => {
 			req.body.variantes[i].img = storagePath;
 			varientsImages.push(storagePath);
 		}
-		console.log("abdou")
+		console.log("adding product");
 
 		const newProduct = new Product({
 			name: req.body.name,
@@ -166,7 +166,11 @@ exports.addProduct = async (req) => {
 			variants: req.body.variantes,
 			priceMin: req.body.priceMin,
 			priceMax: req.body.priceMax,
-			policy : req.body.policy
+			policy : req.body.policy,numberOfSales: 0, 
+			numberOfSearches: 0, 
+			averageRating: 0,
+			releaseDate: req.body.releaseDate,
+			
 		});
 		const savedProduct = await newProduct.save();
 		//add the product to the store
@@ -203,6 +207,7 @@ exports.deleteProduct = async (req) => {
 			let variant_images =  product.variants.map(el => el.img) ;
 			images_to_delete.push(...variant_images) ;
 		}
+		
 
 		//check if any image exist in orders 
 

@@ -16,3 +16,11 @@ exports.searchProduct = async (req, res) => {
 		res.status(500).send(err.message);
 	}
 };
+exports.searchPromotion = async (req, res) => {
+	try {
+		const promotions = await SearchService.searchPromotion(req);
+		res.send(promotions);
+	} catch (err) {
+		res.status(500).send(err.message);
+	}
+};

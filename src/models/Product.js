@@ -86,8 +86,19 @@ const productSchema = new mongoose.Schema(
 			ref: 'Offer',
 		},
 		
-		 
 		
+		numberOfSales: {
+			type: Number,
+			default: 0,
+		  },
+		  numberOfSearches: {
+			type: Number,
+			default: 0,
+		  },
+		  averageRating: {
+			type: Number,
+			default: 0,
+		  },
 
 		reports: [
 			{
@@ -106,10 +117,7 @@ const productSchema = new mongoose.Schema(
 		],
 		policy: policySchema,
 	},
-	{
-		timestamp: true,
-		toJSON: { virtuals: true },
-	}
+	{ timestamps: true,},
 );/*
 productSchema.virtual('quantity').get(function () {
 	const variants = this.variants;

@@ -75,7 +75,7 @@ exports.searchProduct = async (req) => {
 					},
 					key: 'location',
 					distanceField: 'dist.calculated',
-					maxDistance: 200000,
+					maxDistance: 200000000000000000000000000,
 					spherical: true,
 				}
 			},
@@ -117,3 +117,98 @@ exports.searchProduct = async (req) => {
 		throw err;
 	}
 };
+
+
+// ...
+
+exports.searchPromotion = async (req) => {
+  try {
+    if (!req.query.page) {
+      req.query.page = 1;
+    }
+    if (!req.query.limit) {
+      req.query.limit = 10;
+    }
+
+    console.log([parseFloat(req.query.langitude), parseFloat(req.query.latitude), parseFloat(req.query.radius)]);
+    //get the nearest stores
+	const stores = await Store.aggregate([
+		{
+			$geoNear: {
+				near: {
+					type: 'Point',
+					coordinates: [parseFloat(req.query.langitude), parseFloat(req.query.latitude)],
+				},
+				key: 'location',
+				distanceField: 'dist.calculated',
+				maxDistance: 200000000000000000000000000,
+				spherical: true,
+			}
+		},
+		{
+			$match: {
+			  isActive: true
+			}
+		  }
+	]);
+	
+    const products = await Product.find({
+      storeId: {
+        $in: stores.map((store) => store._id)
+      },
+      name: {
+        $regex: req.query.name ? req.query.name : "",
+        $options: 'i',
+      },
+    })
+      .skip((req.query.page - 1) * req.query.limit)
+      .limit(parseInt(req.query.limit))
+      .sort({ createdAt: -1 });
+
+    // Calculate the score for each product with discounts
+    const promotions = products.map((product) => {
+     if (product.discount > 0 ) {
+        const score = calculateScore(product);
+        return {
+          //productId: product._id,
+		  ...product.toObject(),
+          score,
+         
+        };
+      }/* else {
+       // return product.toObject();
+      }*/
+    });
+	console.log('promotionnns');
+
+    return promotions;
+  } catch (err) {
+    throw err;
+  }
+};
+
+// Function to calculate the score based on the given algorithm
+function calculateScore(product) {
+  const popularityWeight = 1.0;
+  const searchWeight = 1.0;
+  const ratingWeight = 5.0;
+  const discountWeight = 1.0;
+
+  const popularityScore = popularityWeight * product.numberOfSales;
+  const searchScore = searchWeight * product.numberOfSearches;
+  const ratingScore = ratingWeight * (product.averageRating ?? 0.0);
+  const discountScore = discountWeight * calculateDiscountScore(product.discount, product.discountEndDate);
+
+  const score = popularityScore + searchScore + ratingScore + discountScore;
+  return score;
+}
+
+// Function to calculate the discount score based on the given algorithm
+function calculateDiscountScore(discountPercentage, discountEndDate) {
+  if (!discountEndDate || discountEndDate <= new Date()) {
+    return 0.0;
+  }
+
+  const remainingDays = Math.max(0, Math.min(30, Math.ceil((discountEndDate - new Date()) / (1000 * 60 * 60 * 24))));
+  return discountPercentage * (1 - remainingDays / 30);
+}

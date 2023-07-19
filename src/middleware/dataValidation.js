@@ -528,9 +528,11 @@ const createProductSchema = joi.object({
 	}).allow(null),
 });
 exports.createProductSchemaValidation = (req, res, next) => {
+
 	if (typeof req.body.variantes === 'string' && req.body.variantes != "") {
+		
 		req.body.variantes = JSON.parse(req.body.variantes);
-		console.log(req) ;
+		
 		if(req.files.images && req.files.images.name) {
 			req.files.images = [req.files.images] ;
 		}
