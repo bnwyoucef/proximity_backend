@@ -7,7 +7,11 @@ const { verifyToken, verifyAdmin, verifySeller } = require('../middleware/verify
 const router = require('express').Router();
 
 router.put('/:id', verifySeller, updateProductSchemaValidation, ProductController.updateProduct);
-
+// update numberOfSales
+router.put('/:id/numberOfSales', ProductController.updateNumberOfSales);
+//update numberSearch 
+router.put('/:id/numberOfSearches', ProductController.updateNumberOfSearches);
+//update 
 //Add Product
 router.post('/', verifySeller, createProductSchemaValidation, ProductController.addProduct);
 //delete Product

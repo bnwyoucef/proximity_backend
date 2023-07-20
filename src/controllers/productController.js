@@ -1,4 +1,5 @@
 var ProductService = require('../services/productService');
+const Product = require('../models/Product'); // Adjust the path based on the actual location of your Product model file
 
 exports.updateProduct = async (req, res) => {
 	try {
@@ -9,10 +10,33 @@ exports.updateProduct = async (req, res) => {
 	}
 };
 
+
+exports.updateNumberOfSearches = async (req, res) => {
+// The new value for numberOfSearches
+console.log('// The new value for numberOfSearches');
+    // Find the product by ID
+	try {
+		const product = await ProductService.updateNumberOfSearches(req);
+		res.send(product);
+	} catch (err) {
+		res.status(500).send(err.message);
+	}
+  };
+
+exports.updateNumberOfSales = async (req, res) => {
+	try {
+		const product = await ProductService.updateNumberOfSales(req);
+		res.send(product);
+	} catch (err) {
+		res.status(500).send(err.message);
+	}
+  };
+  
+
 exports.addProduct = async (req, res) => {
 	try {
 		const product = await ProductService.addProduct(req);
-		console.log(product) ;
+		
 		res.send(product);
 	} catch (err) {
 		res.status(500).send(err.message);

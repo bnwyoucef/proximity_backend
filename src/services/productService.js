@@ -96,6 +96,46 @@ exports.updateProduct = async (req) => {
 		throw error;
 	}
 };
+//Update product Search number 
+exports.updateNumberOfSearches = async (req) => {
+	try {
+		// Validation request
+		const numberOfSearches= parseInt(req.body.numberOfSearches);
+		console.log("product") ;
+		const product = await Product.findById(req.params.id);
+		//test if the product is existe
+		if (!product) throw new Error('The product with the given ID was not found.');
+		product.numberOfSearches += numberOfSearches;
+		await product.save();
+		return product;
+	} catch (error) {
+		console.log(error) ;
+		throw error;
+	}
+		//test the Owner Product}
+		
+};
+
+//Update product Sales number 
+exports.updateNumberOfSales = async (req) => {
+	try {
+		// Validation request
+		console.log("product") ;
+		const product = await Product.findById(req.params.id);
+		const numberOfSales = parseInt(req.body.numberOfSales);
+		
+		//test if the product is existe
+		if (!product) throw new Error('The product with the given ID was not found.');
+		product.numberOfSales += numberOfSales;
+		await product.save();
+		return product;
+	} catch (error) {
+		console.log(error) ;
+		throw error;
+	}
+		//test the Owner Product}
+		
+};
 //Add Product
 exports.addProduct = async (req) => {
 	try {

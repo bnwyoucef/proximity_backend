@@ -103,14 +103,22 @@ exports.searchProduct = async (req) => {
 			.limit(parseInt(req.query.limit))
 			.sort({ createdAt: -1 });
 
+			if (req.query.name !== "" ) {
+				
+		  
+				for (const product of products) {
 			
-
+		  
+				  product.numberOfSearches += 1;
+				  await product.save();
+				}
+			  }
 			
 			let new_products = [...products] ; 
 			
 			
 			new_products  = await asyncMap(new_products, myAsyncFunc);
-			console.log("new_products");
+			
 			console.log(new_products);
 		return new_products;
 	} catch (err) {
