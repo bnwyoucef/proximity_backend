@@ -7,4 +7,5 @@ module.exports = require('./cartController');
 module.exports = require('./storeController');
 module.exports = require('./searchController');
 module.exports = require('./offerController');
+module.exports = require('./viewController');
 module.exports = require('./resetPasswordController');

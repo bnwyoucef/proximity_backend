@@ -69,3 +69,12 @@ exports.deleteStore = async (req, res) => {
 		res.status(500).send(err.message);
 	}
 };
+// Stats get seller stores income 
+exports.getSellerStoresIncome  = async (req, res) => {
+	try {
+		const stores = await StoreService.getSellerStoresIncome(req);
+		res.send(stores);
+	} catch (err) {
+		res.status(500).send(err.message);
+	}
+};

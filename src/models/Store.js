@@ -158,6 +158,7 @@ const storeSchema = new mongoose.Schema(
 			type: Number,
 			default: 0,
 		},
+		revenue: { type: Number, default: 0 },
 		workingTime: {
 
 			type : {

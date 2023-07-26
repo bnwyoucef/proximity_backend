@@ -17,6 +17,7 @@ exports.getOrders = async (req, res) => {
 };
 exports.getPreOrderItems = async (req, res) => {
 	try {
+		
 		const orders = await OrderService.getPreOrderItems(req);
 		res.send(orders);
 	} catch (err) {

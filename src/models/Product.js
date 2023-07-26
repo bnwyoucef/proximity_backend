@@ -91,6 +91,10 @@ const productSchema = new mongoose.Schema(
 			type: Number,
 			default: 0,
 		  },
+		  numberOfViews: {
+			type: Number,
+			default: 0,
+		  },
 		  numberOfSearches: {
 			type: Number,
 			default: 0,

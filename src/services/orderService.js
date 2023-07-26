@@ -1095,7 +1095,7 @@ exports.getPreOrderItems = async (req) => {
 		PreOrder.maxDeliveryFixe = maxDeliveryFixe ; 
 		  
 		PreOrder.items = JSON.stringify(items) ;
-
+		console.log(PreOrder);
 		return PreOrder;
 	} catch (err) {
 		console.log(err);

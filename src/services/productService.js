@@ -7,7 +7,7 @@ const fileUpload = require('express-fileupload');
 const fs = require('fs');
 const Order = require('../models/Order');
 const User = require('../models/User');
-
+const View = require('../models/View');
 //Update product
 exports.updateProduct = async (req) => {
 	try {
@@ -97,17 +97,26 @@ exports.updateProduct = async (req) => {
 	}
 };
 //Update product Search number 
-exports.updateNumberOfSearches = async (req) => {
+exports.updateNumberOfViews = async (req) => {
 	try {
 		// Validation request
-		const numberOfSearches= parseInt(req.body.numberOfSearches);
-		console.log("product") ;
+		//const numberOfS= parseInt(req.body.numberOf);
+		//console.log("product") ;
 		const product = await Product.findById(req.params.id);
 		//test if the product is existe
 		if (!product) throw new Error('The product with the given ID was not found.');
-		product.numberOfSearches += numberOfSearches;
+		product.numberOfViews += 1;
 		await product.save();
+		const view = new View({
+			sellerId: product.sellerId,
+			storeId: product.storeId,
+			productId: product.id,
+			date: new Date(),
+			region:  req.query.city , // Pass the region data for each view, or remove this line if not applicable
+		  });
+		 await  view.save();
 		return product;
+
 	} catch (error) {
 		console.log(error) ;
 		throw error;
@@ -115,6 +124,31 @@ exports.updateNumberOfSearches = async (req) => {
 		//test the Owner Product}
 		
 };
+
+exports.getProductSales = async (req) => {
+	try {
+	  // Find all products for the given sellerId and populate the seller information
+	  const products = await Product.find({sellerId: req.user.id})
+	  // Calculate the number of sales and income for each product
+	  const productsSales = products.map((product) => {
+		const productName = product.name;
+		const numberOfSales = product.numberOfSales; // Assuming the sales are stored as an array in the 'sales' field of the Product model
+		const income = numberOfSales * product.price;
+		const numberOfViews = product.numberOfViews;
+		return {
+
+			productName,// Spread the existing product object
+		  numberOfSales,
+		  income,
+		  numberOfViews
+		};
+	  });
+  
+	  return productsSales;
+	} catch (err) {
+	  throw err;
+	}
+  };
 
 //Update product Sales number 
 exports.updateNumberOfSales = async (req) => {
@@ -210,6 +244,7 @@ exports.addProduct = async (req) => {
 			numberOfSearches: 0, 
 			averageRating: 0,
 			releaseDate: req.body.releaseDate,
+			numberOfViews :0 ,
 			
 		});
 		const savedProduct = await newProduct.save();
