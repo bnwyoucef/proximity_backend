@@ -7,8 +7,15 @@ const { schemaStoreValidation, schemaUpdateStoreValidation , schemaUpdateStoreRa
 
 router.post('/createStore', verifyToken, schemaStoreValidation ,  StoreController.createStore);
 
-router.put('/:id', verifySeller, schemaUpdateStoreValidation, StoreController.updateStore);
+router.put(
+            '/:id', verifySeller, 
+            schemaUpdateStoreValidation, 
+            StoreController.updateStore
+            );
 router.get('/seller/:id', verifyToken, StoreController.getSellerStores);
+router.get('/seller/store/:id', verifyToken, StoreController.getSellerStore);
+router.get('/seller/store/catRayons/:id', verifyToken, StoreController.getSellerCategoriesAndRayons);
+
 router.get('/:id', StoreController.getStore);
 router.get('/findStore/:city', verifyToken, StoreController.getStoresByCity);
 router.get('/findStore/:latitude/:longitude/:maxDistance', verifyToken, StoreController.getStoresByLocation);

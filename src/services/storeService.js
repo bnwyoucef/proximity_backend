@@ -14,9 +14,16 @@ const fs = require('fs');
 const StoreCategory = require('../models/StoreCategory');
 const Category = require('../models/Category');
 
+const { default: mongoose } = require('mongoose');
+const { getCategoryByStoreId } = require('./categoryService');
 
 async function asyncMap(array, asyncFunc) {
 	const promises = array.map(asyncFunc);
+	return Promise.all(promises);
+  }
+  
+  async function asyncMap2(array, asyncFunc , storeId) {
+	const promises = array.map(el => asyncFunc(el  , storeId));
 	return Promise.all(promises);
   }
   
@@ -158,6 +165,50 @@ try {
 		if (!Store) {
 			throw new Error({ message: 'Store not found' });
 		} else {
+			if (typeof req.body.location === 'string') {
+				req.body.location = JSON.parse(req.body.location);
+			}
+			if (typeof req.body.address === 'string') {
+				req.body.address = JSON.parse(req.body.address);
+			}
+			if (typeof req.body.storeCategories === 'string') {
+				req.body.storeCategories = JSON.parse(req.body.storeCategories);
+				req.body.storeCategories = await asyncMap(req.body.storeCategories , myAsyncStoreCategoryFunc) ; 
+				req.body.storeCategorieIds = req.body.storeCategories.map(e => {
+					return mongoose.Types.ObjectId(e.id) ;
+				})	;
+				delete req.body.storeCategories ; 
+			}
+
+			if (typeof req.body.productCategories === 'string') {
+				req.body.productCategories = JSON.parse(req.body.productCategories);
+				req.body.productCategorieIds = await asyncMap(req.body.productCategories , myAsyncProductCategoryFunc) ; 
+				req.body.productCategorieIds = req.body.productCategorieIds.map(e => {
+					let subCategoriesIds = e.subCategories.map(s => {
+						return s.id ;
+					}) ; 
+					return {categoryId : e.id , subCategories : subCategoriesIds}
+				})	
+				delete req.body.productCategories ;
+			}
+		
+			
+			if (typeof req.body.storeRayons === 'string') {
+				req.body.storeRayons = JSON.parse(req.body.storeRayons);
+				req.body.storeRayons = req.body.storeRayons.map((e)=> {
+					if(e.id) {
+						return {name : e.name , _id : e.id} ; 
+					}else {
+						return {name : e.name } ; 
+					}
+				}) ; 	
+			}
+			if(req.body.template != null) {
+				req.body.templateId = parseInt(req.body.template) ;
+				delete req.body.template ; 
+
+			}
+			
 			if (store.sellerId != req.user.id) {
 				throw new Error({ message: 'You are not authorized to update this store' });
 			} else {
@@ -193,7 +244,7 @@ try {
 						{ new: true }
 					);
 				}else {
-					console.log("im here");
+					console.log("im here without image");
 					console.log(req.body);
 					 updatedStore = await Store.findByIdAndUpdate(
 						req.params.id,
@@ -201,12 +252,11 @@ try {
 							$set: req.body,
 						},
 						{ new: true }
-					);
-		
+					);		
 				}
 		
 		
-		
+				console.log(updatedStore.storeCategorieIds) ; 
 				return updatedStore;
 			}
 		}
@@ -294,13 +344,104 @@ exports.getSellerStores = async (req) => {
 				return element ; 
 				
 			}) ;
-			console.log(new_stores);
+			new_stores = await asyncMap(new_stores , myAsyncSellerStoreFunc) ; 
+			console.log(new_stores[new_stores.length-1]);
 			return new_stores;
 		}
 	} catch (err) {
+		console.log(err) ; 
 		throw err;
 	}
 };
+
+exports.getSellerStore = async (req) => {
+	try {
+		const store = await Store.findById(req.params.id );
+		if (!store) {
+			throw new Error({ message: 'Store not found' });
+		} else {
+			let new_stores = [store] ; 
+			
+			const seller = await User.findById(req.user.id) ;
+
+			new_stores.map(element => {
+				if(!element.policy && seller) {
+						element.policy = seller.policy ;
+				}
+				return element ; 
+				
+			}) ;
+			new_stores = await asyncMap(new_stores , myAsyncSellerStoreFunc) ; 
+			console.log(new_stores[new_stores.length-1]);
+			return new_stores[0];
+		}
+	} catch (err) {
+		console.log(err) ; 
+		throw err;
+	}
+};
+
+
+
+exports.getSellerCategoriesAndRayons = async (req) => {
+	try {
+		const store = await Store.findById(req.params.id );
+		if (!store) {
+			throw new Error({ message: 'Store not found' });
+		} else {
+			let new_stores = [store] ; 
+			
+			const seller = await User.findById(req.user.id) ;
+
+			new_stores.map(element => {
+				if(!element.policy && seller) {
+						element.policy = seller.policy ;
+				}
+				return element ; 
+				
+			}) ;
+			new_stores = await asyncMap(new_stores , myAsyncSellerStoreFunc) ; 
+			console.log(new_stores[new_stores.length-1]);
+
+			var cats = await getCategoryByStoreId({params : {
+				id : new_stores[0]._id
+			}}) ; 
+
+			console.log( {
+				rayons : new_stores[0].storeRayons , 
+				cats : cats.ProductCategories
+
+			}) ;
+			return {
+				rayons : new_stores[0].storeRayons , 
+				cats : cats.ProductCategories
+
+			};
+		}
+	} catch (err) {
+		console.log(err) ; 
+		throw err;
+	}
+};
+
+async function myAsyncSellerStoreFunc(element) {
+// do some asynchronous operation with item
+if(element.storeRayons)  {
+	let newstoreRayons = await asyncMap2(element.storeRayons , myAsyncSellerStoreRayonFunc , element._id) ; 
+	return {...element._doc , storeRayons : newstoreRayons} ; 
+
+}
+return element ; 
+}
+
+async function myAsyncSellerStoreRayonFunc(element , storeId) {
+// do some asynchronous operation with item
+	let product_number = await Product.count({rayonId : element._id , storeId : storeId}) ; 
+	element = {...element._doc , product_count : product_number , selected : true } ; 
+	return element ; 
+}
+	
+
 //get stores by location
 exports.getStoresByLocation = async (req) => {
 	try {

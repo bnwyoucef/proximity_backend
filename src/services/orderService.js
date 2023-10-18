@@ -141,11 +141,37 @@ exports.createOrder = async (req) => {
 //create order
 exports.createOrderDirectly = async (req) => {
 	try {
+		console.log(req.body); 
+
 		let orders = req.body.orders ; 
 		if(typeof orders === "string") {
 			orders = JSON.parse(orders) ; 
 		}else {
 			orders = [] ; 
+		}
+
+		
+		let persons = req.body.persons ; 
+		if(typeof persons === "string") {
+			persons = JSON.parse(persons) ; 
+		}else {
+			persons = [] ; 
+		}
+
+		
+		let addresses = req.body.addresses ; 
+		if(typeof addresses === "string") {
+			addresses = JSON.parse(addresses) ; 
+		}else {
+			addresses = [] ; 
+		}
+
+		
+		let cards = req.body.cards ; 
+		if(typeof cards === "string") {
+			cards = JSON.parse(cards) ; 
+		}else {
+			cards = [] ; 
 		}
 
 		
@@ -155,6 +181,12 @@ exports.createOrderDirectly = async (req) => {
 		if(req.body.orderId) {
 			await Order.findByIdAndDelete(req.body.orderId) ;
 		}
+
+		await User.findByIdAndUpdate(req.user.id , {
+			pickupPersons : persons , 
+			cards : cards 
+			
+		} )
 		
 	} catch (error) {
 		console.log(error) ;
@@ -1042,6 +1074,11 @@ exports.getPreOrderItems = async (req) => {
 				throw new Error('cart not found');
 			}
 		}
+		var user = await User.findById(mongoose.Types.ObjectId(req.body.clientId)) ; 
+		console.log(user._doc) ; 
+		if(!user) {
+			throw new Error('client not found');
+		}
 
 		PreOrder.cartId = req.body.cartId ; 
 
@@ -1095,7 +1132,21 @@ exports.getPreOrderItems = async (req) => {
 		PreOrder.maxDeliveryFixe = maxDeliveryFixe ; 
 		  
 		PreOrder.items = JSON.stringify(items) ;
+		PreOrder.pickupPersons = JSON.stringify(user.pickupPersons && user.pickupPersons.length ? user.pickupPersons : []) ; 
+		PreOrder.addresses = JSON.stringify(user.addresses && user.addresses.length ? user.addresses : []) ; 
+		PreOrder.cards = JSON.stringify(user.cards && user.cards.length ? user.cards.map(e => {return {"infos" : {
+			"cardNumber": null,
+			"ccv": null,
+			"expdate": null,
+			"name": e.name ?? "",
+			"phone": e.phone ?? "",
+			"city": e.address_city ?? "",
+			"street": e.address_line1 ?? "",
+			"street2": e.address_line2 ?? "",
+			"postalCode": e.postalCode ?? ""
+		}}}) : []) ; 
 
+		console.log(PreOrder) ; 
 		return PreOrder;
 	} catch (err) {
 		console.log(err);
@@ -1130,17 +1181,21 @@ async function myAsyncFuncPreOrderItems(element) {
 				// get item policy
 				if(!product.policy) {
 					product.policy = null ;
-					let store = await Store.findById(product.storeId) ;
-					if(!(store && store.policy)) {
+					console.log("product.policy") ;
+					// let store = await Store.findById(product.storeId) ;
+					// if(!(store && store.policy)) {
+					// 	console.log("store.policy") ;
 							let seller = await User.findById(product.sellerId) ;
 							if(seller && seller.policy) {
+								console.log("seller.policy") ;
 								product.policy = seller.policy ;
+								console.log(seller.policy) ;
 							}else {
 								product.policy = null
 							}
-					}else {
-						product.policy = store.policy  ;
-					}
+					// }else {
+					// 	product.policy = store.policy  ;
+					// }
 				}
 				returnedItem = {
 					id : productVariant._id ,
@@ -1152,15 +1207,23 @@ async function myAsyncFuncPreOrderItems(element) {
 					price : productVariant.price , 
 					quantity : parseInt(element.orderQuantity) , 
 					discount : product.discount , 
-					reservationPolicy: false ,
-					deliveryPolicy:  product.policy && product.policy.delivery && product.policy.delivery.delivery ,
+					reservationPolicy: product.policy && product.policy.reservation && product.policy.reservation.payment ,
+					deliveryPolicy:  product.policy && product.policy.delivery && product.policy.delivery.pricing ,
 					pickupPolicy:  product.policy && product.policy.pickup && product.policy.pickup.timeLimit ,
 					reservation: false,
 					delivery: !(product.policy && product.policy.pickup && product.policy.pickup.timeLimit != null) ,
 					pickup: product.policy && product.policy.pickup && product.policy.pickup.timeLimit != null ,
-					reservationP:  0.0 ,
-					deliveryP:  0.0 ,
-					deliveryFixe:  0.0 ,
+					reservationP: product.policy && product.policy.reservation && product.policy.reservation.payment && !product.policy.reservation.payment.free ?
+								 product.policy.reservation.payment.total ? 1 
+								 : product.policy.reservation.payment.partial && product.policy.reservation.payment.partial.percentage ? product.policy.reservation.payment.partial.percentage / 100 
+								 : product.policy.reservation.payment.partial && product.policy.reservation.payment.partial.fixe ? product.policy.reservation.payment.partial.fixe : 0.0
+								 : 0.0 ,
+					deliveryP: product.policy && product.policy.delivery && product.policy.delivery.pricing && product.policy.delivery.pricing.km ?
+					product.policy.delivery.pricing.km
+					: 0.0 ,
+					 deliveryFixe: product.policy && product.policy.delivery && product.policy.delivery.pricing && product.policy.delivery.pricing.fixe ?
+								 product.policy.delivery.pricing.fixe
+								 : 0.0 ,
 					policy : product.policy
 				}
 

@@ -51,6 +51,26 @@ exports.getSellerStores = async (req, res) => {
 		res.status(500).send(err.message);
 	}
 };
+
+
+//get seller store
+exports.getSellerStore = async (req, res) => {
+	try {
+		const stores = await StoreService.getSellerStore(req);
+		res.send(stores);
+	} catch (err) {
+		res.status(500).send(err.message);
+	}
+};
+//get store cats & rayons
+exports.getSellerCategoriesAndRayons = async (req, res) => {
+	try {
+		const stores = await StoreService.getSellerCategoriesAndRayons(req);
+		res.send(stores);
+	} catch (err) {
+		res.status(500).send(err.message);
+	}
+};
 exports.getStoresByLocation = async (req, res) => {
 	try {
 		const stores = await StoreService.getStoresByLocation(req);

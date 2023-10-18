@@ -10,9 +10,22 @@ const productSchema = new mongoose.Schema(
 		},
 		description: { type: String, required: true },
 		price: { type: Number, required: true },
+		storeCategoryId : {
+			type: mongoose.Schema.Types.ObjectId,
+			ref: 'StoreCategory',
+			required: true,
+		} , 
 		categoryId: {
 			type: mongoose.Schema.Types.ObjectId,
 			ref: 'Category',
+			required: true,
+		},
+		subCategoryId: {
+			type: mongoose.Schema.Types.ObjectId,
+			required: true,
+		},
+		rayonId: {
+			type: mongoose.Schema.Types.ObjectId,
 			required: true,
 		},
 		//customCategory: { type: String, required: true },

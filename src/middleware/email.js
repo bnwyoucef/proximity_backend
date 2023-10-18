@@ -1,6 +1,6 @@
 const nodemailer = require('nodemailer');
 require('dotenv').config();
-const sendMail = (email, subject, message) => {
+const sendMail = (email, subject, message , html = false) => {
 	const transporter = nodemailer.createTransport({
 		service: 'gmail',
 		auth: {
@@ -8,12 +8,22 @@ const sendMail = (email, subject, message) => {
 			pass: process.env.EMAIL_PASSWORD,
 		},
 	});
-	const mailOptions = {
+	
+	let mailOptions = {
 		from: process.env.EMAIL,
 		to: email,
 		subject: subject,
 		text: message,
 	};
+	if(html) {
+		mailOptions = {
+			from: process.env.EMAIL,
+			to: email,
+			subject: subject,
+			html: message,
+		} ;
+	}
+	console.log(mailOptions) ; 
 	transporter.sendMail(mailOptions, function (error, info) {
 		if (error) {
 			console.log(error);

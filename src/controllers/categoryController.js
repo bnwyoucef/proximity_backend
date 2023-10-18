@@ -36,6 +36,15 @@ exports.getCategoryByStoreCategoryIds = async (req, res) => {
 	}
 };
 
+exports.getCategoryByStoreId = async (req, res) => {
+	try {
+		const category = await CategoryService.getCategoryByStoreId(req);
+		res.send(category);
+	} catch (err) {
+		res.status(500).send(err.message);
+	}
+};
+
 
 
 exports.createCategory = async (req, res) => {

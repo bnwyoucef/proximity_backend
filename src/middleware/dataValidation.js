@@ -10,6 +10,7 @@ const userSchema = joi.object({
 	password_confirmation: joi.string().min(6).required(),
 	role: joi.string().valid('user', 'admin', 'seller').required(),
 	cart: joi.string().allow(null).allow(""),
+	google: joi.boolean(),
 });
 exports.userSchemaValidation = (req, res, next) => {
 	const { error } = userSchema.validate(req.body);
@@ -53,7 +54,9 @@ exports.resetPasswordSchemaValidation = (req, res, next) => {
 const userLoginSchema = joi.object({
 	email: joi.string().required(),
 	role: joi.string().valid('user', 'admin', 'seller').required(),
-	password: joi.string().min(6).required(),
+	password: joi.string().min(6),
+	google: joi.boolean(),
+	name: joi.string(),
 });
 exports.userLoginSchemaValidation = (req, res, next) => {
 	const { error } = userLoginSchema.validate(req.body);
@@ -183,6 +186,10 @@ const updateSchema = joi.object({
 		region: joi.string(),
 		apartmentNumber: joi.string(),
 	}),
+	storeCategories : joi.string().allow(null) ,
+	productCategories : joi.string().allow(null) ,
+	tags : joi.string().allow(null) ,
+	notification : joi.string().allow(null) ,
 	proximityRange: joi.number().min(0).max(1000),
 });
 exports.updateSchemaValidation = (req, res, next) => {
@@ -334,6 +341,9 @@ const updateProductSchema = joi.object({
 	images: joi.array().items(joi.string().min(3).max(200)),
 	storeId: joi.string().required(),
 	categoryId: joi.string(),
+	storeCategoryId: joi.string(),
+	subCategoryId: joi.string(),
+	rayonId: joi.string(),
 	variantes: joi.array().items(
 		joi.object({
 			_id: joi.string(),
@@ -439,7 +449,10 @@ const createProductSchema = joi.object({
 	price: joi.number().min(1).required(),
 	description: joi.string().min(3).max(800),
 	image: joi.string().min(3).max(200),
-	categoryId: joi.string(),
+	storeCategoryId : joi.string().allow(""),
+	categoryId : joi.string(),
+	subCategoryId :joi.string(),
+	rayonId : joi.string() ,
 	subcategory: joi.string().min(3),
 	discount: joi.number().min(1).max(100),
 	tags: joi.array().items(joi.string().min(2)),
@@ -849,11 +862,11 @@ exports.schemaUpdateStoreValidation = (req, res, next) => {
 		console.log("ff");
 		console.log(req.body.workingTime);
 	}
-	const { error } = schemaUpdateStore.validate(req.body);
-	if (error) {
-		console.log(error);
-		return res.status(400).send(error.details[0].message);
-	}
+	// const { error } = schemaUpdateStore.validate(req.body);
+	// if (error) {
+	// 	console.log(error);
+	// 	return res.status(400).send(error.details[0].message);
+	// }
 	next();
 };
 

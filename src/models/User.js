@@ -87,7 +87,125 @@ const userSchema = new mongoose.Schema(
 			type: Number,
 			default: 20,
 		},
+		storeCategorieIds: [
+			{
+				type: mongoose.Schema.Types.ObjectId,
+				ref: 'StoreCategory',
+			},
+		],
+		productCategorieIds: [
+			{
+				categoryId : {
+					type: mongoose.Schema.Types.ObjectId,
+					ref: 'Category',
+				} , 
+				subCategories : [
+					{
+						type: mongoose.Schema.Types.ObjectId,
+						ref: 'Category.subCategories',
+					}
+				]
+			},
+		],
+		tags: [
+			{
+				name: {
+					type: String,
+					required: true,
+				}
+			},
+		],
+		notification : {
+			orderNotifications :{type : Boolean ,  default : null} , 
+			offerNotification :{type : Boolean ,  default : null} , 
+			mail :{type : Boolean ,  default : null} , 
+			sms :{type : Boolean ,  default : null} , 
+			platforme :{type : Boolean ,  default : null} , 
+			popup :{type : Boolean ,  default : null} , 
+			vibration :{type : Boolean ,  default : null} , 
+			ringing :{type : Boolean ,  default : null} , 
+		} , 
+		
+		pickupPersons: [
+			{
+				type : {
+					name : {type : String, required: true } 
+				} 
+			},
+		],
+		addresses : [
+			{
+				type : {
+					deliveryLocation : {
+						type: {
+							type: String,
+							enum: ['Point'],
+						},
+						coordinates: [
+							{
+								type: Number,
+							},
+							{
+								type: Number,
+							},
+						],
+					},
+					deliveryAddresse : {
+						city: {
+							type: String,
+							// required: true,
+						},
+						streetName: {
+							type: String,
+							//required: true,
+						},
+						postalCode: {
+							type: String,
+							//required: true,
+						},
+						country: {
+							type: String,
+							//required: true,
+						},
+						fullAdress: {
+							type: String,
+							//required: true,
+						},
+						region: {
+							type: String,
+							//required: true,
+						},
+						countryCode: {
+							type: String,
+							//required: true,
+						},
+						phone: {
+							type: String,
+							//required: true,
+						},
+					},
+					
+				}
+			}
+		] , 
+		cards : [
+			{
+				type : {
+					cardNumber : { type: String,  default : null },
+					ccv: { type: String, default : null },
+					expdate: { type: String, default : null},
+					name: { type: String, required: true },
+					phone: { type: String, required: true },
+					postalCode: { type: String, required: true },
+					address_city: { type: String, required: true },
+					address_line1: { type: String, required: true },
+					address_line2: { type: String, default: ""},
+				}
+			}
+		]
+
 	},
+	
 
 	{ timestamps: true }
 );

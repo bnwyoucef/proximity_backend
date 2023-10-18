@@ -21,7 +21,9 @@ const NotificationSchema = new mongoose.Schema(
 														'Reservation', 
 														'Return', 
 														'Refund', 
-														'Cancel' 
+														'Cancel' , 
+														'offer', 
+														'product'
 													], default: 'Cancel' }, 
 		seend : { type : Boolean ,  default : false }  ,
 		seendInList : { type : Boolean ,  default : false }

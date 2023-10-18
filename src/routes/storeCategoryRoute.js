@@ -5,6 +5,8 @@ const { verifyToken, verifyAdmin, verifyTokenAndAutherization, verifySeller } = 
 
 //get All StoreCategories
 router.get('/', verifyToken, StoreCategoryController.getStoreCategories);
+router.get('/store/:id', verifyToken, StoreCategoryController.getAllStoreCategoriesOfaStore);
+router.get('/client/:id', verifyToken, StoreCategoryController.getAllStoreCategoriesOfaClient);
 
 //get StoreCategory by id with all products
 router.get('/:id', verifyToken, StoreCategoryController.getStoreCategoryById);

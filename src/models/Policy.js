@@ -16,9 +16,18 @@ exports.policySchema = new Schema(
         },
         delivery: {
             type : {
-                delivery : {
-                    
-                    type : Boolean,  default : null } , 
+                    delivery : {type : Boolean,  default : null } , 
+                    zone : {
+                        centerPoint : {
+                            latitude : { type : Number ,  default : null} , 
+                            longitude : { type : Number ,  default : null} , 
+                        } , 
+                        radius : { type : Number ,  default : null } , 
+                    } ,
+                    pricing : {
+                        fixe : {type : Number ,  default : null} ,
+                        km : {type : Number ,  default : null} ,
+                    } ,
                 }
         
             } ,

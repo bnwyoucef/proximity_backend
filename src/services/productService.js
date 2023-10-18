@@ -7,10 +7,13 @@ const fileUpload = require('express-fileupload');
 const fs = require('fs');
 const Order = require('../models/Order');
 const User = require('../models/User');
+const { default: mongoose } = require('mongoose');
+const { localSendNotification } = require('./notificationsService');
 
 //Update product
 exports.updateProduct = async (req) => {
 	try {
+		console.log(req.body) ;
 		// Validation request
 		const product = await Product.findById(req.params.id);
 		//test if the product is existe
@@ -86,8 +89,11 @@ exports.updateProduct = async (req) => {
 		product.discount = req.body.discount || product.discount;
 		product.images = req.body.images || product.images;
 		product.storeId = req.body.storeId || product.storeId;
-		product.categoryId = req.body.categoryId || product.categoryId;
 		product.policy = req.body.policy || product.policy;
+		product.categoryId = req.body.categoryId || product.categoryId;
+		product.subCategoryId = req.body.subCategoryId || product.subCategoryId;
+		product.storeCategoryId = req.body.storeCategoryId || product.storeCategoryId;
+		product.rayonId = req.body.rayonId || product.rayonId;
 		//save the product with previos varients
 		await product.save();
 		return product;
@@ -158,7 +164,6 @@ exports.addProduct = async (req) => {
 			price: req.body.price,
 			description: req.body.description,
 			images: imagess,
-			categoryId: category._id,
 			subcategory: req.body.subcategory || '',
 			sellerId: req.user.id,
 			storeId: store._id,
@@ -166,15 +171,124 @@ exports.addProduct = async (req) => {
 			variants: req.body.variantes,
 			priceMin: req.body.priceMin,
 			priceMax: req.body.priceMax,
-			policy : req.body.policy
+			policy : req.body.policy,
+			storeCategoryId : req.body.storeCategoryId,
+			categoryId : req.body.categoryId,
+			subCategoryId : req.body.subCategoryId,
+			rayonId : req.body.rayonId
 		});
 		const savedProduct = await newProduct.save();
-		//add the product to the store
-		//store.products.push(savedProduct._id);
-		//await store.save();
-		//add the product to the category
-		category.productIds.push(savedProduct._id);
-		await category.save();
+		// get users notified 
+		
+		const regexPatternTitle = new RegExp(`\\b${savedProduct.name}\\b`, 'i');
+		const regexPatternDescription = new RegExp(`\\b${savedProduct.description}\\b`, 'i');
+
+		let users = await User.find({_id : "6491ed986b54174db78c0695"}) ; 
+		// let users = await User.aggregate([
+		// 	{
+		// 	  $match: {
+		// 		$and: [
+		// 			{
+		// 				notification : {
+		// 				offerNotification : true
+		// 				} 
+		// 			} ,
+		// 			{ 
+		// 				productCategorieIds: {
+		// 				$elemMatch: {
+		// 				  subCategories: savedProduct.subCategoryId
+		// 				}
+		// 			  } 
+		// 			},
+		// 			{
+		// 				$or : [
+		// 					{
+		// 						Tags: {
+		// 						$regex: regexPatternTitle,
+		// 						$options: 'i'
+		// 						}
+		// 					},
+		// 					{
+		// 						Tags: {
+		// 						$regex: regexPatternDescription,
+		// 						$options: 'i'
+		// 						}
+		// 					},
+
+		// 				]
+		// 			}
+		// 		]
+		// 	  }
+		// 	},
+		// 	{ $limit: 10 } // Limit the search results to 10
+		//   ]).toArray();
+
+		// if(users.length < 10) {
+		// 	let usersSup = await User.aggregate([
+		// 		{
+		// 		  $match: {
+		// 			$and: [
+		// 				{
+		// 					notification : {
+		// 					offerNotification : true
+		// 					}
+		// 				} ,
+		// 				{
+		// 					_id: {
+		// 					$nin: users.map(el => el._id)
+		// 					}
+		// 				} ,
+		// 				{
+		// 					$or: [
+		// 					{ 
+		// 						productCategorieIds: {
+		// 						$elemMatch: {
+		// 							subCategories: savedProduct.subCategoryId
+		// 						}
+		// 					} 
+		// 					},
+		// 					{
+		// 						$or : [
+		// 							{
+		// 								Tags: {
+		// 								$regex: regexPatternTitle,
+		// 								$options: 'i'
+		// 								}
+		// 							},
+		// 							{
+		// 								Tags: {
+		// 								$regex: regexPatternDescription,
+		// 								$options: 'i'
+		// 								}
+		// 							},
+		
+		// 						]
+		// 					}
+		// 				]
+		// 				},
+		// 			]
+		// 		  }
+		// 		},
+		// 		{ $limit: 10 } // Limit the search results to 10
+		// 	  ]).toArray();
+		//  users = users.concat(usersSup);
+		// }
+		console.log(users) ; 
+		// send product notifications to users 
+		if(users.length)  {
+			let data = {
+				owner_id : users.map(el => el._id) , 
+				type : "offer" , // order or offer
+				sub_type : "product" , // for the icon
+				id : savedProduct._id // get order or offer and go to the page 
+			};
+	
+			let title = "New Product :"+savedProduct.name ; 
+			let content = savedProduct.description ;
+	
+			await localSendNotification(title , content , data) ;
+
+		}
 		return savedProduct;
 	} catch (err) {
 		console.log(err.message)
@@ -276,14 +390,22 @@ exports.getProduct = async (req) => {
 };
 //get all products for a store
 exports.getProducts = async (req) => {
+	console.log("req.body") ; 
+	console.log(req.body) ; 
 	try {
 		const store = await Store.findById(req.params.id);
 		if (!store) {
 			throw new Error('Store not found');
+		} 
+		var products = [] ; 
+		if(req.body.rayonId) {
+			products = await Product.find({ storeId: req.params.id , rayonId : mongoose.Types.ObjectId(req.body.rayonId) });
+		} else {
+			products = await Product.find({ storeId: req.params.id });
 		}
-		const products = await Product.find({ storeId: req.params.id });
 		return products;
 	} catch (err) {
+		console.log(err) ;
 		throw err;
 	}
 };
@@ -315,11 +437,12 @@ exports.searchProduct = async (req) => {
 };
 //search product by his name and store id
 exports.searchProductStore = async (req) => {
-	try {
-		const products = await Product.find({
-			name: { $regex: req.params.name },
-			storeId: req.params.id,
-		});
+	try { 
+		var products = [] ; 
+		products = await Product.find({
+		   name: { $regex: req.params.name },
+		   storeId: req.params.id,
+	   });
 		return products;
 	} catch (err) {
 		throw err;

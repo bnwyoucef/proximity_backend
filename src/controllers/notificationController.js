@@ -16,6 +16,22 @@ exports.sendNotification = async (req, res) => {
 		res.status(500).send(err.message);
 	}
 };
+exports.shareProduct = async (req, res) => {
+	try {
+		const notification = await NotificationService.shareProduct(req);
+		res.send(notification);
+	} catch (err) {
+		res.status(500).send(err.message);
+	}
+};
+exports.shareStore = async (req, res) => {
+	try {
+		const notification = await NotificationService.shareStore(req);
+		res.send(notification);
+	} catch (err) {
+		res.status(500).send(err.message);
+	}
+};
 exports.updateNotificationsUser = async (req, res) => {
 	try {
 		const notification = await NotificationService.updateNotificationsUser(req);

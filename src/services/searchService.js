@@ -63,6 +63,7 @@ async function myAsyncFunc(element) {
 
 // search product by nearest store
 exports.searchProduct = async (req) => {
+	console.log(req.body) ;
 	try {
 		if (!req.query.page) {
 			req.query.page = 1;

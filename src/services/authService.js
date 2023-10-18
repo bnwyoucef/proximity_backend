@@ -35,15 +35,29 @@ exports.register = async (userInfo) => {
 		if(!(userInfo.password && userInfo.password_confirmation && userInfo.password == userInfo.password_confirmation)) {
 			throw new Error('The password and its confirmation are not the same');
 		}
-
-		const newUser = new User({
-			email: userInfo.email,
-			phone: userInfo.phone ,
-			username : userInfo.username , 
-			password: userInfo.password,
-			role: userInfo.role,
-			verificationCode: random,
-		});
+		let newUser = null ; 
+		if(userInfo.google) {
+			newUser = new User({
+				email: userInfo.email,
+				phone: userInfo.phone ,
+				username : userInfo.username , 
+				password: userInfo.password,
+				role: userInfo.role,
+				verificationCode: random,
+				isVerified : true , 
+				welcome : false 
+			});
+		}else {
+			newUser = new User({
+				email: userInfo.email,
+				phone: userInfo.phone ,
+				username : userInfo.username , 
+				password: userInfo.password,
+				role: userInfo.role,
+				verificationCode: random,
+			});
+		}
+		 
 		newUser.password = CryptoJS.AES.encrypt(newUser.password, process.env.ACCESS_TOKEN_SECRET).toString();
 
 		
@@ -129,7 +143,9 @@ exports.login = async (userInfo) => {
 		if (user) {
 			const hashedPassword = CryptoJS.AES.decrypt(user.password, process.env.ACCESS_TOKEN_SECRET).toString(CryptoJS.enc.Utf8);
 				const inputPassword = userInfo.password;
-				if (hashedPassword === inputPassword) {
+				console.log("userInfo.google" ) ; 
+				console.log(userInfo.google ) ; 
+				if (userInfo.google || hashedPassword === inputPassword) {
 					const token = jwt.sign({ id: user._id, role: user.role }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '7d' });
 					if(user.role != userInfo.role) {
 						return {

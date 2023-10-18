@@ -7,6 +7,7 @@ const fileUpload = require('express-fileupload');
 const Category = require('../models/Category');
 const { Cookies } = require('nodemailer/lib/fetch');
 const StoreCategory = require('../models/StoreCategory');
+const User = require('../models/User');
 
 //get All Categories
 exports.getAllCategories = async (req) => {
@@ -53,16 +54,141 @@ exports.getCategoryByStoreCategoryIds = async (req) => {
 		if(req.body.storeCategories && typeof req.body.storeCategories === "string" ) {
 			storeCatIds = JSON.parse(req.body.storeCategories) ; 
 		}
-		console.log(storeCatIds) ; 
-		const category = await Category.find({
-			storeCategoryId : {$in : storeCatIds}, 
-			// confirmed : true 
-		});
-		return category;
+		if(req.body.user_id && req.body.user_id != "") {
+			console.log("user is here ") ;
+			const user = await User.findById(req.body.user_id);
+			if(!user) {
+				throw "User not found" ; 
+			}	
+			let category = await Category.find({
+				storeCategoryId : {$in : storeCatIds}, 
+				// confirmed : true 
+			});
+			category = category.map(cat => {
+				let cat_index = user.productCategorieIds.findIndex(el => el.categoryId.equals(cat._id)) ; 
+				console.log(cat_index) ; 
+				let cat_selected = cat_index != -1 ; 
+				let sub_cats = cat.subCategories.map(el => {
+					if(!cat_selected) {
+						return {...el._doc , selected : false} ;
+					}else {
+						let sub_selected = user.productCategorieIds[cat_index].subCategories.findIndex(it => it.equals(el._id)) != -1 ; 
+						return {...el._doc , selected : sub_selected} ;
+					}
+				})
+
+				return {...cat._doc , subCategories : sub_cats ,selected : cat_selected } ;
+			})
+			return category;
+
+		}else {
+			const category = await Category.find({
+				storeCategoryId : {$in : storeCatIds}, 
+				// confirmed : true 
+			});
+			return category;
+		}
 	} catch (err) {
 		throw err;
 	}
 };
+
+
+//get Categories by store categorie id
+exports.getCategoryByStoreId = async (req) => {
+	try {
+		console.log(req.params) ; 
+		const store = await Store.findById(req.params.id);
+		if (!store) {
+			throw new Error({ message: 'Store not found' });
+		} 
+		var categoryIds = store.productCategorieIds.map(el => {
+			return el.categoryId ; 
+		}) ; 
+
+		const subCategoryIds = store.productCategorieIds.flat().flatMap(element => element.subCategories) ; 
+		
+		const categories = await Category.find({
+			_id : {$in : categoryIds}, 
+			// confirmed : true 
+		});
+
+		const returned_categories = await asyncMap(categories ,myAsyncFuncProductCategoriesForStore , subCategoryIds , store._id) ; 
+
+		
+
+		var storeCategoryIds = store.storeCategorieIds ; 
+		console.log("storeCategoryIds") ; 
+		console.log(storeCategoryIds) ; 
+
+		var StoreCategories = await StoreCategory.find({
+			_id : {$in : storeCategoryIds}, 
+			// confirmed : true 
+		});
+		console.log("StoreCategories") ; 
+		console.log(StoreCategories) ; 
+
+		StoreCategories = StoreCategories.map(el => {
+			return {...el._doc , selected : true }  ;
+		}) ;
+		console.log("StoreCategories 2") ; 
+		console.log(StoreCategories) ; 
+
+		console.log("result ") ; 
+		console.log({
+			ProductCategories : returned_categories , 
+			StoreCategories : StoreCategories
+		}) ;
+
+		return {
+			ProductCategories : returned_categories , 
+			StoreCategories : StoreCategories
+		};
+		
+	} catch (err) {
+		console.log(err) ; 
+		throw err;
+	}
+};
+
+async function asyncMap(array, asyncFunc , values , storeId) {
+	const promises = array.map(el => asyncFunc(el , values , storeId));
+	return Promise.all(promises);
+  }
+  
+// Example usage
+async function myAsyncFuncProductCategoriesForStore(el , values , storeId) {
+			let element = {...el._doc , selected : true } ; 
+			let product_number = await Product.count({categoryId : element._id , storeId : storeId }) ; 
+			element = {...element , product_count : product_number} ; 
+			element.subCategories = await  asyncMap(element.subCategories , myAsyncFuncProductSubCategoriesForStore , values , storeId) ;
+			return element ; 
+} 
+// Example usage
+async function myAsyncFuncProductSubCategoriesForStore(sub , values , storeId) {
+	sub = {...sub._doc} ; 
+	let product_number = await Product.count({subCategoryId : sub._id , storeId : storeId }) ; 
+	sub = {...sub , product_count : product_number} ; 
+
+
+	let store_product_categorie_index = values.findIndex(p_cat => {
+		if(p_cat) {
+			return p_cat.equals(sub._id) ; 
+		}else {
+			return -1
+		}
+	}) ;
+	
+	if(
+		store_product_categorie_index != -1
+		) {
+		return {...sub , selected : true } ;
+	}else {
+		return {...sub , selected : false } ;
+	}
+}
+
+
 //Creat Category
 exports.createCategory = async (req) => {
 	try {

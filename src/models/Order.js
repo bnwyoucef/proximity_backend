@@ -17,7 +17,6 @@ const orderSchema = new mongoose.Schema(
 		pickupPerson : {
 			type : {
 				name : {type : String, required: true } ,
-				nif : {type : String, required: true } ,
 			} , 
 			default : null
 		} ,

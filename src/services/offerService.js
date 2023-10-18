@@ -1,6 +1,8 @@
 const Product = require('../models/Product');
 const Offer = require('../models/Offer');
 const Store = require('../models/Store');
+const User = require('../models/User');
+const { localSendNotification } = require('./notificationsService');
 
 //ceate offer
 exports.createOffer = async (req) => {
@@ -34,16 +36,130 @@ exports.createOffer = async (req) => {
 		});
 		await offer.save();
 		//assign offer to product
-		await Product.findOneAndUpdate({ _id: req.body.productId }, 
+		let savedProduct = await Product.findOneAndUpdate({ _id: req.body.productId }, 
 			{ 
 				offer: offer._id , 
 				discountType: req.body.discountType, 
 				discount: req.body.offerDiscount,
 				discountExpiration: req.body.offerExpiration,
 		});
+		console.log(savedProduct) ; 
+		if(savedProduct != null) {
+			// get users notified 
+			
+			const regexPatternTitle = new RegExp(`\\b${savedProduct.name}\\b`, 'i');
+			const regexPatternDescription = new RegExp(`\\b${savedProduct.description}\\b`, 'i');
+			let users = await User.find({_id : "6491ed986b54174db78c0695"}) ; 
+	
+			// let users = await User.aggregate([
+			// 	{
+			// 	  $match: {
+			// 		$and: [
+			// 			{
+			// 				notification : {
+			// 				offerNotification : true
+			// 				} 
+			// 			} ,
+						// { 
+						// 	productCategorieIds: {
+						// 	$elemMatch: {
+						// 	  subCategories: savedProduct.subCategoryId
+						// 	}
+						//   } 
+						// },
+						// {
+						// 	$or : [
+						// 		{
+						// 			Tags: {
+						// 			$regex: regexPatternTitle,
+						// 			}
+						// 		},
+						// 		{
+						// 			Tags: {
+						// 			$regex: regexPatternDescription,
+						// 			}
+						// 		},
+	
+						// 	]
+						// }
+			// 		]
+			// 	  }
+			// 	},
+			// 	{ $limit: 10 } // Limit the search results to 10
+			//   ]);
+			  console.log("users 1") ;
+			  console.log(users) ;
+	
+			if(users.length < 10) {
+				let usersSup = await User.aggregate([
+					{
+					  $match: {
+						$and: [
+							{
+								notification : {
+								offerNotification : true
+								}
+							} ,
+							{
+								_id: {
+								$nin: users.map(el => el._id)
+								}
+							} ,
+							// {
+							// 	$or: [
+							// 	{ 
+							// 		productCategorieIds: {
+							// 		$elemMatch: {
+							// 			subCategories: savedProduct.subCategoryId
+							// 		}
+							// 	} 
+							// 	},
+							// 	{
+							// 		$or : [
+							// 			{
+							// 				Tags: {
+							// 				$regex: regexPatternTitle,
+							// 				}
+							// 			},
+							// 			{
+							// 				Tags: {
+							// 				$regex: regexPatternDescription,
+							// 				}
+							// 			},
+			
+							// 		]
+							// 	}
+							// ]
+							// },
+						]
+					  }
+					},
+					{ $limit: 10 } // Limit the search results to 10
+				  ]);
+			 users = users.concat(usersSup);
+			}
+			console.log("users 2") ;
+			console.log(users) ; 
+			// send product notifications to users 
+			if(users.length)  {
+				let data = {
+					owner_id : users.map(el => el._id) , 
+					type : "offer" , // order or offer
+					sub_type : "offer" , // for the icon
+					id : savedProduct._id // get order or offer and go to the page 
+				};
+		
+				let title = "New Product Offer :"+savedProduct.name+" -"+parseFloat(req.body.offerDiscount)*100+"% !" ; 
+				let content = savedProduct.description ;
+		
+				await localSendNotification(title , content , data) ;
+	
+			}
+		}
 
 		return offer;
 	} catch (error) {
+		console.log(error) ; 
 		throw Error(error);
 	}
 };

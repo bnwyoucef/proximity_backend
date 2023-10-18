@@ -8,6 +8,22 @@ exports.getStoreCategories = async (req, res) => {
 		res.status(500).send(err.message);
 	}
 };
+exports.getAllStoreCategoriesOfaStore = async (req, res) => {
+	try {
+		const StoreCategories = await StoreCategoryService.getAllStoreCategoriesOfaStore(req);
+		res.send(StoreCategories);
+	} catch (err) {
+		res.status(500).send(err.message);
+	}
+};
+exports.getAllStoreCategoriesOfaClient = async (req, res) => {
+	try {
+		const StoreCategories = await StoreCategoryService.getAllStoreCategoriesOfaClient(req);
+		res.send(StoreCategories);
+	} catch (err) {
+		res.status(500).send(err.message);
+	}
+};
 
 exports.getStoreCategoryById = async (req, res) => {
 	try {
