@@ -72,13 +72,15 @@ exports.updateProduct = async (req) => {
 				varientsImages.push(storagePath);
 			}
 	
-			product.variants =  req.body.variantes  ;
-
 		}
+		console.log(req.body.variantes) ; 
+		product.variants =  req.body.variantes  ;
 
 		if(req.body.variantes && req.body.variantes.length == 1 && product.variants != null && product.variants.length == 1 && req.body.variantes[0].characterstics[0].value ==  req.body.name ) {
-			product.variants[0].price = req.body.price ; 
-			product.variants[0].quantity = req.body.quantity ; 
+			product.variants[0].price = req.body.price ;
+			console.log("req.body.quantity") ; 
+			console.log(req.body.quantity) ;  
+			product.variants[0].quantity = req.body.variantes[0].quantity  ; 
 			product.variants[0].img =  product.images[0] ;
 		}
 
@@ -95,6 +97,7 @@ exports.updateProduct = async (req) => {
 		product.storeCategoryId = req.body.storeCategoryId || product.storeCategoryId;
 		product.rayonId = req.body.rayonId || product.rayonId;
 		//save the product with previos varients
+		console.log(product.variants) ; 
 		await product.save();
 		return product;
 	} catch (error) {
@@ -345,14 +348,14 @@ exports.deleteProduct = async (req) => {
 		
 		await Product.findByIdAndDelete(req.params.id);
 		const category = await Category.findById(product.categoryId);
-		if (category) {
-			const index = category.productIds.indexOf(product._id);
-			category.productIds.splice(index, 1);
-			await category.save();
-			if (category.productIds.length == 0) {
-				await Category.findByIdAndDelete(category._id);
-			}
-		}
+		// if (category) {
+		// 	const index = category.productIds.indexOf(product._id);
+		// 	category.productIds.splice(index, 1);
+		// 	await category.save();
+		// 	if (category.productIds.length == 0) {
+		// 		await Category.findByIdAndDelete(category._id);
+		// 	}
+		// }
 		return { message: 'Product deleted successfully' };
 	} catch (err) {
 		console.log(err);

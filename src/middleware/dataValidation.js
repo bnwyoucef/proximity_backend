@@ -429,6 +429,8 @@ exports.updateProductSchemaValidation = (req, res, next) => {
 	if (typeof req.body.variantes === 'string') {
 		req.body.variantes = JSON.parse(req.body.variantes);
 	}
+	console.log("req.body.variantes") ; 
+	console.log(req.body.variantes) ; 
 	
 	if (typeof req.body.policy === 'string' && req.body.policy != "") {
 		req.body.policy = JSON.parse(req.body.policy);
