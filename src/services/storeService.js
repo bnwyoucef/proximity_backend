@@ -35,6 +35,8 @@ async function myAsyncStoreCategoryFunc(element) {
 			name : element.name 
 		}) ;
 		newStoreCategory = await newStoreCategory.save() ;
+		element.Oldid = element.id ; 
+		element.Oldeid = element.eid ; 
 		element.id = newStoreCategory._id ; 
 	}
 	return element ; 
@@ -48,6 +50,7 @@ async function myAsyncProductCategoryFunc(element) {
 			let newCategory = new Category({
 				name : element.name , 
 				confirmed : false , 
+				storeCategoryId : element.storeCategoryDBId ,
 				subCategories : element.subCategories.map((e) => {return {name : e.name , confirmed : false} ; }) 
 			}) ;
 			newCategory = await newCategory.save() ;
@@ -83,6 +86,13 @@ exports.createStore = async (req) => {
 		let productCategories = [] ; 
 		if (typeof req.body.productCategories === 'string') {
 			productCategories = JSON.parse(req.body.productCategories);
+			productCategories.map(element => {
+				if (element.storeCategoryDBId == null) {
+					let newStoreCategorieId = storeCategories.filter(el => el.Oldeid == element.storeCategoryId )[0].id ; 
+					element.storeCategoryDBId = newStoreCategorieId ; 
+				}
+				return element ;
+			});
 			productCategories = await asyncMap(productCategories , myAsyncProductCategoryFunc) ; 	
 		}
 	
