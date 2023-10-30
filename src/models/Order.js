@@ -196,4 +196,22 @@ const orderSchema = new mongoose.Schema(
 	},
 	{ timestamps: true }
 );
+orderSchema.post('save', async function (doc) {
+	try {
+	  // Create a new Sale document for each item in the order
+	  for (const item of doc.items) {
+		const newSale = new Sale({
+		  sellerId: doc.sellerId, // Replace with the actual sellerId
+		  storeId: doc.storeId,   // Replace with the actual storeId
+		  productId: item.productId,
+		  date: doc.createdAt,
+		  region: doc.deliveryAddresse.city} // Replace with the actual region field from the order
+		);
+  
+		await newSale.save();
+	  }
+	} catch (error) {
+	  console.error('Error creating sale records:', error);
+	}
+  });
 module.exports = mongoose.model('Order', orderSchema);

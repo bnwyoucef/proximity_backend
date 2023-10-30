@@ -7,5 +7,5 @@ const { verifyToken } = require('../middleware/verifyToken');
 router.get('/',   SearchController.searchStore);
 //search product by nearest store
 router.get('/product' , SearchController.searchProduct);
-
+router.get('/promotion' , SearchController.searchPromotion);
 module.exports = router;

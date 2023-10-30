@@ -24,6 +24,7 @@ const offerRoute = require('./routes/offerRoute');
 const categoryRoute = require('./routes/categoryRoute');
 const orderRoute = require('./routes/orderRoute');
 const searchRoute = require('./routes/searchRoute');
+const viewRoute = require('./routes/viewRoute');
 const resetPasswordRoute = require('./routes/resetPasswordRoute');
 const notificationRoute = require('./routes/notificationRoute');
 const storeCategoryRoute = require('./routes/storeCategoryRoute');
@@ -46,6 +47,7 @@ app.use('/api/order', orderRoute);
 app.use('/api/search', searchRoute);
 app.use('/api/password-reset', resetPasswordRoute);
 app.use('/api/notification', notificationRoute);
+app.use('/api/view', viewRoute);
 app.use('/api/storeCategory', storeCategoryRoute);
 
 mongoose

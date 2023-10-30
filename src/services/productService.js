@@ -7,6 +7,7 @@ const fileUpload = require('express-fileupload');
 const fs = require('fs');
 const Order = require('../models/Order');
 const User = require('../models/User');
+const View = require('../models/View');
 const { default: mongoose } = require('mongoose');
 const { localSendNotification } = require('./notificationsService');
 
@@ -105,6 +106,80 @@ exports.updateProduct = async (req) => {
 		throw error;
 	}
 };
+//Update product Search number 
+exports.updateNumberOfViews = async (req) => {
+	try {
+		// Validation request
+		//const numberOfS= parseInt(req.body.numberOf);
+		//console.log("product") ;
+		const product = await Product.findById(req.params.id);
+		//test if the product is existe
+		if (!product) throw new Error('The product with the given ID was not found.');
+		product.numberOfViews += 1;
+		await product.save();
+		const view = new View({
+			sellerId: product.sellerId,
+			storeId: product.storeId,
+			productId: product.id,
+			date: new Date(),
+			region:  req.query.city , // Pass the region data for each view, or remove this line if not applicable
+		  });
+		 await  view.save();
+		return product;
+
+	} catch (error) {
+		console.log(error) ;
+		throw error;
+	}
+		//test the Owner Product}
+		
+};
+
+exports.getProductSales = async (req) => {
+	try {
+	  // Find all products for the given sellerId and populate the seller information
+	  const products = await Product.find({sellerId: req.user.id})
+	  // Calculate the number of sales and income for each product
+	  const productsSales = products.map((product) => {
+		const productName = product.name;
+		const numberOfSales = product.numberOfSales; // Assuming the sales are stored as an array in the 'sales' field of the Product model
+		const income = numberOfSales * product.price;
+		const numberOfViews = product.numberOfViews;
+		return {
+
+			productName,// Spread the existing product object
+		  numberOfSales,
+		  income,
+		  numberOfViews
+		};
+	  });
+  
+	  return productsSales;
+	} catch (err) {
+	  throw err;
+	}
+  };
+
+//Update product Sales number 
+exports.updateNumberOfSales = async (req) => {
+	try {
+		// Validation request
+		console.log("product") ;
+		const product = await Product.findById(req.params.id);
+		const numberOfSales = parseInt(req.body.numberOfSales);
+		
+		//test if the product is existe
+		if (!product) throw new Error('The product with the given ID was not found.');
+		product.numberOfSales += numberOfSales;
+		await product.save();
+		return product;
+	} catch (error) {
+		console.log(error) ;
+		throw error;
+	}
+		//test the Owner Product}
+		
+};
 //Add Product
 exports.addProduct = async (req) => {
 	try {
@@ -160,7 +235,7 @@ exports.addProduct = async (req) => {
 			req.body.variantes[i].img = storagePath;
 			varientsImages.push(storagePath);
 		}
-		console.log("abdou")
+		console.log("adding product");
 
 		const newProduct = new Product({
 			name: req.body.name,
@@ -174,11 +249,7 @@ exports.addProduct = async (req) => {
 			variants: req.body.variantes,
 			priceMin: req.body.priceMin,
 			priceMax: req.body.priceMax,
-			policy : req.body.policy,
-			storeCategoryId : req.body.storeCategoryId,
-			categoryId : req.body.categoryId,
-			subCategoryId : req.body.subCategoryId,
-			rayonId : req.body.rayonId
+			policy : req.body.policy
 		});
 		const savedProduct = await newProduct.save();
 		// get users notified 
@@ -320,6 +391,7 @@ exports.deleteProduct = async (req) => {
 			let variant_images =  product.variants.map(el => el.img) ;
 			images_to_delete.push(...variant_images) ;
 		}
+		
 
 		//check if any image exist in orders 
 

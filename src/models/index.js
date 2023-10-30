@@ -1,5 +1,6 @@
 module.exports = require('./Cart');
 module.exports = require('./Product');
+module.exports = require('./View');
 module.exports = require('./User');
 module.exports = require('./Order');
 module.exports = require('./Bill');

@@ -132,6 +132,7 @@ exports.createStore = async (req) => {
 			description: req.body.description,
 			workingTime:  req.body.workingTime ,
 			image: storagePath,
+			revenue :0 ,
 			address: {
 				city: req.body.address.city,
 				streetName: req.body.address.streetName,
@@ -513,3 +514,39 @@ exports.deleteStore = async (req) => {
 		throw err;
 	}
 };
+// get stores Income
+exports.getSellerStoresIncome = async (req) => {
+	try {
+	  const stores = await Store.find({ sellerId: req.user.id });
+	  if (!stores || stores.length === 0) {
+		throw new Error('Stores not found');
+	  } else {
+		const seller = await User.findById(req.user.id);
+		let totalRevenue = 0;
+		const storeData = stores.map((store) => {
+		  const storeInfo = {
+			storeName: store.name,
+			revenue: store.revenue,
+		  };
+		  totalRevenue += store.revenue;
+  
+		  if (!store.policy && seller) {
+			storeInfo.policy = seller.policy;
+		  }
+		  return storeInfo;
+		});
+		const result = {
+		  stores: storeData,
+		  totalRevenue: totalRevenue,
+		};
+		console.log(result);
+		return result;
+
+	  }
+	} catch (err) {
+	  throw err;
+	}
+  };
+  
+   
+

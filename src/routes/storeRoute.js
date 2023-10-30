@@ -16,6 +16,7 @@ router.get('/seller/:id', verifyToken, StoreController.getSellerStores);
 router.get('/seller/store/:id', verifyToken, StoreController.getSellerStore);
 router.get('/seller/store/catRayons/:id', verifyToken, StoreController.getSellerCategoriesAndRayons);
 
+
 router.get('/:id', StoreController.getStore);
 router.get('/findStore/:city', verifyToken, StoreController.getStoresByCity);
 router.get('/findStore/:latitude/:longitude/:maxDistance', verifyToken, StoreController.getStoresByLocation);
@@ -25,5 +26,7 @@ router.get('/findStore/:latitude/:longitude/:maxDistance', verifyToken, StoreCon
 router.post('/update_rating/:id', verifyToken , schemaUpdateStoreRatingValidation, StoreController.updateStoreRating);
 
 router.delete('/:storeId', verifyToken ,  StoreController.deleteStore);
+// Statistics
+router.get('/seller/:id/storesIncome', verifyToken, StoreController.getSellerStoresIncome);
 
 module.exports = router;

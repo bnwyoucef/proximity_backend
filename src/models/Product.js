@@ -99,8 +99,23 @@ const productSchema = new mongoose.Schema(
 			ref: 'Offer',
 		},
 		
-		 
 		
+		numberOfSales: {
+			type: Number,
+			default: 0,
+		  },
+		  numberOfViews: {
+			type: Number,
+			default: 0,
+		  },
+		  numberOfSearches: {
+			type: Number,
+			default: 0,
+		  },
+		  averageRating: {
+			type: Number,
+			default: 0,
+		  },
 
 		reports: [
 			{
@@ -120,7 +135,7 @@ const productSchema = new mongoose.Schema(
 		policy: policySchema,
 	},
 	{
-		timestamps: true,
+		timestamp: true,
 		toJSON: { virtuals: true },
 	}
 );/*
