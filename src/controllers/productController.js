@@ -10,18 +10,17 @@ exports.updateProduct = async (req, res) => {
 	}
 };
 
-
 exports.updateNumberOfViews = async (req, res) => {
-// The new value for numberOfSearches
-console.log('// The new value for numberOfview)');
-    // Find the product by ID
+	// The new value for numberOfSearches
+	console.log('// The new value for numberOfview)');
+	// Find the product by ID
 	try {
 		const product = await ProductService.updateNumberOfViews(req);
 		res.send(product);
 	} catch (err) {
 		res.status(500).send(err.message);
 	}
-  };
+};
 
 exports.updateNumberOfSales = async (req, res) => {
 	try {
@@ -30,13 +29,12 @@ exports.updateNumberOfSales = async (req, res) => {
 	} catch (err) {
 		res.status(500).send(err.message);
 	}
-  };
-  
+};
 
 exports.addProduct = async (req, res) => {
 	try {
 		const product = await ProductService.addProduct(req);
-		
+
 		res.send(product);
 	} catch (err) {
 		res.status(500).send(err.message);
@@ -92,7 +90,6 @@ exports.searchProductStore = async (req, res) => {
 };
 exports.getProductSales = async (req, res) => {
 	try {
-		
 		console.log(req.user.id);
 		const products = await ProductService.getProductSales(req);
 		res.send(products);

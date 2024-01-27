@@ -9,9 +9,9 @@ const router = require('express').Router();
 router.put('/:id', verifySeller, updateProductSchemaValidation, ProductController.updateProduct);
 // update numberOfSales
 router.put('/:id/city/numberOfSales', ProductController.updateNumberOfSales);
-//update numberSearch 
+//update numberSearch
 router.put('/:id/numberOfViews', ProductController.updateNumberOfViews);
-//update 
+//update
 //Add Product
 router.post('/', verifySeller, createProductSchemaValidation, ProductController.addProduct);
 //delete Product
@@ -21,9 +21,8 @@ router.get('/:id', ProductController.getProduct);
 //get all products for a store
 router.post('/store/:id', ProductController.searchProductStore);
 
-
-//statistiques 
-router.get('/sales/:id',verifySeller, ProductController.getProductSales);
+//statistiques
+router.get('/sales/:id', verifySeller, ProductController.getProductSales);
 //get limit products for a store
 
 //router.get('/store/:id/limit/:limit', verifyToken, ProductController.getProductsForStoreLimit);
