@@ -10,3 +10,6 @@ module.exports = require('./Offer');
 module.exports = require('./Category');
 module.exports = require('./ResetPassword');
 module.exports = require('./StoreRate');
+module.exports = require('./Subscription');
+module.exports = require('./Plan');
+module.exports = require('./SubscriptionOffer');

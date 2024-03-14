@@ -20,7 +20,7 @@ const userSchema = new mongoose.Schema(
 		},
 		role: {
 			type: String,
-			enum: ['user', 'admin', 'seller'],
+			enum: ['user', 'admin', 'seller', 'paymentManager'],
 			default: 'user',
 		},
 		isAdmin: { type: Boolean, default: false },
@@ -29,7 +29,7 @@ const userSchema = new mongoose.Schema(
 		},
 		phone: {
 			type: String,
-			default : null
+			default: null,
 		},
 
 		verificationCode: {
@@ -51,7 +51,7 @@ const userSchema = new mongoose.Schema(
 		},
 		email: {
 			type: String,
-			default : null
+			default: null,
 		},
 		favouritsProductst: [
 			{
@@ -71,7 +71,7 @@ const userSchema = new mongoose.Schema(
 			region: { type: String },
 			fullAddress: { type: String },
 		},
-		policy: policySchema ,
+		policy: policySchema,
 		shippingAdress: {
 			countryCode: { type: String },
 			country: { type: String },
@@ -95,16 +95,16 @@ const userSchema = new mongoose.Schema(
 		],
 		productCategorieIds: [
 			{
-				categoryId : {
+				categoryId: {
 					type: mongoose.Schema.Types.ObjectId,
 					ref: 'Category',
-				} , 
-				subCategories : [
+				},
+				subCategories: [
 					{
 						type: mongoose.Schema.Types.ObjectId,
 						ref: 'Category.subCategories',
-					}
-				]
+					},
+				],
 			},
 		],
 		tags: [
@@ -112,31 +112,31 @@ const userSchema = new mongoose.Schema(
 				name: {
 					type: String,
 					required: true,
-				}
+				},
 			},
 		],
-		notification : {
-			orderNotifications :{type : Boolean ,  default : null} , 
-			offerNotification :{type : Boolean ,  default : null} , 
-			mail :{type : Boolean ,  default : null} , 
-			sms :{type : Boolean ,  default : null} , 
-			platforme :{type : Boolean ,  default : null} , 
-			popup :{type : Boolean ,  default : null} , 
-			vibration :{type : Boolean ,  default : null} , 
-			ringing :{type : Boolean ,  default : null} , 
-		} , 
-		
+		notification: {
+			orderNotifications: { type: Boolean, default: null },
+			offerNotification: { type: Boolean, default: null },
+			mail: { type: Boolean, default: null },
+			sms: { type: Boolean, default: null },
+			platforme: { type: Boolean, default: null },
+			popup: { type: Boolean, default: null },
+			vibration: { type: Boolean, default: null },
+			ringing: { type: Boolean, default: null },
+		},
+
 		pickupPersons: [
 			{
-				type : {
-					name : {type : String, required: true } 
-				} 
+				type: {
+					name: { type: String, required: true },
+				},
 			},
 		],
-		addresses : [
+		addresses: [
 			{
-				type : {
-					deliveryLocation : {
+				type: {
+					deliveryLocation: {
 						type: {
 							type: String,
 							enum: ['Point'],
@@ -150,7 +150,7 @@ const userSchema = new mongoose.Schema(
 							},
 						],
 					},
-					deliveryAddresse : {
+					deliveryAddresse: {
 						city: {
 							type: String,
 							// required: true,
@@ -184,28 +184,25 @@ const userSchema = new mongoose.Schema(
 							//required: true,
 						},
 					},
-					
-				}
-			}
-		] , 
-		cards : [
+				},
+			},
+		],
+		cards: [
 			{
-				type : {
-					cardNumber : { type: String,  default : null },
-					ccv: { type: String, default : null },
-					expdate: { type: String, default : null},
+				type: {
+					cardNumber: { type: String, default: null },
+					ccv: { type: String, default: null },
+					expdate: { type: String, default: null },
 					name: { type: String, required: true },
 					phone: { type: String, required: true },
 					postalCode: { type: String, required: true },
 					address_city: { type: String, required: true },
 					address_line1: { type: String, required: true },
-					address_line2: { type: String, default: ""},
-				}
-			}
-		]
-
+					address_line2: { type: String, default: '' },
+				},
+			},
+		],
 	},
-	
 
 	{ timestamps: true }
 );
