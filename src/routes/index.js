@@ -9,3 +9,5 @@ module.exports = require('./searchRoute');
 module.exports = require('./storeRoute');
 module.exports = require('./resetPasswordRoute');
 module.exports = require('./viewRoute');
+module.exports = require('./planRoute');
+module.exports = require('./SubscriptionOfferRoute');

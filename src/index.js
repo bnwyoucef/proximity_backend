@@ -28,6 +28,8 @@ const viewRoute = require('./routes/viewRoute');
 const resetPasswordRoute = require('./routes/resetPasswordRoute');
 const notificationRoute = require('./routes/notificationRoute');
 const storeCategoryRoute = require('./routes/storeCategoryRoute');
+const planRoute = require('./routes/planRoute');
+const subscriptionOfferRoute = require('./routes/SubscriptionOfferRoute');
 //const adminRoute = require('./routes/admin');*/
 app.use(helmet());
 app.use(fileUpload());
@@ -49,6 +51,8 @@ app.use('/api/password-reset', resetPasswordRoute);
 app.use('/api/notification', notificationRoute);
 app.use('/api/view', viewRoute);
 app.use('/api/storeCategory', storeCategoryRoute);
+app.use('/api/plan', planRoute);
+app.use('/api/subscriptionOffer', subscriptionOfferRoute);
 
 mongoose
 	.connect(process.env.MONGO_URL)
