@@ -1,7 +1,7 @@
 const SubscriptionOffer = require('../models/SubscriptionOffer');
 
 // get all offers
-exports.getOffers = async (req) => {
+exports.getOffers = async () => {
 	try {
 		const offers = await SubscriptionOffer.find();
 		return offers;

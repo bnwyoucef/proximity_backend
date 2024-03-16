@@ -6,7 +6,7 @@ exports.getPlans = async (req, res) => {
 		const plans = await PlanService.getPlans(req.params.planId);
 		res.send(plans);
 	} catch (error) {
-		res.status(500).send(err.message);
+		res.status(500).send(error.message);
 	}
 };
 // create a new plan
@@ -15,7 +15,7 @@ exports.createPlan = async (req, res) => {
 		const newPlan = await PlanService.createPlan(req);
 		res.send(newPlan);
 	} catch (error) {
-		res.status(500).send(err.message);
+		res.status(500).send(error.message);
 	}
 };
 
@@ -25,7 +25,7 @@ exports.updatePlan = async (req, res) => {
 		const updatedPlan = await PlanService.updatePlan(req);
 		res.send(updatedPlan);
 	} catch (error) {
-		res.status(500).send(err.message);
+		res.status(500).send(error.message);
 	}
 };
 
@@ -35,6 +35,6 @@ exports.deletePlan = async (req, res) => {
 		const message = await PlanService.deletePlan(req);
 		res.send(message);
 	} catch (error) {
-		res.status(500).send(err.message);
+		res.status(500).send(error.message);
 	}
 };

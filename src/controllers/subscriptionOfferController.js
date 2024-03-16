@@ -3,7 +3,7 @@ const SubscriptionOfferService = require('../services/subscriptionOfferService')
 // get all subscription Offers
 exports.getOffers = async (req, res) => {
 	try {
-		const offers = await SubscriptionOfferService.getOffers(req.params.planId);
+		const offers = await SubscriptionOfferService.getOffers();
 		res.send(offers);
 	} catch (error) {
 		res.status(500).send(err.message);

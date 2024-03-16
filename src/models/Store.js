@@ -53,7 +53,7 @@ const storeSchema = new mongoose.Schema(
 			type: {
 				type: String,
 				enum: ['Point'],
-				default: "Point"
+				default: 'Point',
 			},
 			coordinates: [
 				{
@@ -103,7 +103,7 @@ const storeSchema = new mongoose.Schema(
 			type: Boolean,
 			default: true,
 		},
-		policy: policySchema ,
+		policy: policySchema,
 		offers: [
 			{
 				name: {
@@ -160,25 +160,13 @@ const storeSchema = new mongoose.Schema(
 		},
 		revenue: { type: Number, default: 0 },
 		workingTime: {
-
-			type : {
+			type: {
 				option: {
 					type: String,
-					default: "",
+					default: '',
 				},
-				fixedHours: [{
-					openTime: {
-						type: String,
-						required: true,
-					},
-					closeTime: {
-						type: String,
-						required: true,
-					},
-				}],
-				customizedHours: {
-					type: Map,
-					of: [{
+				fixedHours: [
+					{
 						openTime: {
 							type: String,
 							required: true,
@@ -187,13 +175,25 @@ const storeSchema = new mongoose.Schema(
 							type: String,
 							required: true,
 						},
-					}],
-				
+					},
+				],
+				customizedHours: {
+					type: Map,
+					of: [
+						{
+							openTime: {
+								type: String,
+								required: true,
+							},
+							closeTime: {
+								type: String,
+								required: true,
+							},
+						},
+					],
+				},
 			},
-
-			} , 
 			required: false,
-			
 		},
 		storeCategorieIds: [
 			{
@@ -203,16 +203,16 @@ const storeSchema = new mongoose.Schema(
 		],
 		productCategorieIds: [
 			{
-				categoryId : {
+				categoryId: {
 					type: mongoose.Schema.Types.ObjectId,
 					ref: 'Category',
-				} , 
-				subCategories : [
+				},
+				subCategories: [
 					{
 						type: mongoose.Schema.Types.ObjectId,
 						ref: 'Category.subCategories',
-					}
-				]
+					},
+				],
 			},
 		],
 		storeRayons: [
@@ -220,21 +220,24 @@ const storeSchema = new mongoose.Schema(
 				name: {
 					type: String,
 					required: true,
-				}
+				},
 			},
 		],
 		templateId: {
 			type: Number,
 			default: 1,
 		},
-		
-		activated : {
+
+		activated: {
 			type: Boolean,
 			default: false,
 		},
-		
+		subscriptionId: {
+			type: mongoose.Schema.Types.ObjectId,
+			ref: 'Subscription',
+		},
 	},
-	{ timestamps: true,},
+	{ timestamps: true }
 	//{ timestamps: true, toJSON: { virtuals: true } }
 );
 //virtual image url

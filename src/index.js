@@ -30,6 +30,7 @@ const notificationRoute = require('./routes/notificationRoute');
 const storeCategoryRoute = require('./routes/storeCategoryRoute');
 const planRoute = require('./routes/planRoute');
 const subscriptionOfferRoute = require('./routes/SubscriptionOfferRoute');
+const subscriptionRoute = require('./routes/subscriptionRoute');
 //const adminRoute = require('./routes/admin');*/
 app.use(helmet());
 app.use(fileUpload());
@@ -53,6 +54,7 @@ app.use('/api/view', viewRoute);
 app.use('/api/storeCategory', storeCategoryRoute);
 app.use('/api/plan', planRoute);
 app.use('/api/subscriptionOffer', subscriptionOfferRoute);
+app.use('/api/subscription', subscriptionRoute);
 
 mongoose
 	.connect(process.env.MONGO_URL)
