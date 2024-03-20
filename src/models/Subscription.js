@@ -4,7 +4,7 @@ const subscriptionSchema = new mongoose.Schema(
 	{
 		paymentManagerId: {
 			type: mongoose.Schema.Types.ObjectId,
-			required: true,
+			required: false,
 			ref: 'User',
 		},
 		storeId: {
@@ -14,7 +14,7 @@ const subscriptionSchema = new mongoose.Schema(
 		},
 		planId: {
 			type: mongoose.Schema.Types.ObjectId,
-			required: true,
+			required: false,
 			ref: 'Plan',
 		},
 		subscriptionOfferId: {
@@ -28,8 +28,8 @@ const subscriptionSchema = new mongoose.Schema(
 		},
 		status: {
 			type: String,
-			enum: ['active', 'delayed', 'suspended'],
-			default: 'active',
+			enum: ['inactive', 'active', 'delayed', 'suspended'],
+			default: 'inactive',
 		},
 		startDate: {
 			type: Date,
