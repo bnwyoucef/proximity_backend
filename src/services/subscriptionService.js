@@ -14,17 +14,14 @@ exports.getSubscriptions = async () => {
 exports.createSubscription = async (req) => {
 	try {
 		if (req.body.subscriptionId) {
-			console.log('updating the current subscription ..........');
 			//update the current subscription
 			const currentSubscription = await Subscription.findById(req.body.subscriptionId);
 			let { subscriptionsHistory, _id, storeId, ...previousSubscription } = currentSubscription._doc;
 			previousSubscription.status = 'suspended';
 			currentSubscription.subscriptionsHistory.unshift(previousSubscription);
-			// await currentSubscription.save();
 			req.body.subscriptionsHistory = currentSubscription.subscriptionsHistory;
 			await this.updateSubscription(req.body.subscriptionId, req.body);
 		} else {
-			console.log('creating a new subscription ..........');
 			// create a new subscription
 			const newSubscription = new Subscription({
 				paymentManagerId: req.body.paymentManagerId,

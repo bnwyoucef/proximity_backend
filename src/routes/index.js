@@ -12,3 +12,4 @@ module.exports = require('./viewRoute');
 module.exports = require('./planRoute');
 module.exports = require('./SubscriptionOfferRoute');
 module.exports = require('./subscriptionRoute');
+module.exports = require('./elasticSearchRoute');
