@@ -1,25 +1,28 @@
-const Store = require('../models/Store');
 const { Client } = require('@elastic/elasticsearch');
+const User = require('../models/User');
 
-// Connect to Elasticsearch using Elasticsearch client
-const esClient = new Client({ node: 'http://localhost:9200' }); // add the url to env var
+const esClient = new Client({ node: process.env.ELASRIC_URL });
 
 // Index MongoDB data to Elasticsearch
-indexStoresToElasticsearch = async () => {
-	const stores = await Store.find();
-	for (const store of stores) {
-		const { _id, ...storeData } = store.toObject();
-		await esClient.index({
-			index: 'stores',
-			body: storeData,
-		});
-	}
+exports.indexStoresToElasticsearch = async (store) => {
+	const seller = await User.findById(store.sellerId);
+	const storeData = {
+		storeId: store._id,
+		name: store.name,
+		sellerName: seller.username,
+		address: store.address,
+		status: store.activated,
+		image: store.image,
+	};
+	await esClient.index({
+		index: 'stores',
+		body: storeData,
+	});
 };
 
-// Perform searches using Elasticsearch
+// search using Elasticsearch
 exports.searchStores = async (query) => {
 	try {
-		await indexStoresToElasticsearch();
 		const body = await esClient.search({
 			index: 'stores',
 			body: {
@@ -34,6 +37,26 @@ exports.searchStores = async (query) => {
 							{
 								wildcard: {
 									description: `*${query}*`,
+								},
+							},
+							{
+								wildcard: {
+									'address.city': `*${query}*`,
+								},
+							},
+							{
+								wildcard: {
+									'address.region': `*${query}*`,
+								},
+							},
+							{
+								wildcard: {
+									'address.streetName': `*${query}*`,
+								},
+							},
+							{
+								wildcard: {
+									'address.postalCode': `*${query}*`,
 								},
 							},
 						],
@@ -64,15 +87,3 @@ exports.searchStores = async (query) => {
 		throw error;
 	}
 };
-
-// Example usage
-// async function main() {
-// 	// Index stores to Elasticsearch
-// 	await indexStoresToElasticsearch();
-
-// 	// Search for products
-// 	const results = await searchStores('laptop');
-// 	console.log('Search results:', results);
-// }
-
-// main().catch(console.error);
