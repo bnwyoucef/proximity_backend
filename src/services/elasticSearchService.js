@@ -4,8 +4,13 @@ const User = require('../models/User');
 const esClient = new Client({ node: process.env.ELASRIC_URL });
 
 // Index MongoDB data to Elasticsearch
-exports.indexStoresToElasticsearch = async (store) => {
+exports.indexStoresToElasticsearch = async (store, updateStore) => {
+	if (updateStore) {
+		// delete the indexed store if it exists
+		deleteIndexedDocument(store._id);
+	}
 	const seller = await User.findById(store.sellerId);
+	if (store.address.postalCode === '') store.address.postalCode = 'NAN';
 	const storeData = {
 		storeId: store._id,
 		name: store.name,
@@ -28,62 +33,57 @@ exports.searchStores = async (query) => {
 			body: {
 				query: {
 					bool: {
-						should: [
+						must: [
 							{
 								wildcard: {
-									name: `*${query}*`,
+									name: `*${query.name?.toLowerCase() || ''}*`,
 								},
 							},
 							{
 								wildcard: {
-									description: `*${query}*`,
+									sellerName: `*${query.sellerName?.toLowerCase() || ''}*`,
 								},
 							},
 							{
 								wildcard: {
-									'address.city': `*${query}*`,
+									'address.city': `*${query.city?.toLowerCase() || ''}*`,
 								},
 							},
 							{
 								wildcard: {
-									'address.region': `*${query}*`,
+									'address.region': `*${query.region?.toLowerCase() || ''}*`,
 								},
 							},
 							{
 								wildcard: {
-									'address.streetName': `*${query}*`,
+									'address.streetName': `*${query.streetName?.toLowerCase() || ''}*`,
 								},
 							},
 							{
 								wildcard: {
-									'address.postalCode': `*${query}*`,
+									'address.postalCode': `*${query.postalCode?.toLowerCase() || ''}*`,
 								},
 							},
 						],
 					},
 				},
-				aggs: {
-					unique_names: {
-						terms: {
-							field: 'name.keyword',
-							size: 100, // maximum number of unique values to return
-						},
-						aggs: {
-							top_hits: {
-								top_hits: {
-									size: 1, //top document for each unique name
-								},
-							},
-						},
-					},
-				},
 			},
 		});
-
-		const uniqueDocuments = body.aggregations.unique_names.buckets.map((bucket) => bucket.top_hits.hits.hits[0]._source);
-
-		return uniqueDocuments;
+		return body.hits.hits.map((hit) => hit._source);
 	} catch (error) {
 		throw error;
 	}
 };
+
+async function deleteIndexedDocument(id) {
+	await esClient.deleteByQuery({
+		index: 'stores',
+		body: {
+			query: {
+				term: {
+					storeId: id,
+				},
+			},
+		},
+	});
+}

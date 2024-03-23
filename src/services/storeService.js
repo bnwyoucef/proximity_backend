@@ -164,7 +164,7 @@ exports.createStore = async (req) => {
 		});
 
 		const store = await newStore.save();
-		indexStoresToElasticsearch(store);
+		indexStoresToElasticsearch(store, false);
 		return store;
 	} catch (err) {
 		console.log(err);
@@ -266,7 +266,7 @@ exports.updateStore = async (req) => {
 				}
 
 				console.log(updatedStore.storeCategorieIds);
-				indexStoresToElasticsearch(store); // TODO: add a condition to update the index
+				indexStoresToElasticsearch(updatedStore, true);
 				return updatedStore;
 			}
 		}
