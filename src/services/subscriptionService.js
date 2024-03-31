@@ -1,4 +1,5 @@
 const Subscription = require('../models/Subscription');
+const mongoose = require('mongoose');
 
 // get all Subscriptions
 exports.getSubscriptions = async () => {
@@ -9,6 +10,83 @@ exports.getSubscriptions = async () => {
 		throw error;
 	}
 };
+
+exports.getSubscriptionById = async (id) => {
+	try {
+		const subscription = await Subscription.aggregate([
+			{
+				$match: { _id: mongoose.Types.ObjectId(id) },
+			},
+			{
+				$lookup: {
+					from: 'plans',
+					localField: 'planId',
+					foreignField: '_id',
+					as: 'plan',
+				},
+			},
+			{
+				$unwind: {
+					path: '$plan',
+					preserveNullAndEmptyArrays: true,
+				},
+			},
+			{
+				$lookup: {
+					from: 'plans',
+					localField: 'subscriptionsHistory.planId',
+					foreignField: '_id',
+					as: 'subscriptionsHistoryPlans',
+				},
+			},
+			{
+				$unwind: {
+					path: '$subscriptionsHistory',
+					preserveNullAndEmptyArrays: true,
+				},
+			},
+			{
+				$unwind: {
+					path: '$subscriptionsHistoryPlans',
+					preserveNullAndEmptyArrays: true,
+				},
+			},
+			{
+				$addFields: {
+					'subscriptionsHistory.plan': '$subscriptionsHistoryPlans',
+				},
+			},
+			{
+				$unset: 'subscriptionsHistory.planId',
+			},
+			{
+				$group: {
+					_id: '$_id',
+					paymentManagerId: { $first: '$paymentManagerId' },
+					storeId: { $first: '$storeId' },
+					paymentAmount: { $first: '$paymentAmount' },
+					status: { $first: '$status' },
+					startDate: { $first: '$startDate' },
+					endDate: { $first: '$endDate' },
+					notes: { $first: '$notes' },
+					plan: { $first: '$plan' },
+					subscriptionsHistory: { $push: '$subscriptionsHistory' },
+				},
+			},
+		]);
+
+		return subscription[0];
+	} catch (error) {
+		throw error;
+	}
+};
+
+// try {
+// 	const subscription = await Subscription.findById(id);
+// 	return subscription;
+// } catch (error) {
+// 	throw error;
+// }
 
 // create a new Subscription
 exports.createSubscription = async (req) => {
@@ -54,9 +132,3 @@ exports.updateSubscription = async (id, body) => {
 		throw error;
 	}
 };
-
-//create the id of an subscription in the history array
-function modifyId(objectId, numberOfHistory) {
-	const strId = objectId.toString();
-	return strId + numberOfHistory;
-}

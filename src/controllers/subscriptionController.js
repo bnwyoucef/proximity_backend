@@ -6,7 +6,17 @@ exports.getSubscriptions = async (req, res) => {
 		const subscriptions = await SubscriptionService.getSubscriptions();
 		res.send(subscriptions);
 	} catch (error) {
-		res.status(500).send(err.message);
+		res.status(500).send(error.message);
+	}
+};
+
+// get subscription by id
+exports.getSubscriptionById = async (req, res) => {
+	try {
+		const subscription = await SubscriptionService.getSubscriptionById(req.params.id);
+		res.send(subscription);
+	} catch (error) {
+		res.status(500).send(error.message);
 	}
 };
 

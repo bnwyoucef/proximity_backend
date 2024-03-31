@@ -1,8 +1,10 @@
 const express = require('express');
+const cors = require('cors');
 const app = express();
 const dotenv = require('dotenv');
 const NODE_ENV = process.env.NODE_ENV || 'development';
 dotenv.config({ path: `.env.${NODE_ENV}` });
+const router = require('express').Router();
 
 const mongoose = require('mongoose');
 const morgan = require('morgan');
@@ -12,7 +14,7 @@ const path = require('path');
 const fileUpload = require('express-fileupload');
 const flash = require('connect-flash');
 const helmet = require('helmet');
-
+app.use(cors());
 //routes
 
 const userRoute = require('./routes/userRoute');
@@ -38,8 +40,13 @@ app.use(fileUpload());
 app.use(express.json());
 
 /////////
+router.get('/', async (req, res) => {
+	console.log('request recieved');
+	res.send('backend connected');
+});
 
 app.use(express.static('public'));
+app.use('/api', router);
 app.use('/api/user', userRoute);
 app.use('/api/auth', authRoute);
 app.use('/api/store', storeRoute);
@@ -56,7 +63,7 @@ app.use('/api/storeCategory', storeCategoryRoute);
 app.use('/api/plan', planRoute);
 app.use('/api/subscriptionOffer', subscriptionOfferRoute);
 app.use('/api/subscription', subscriptionRoute);
-app.use('/api/stores', elasticSearchRoute);
+app.use('/api/elasticSearch', elasticSearchRoute);
 
 mongoose
 	.connect(process.env.MONGO_URL)

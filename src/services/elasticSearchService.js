@@ -15,9 +15,10 @@ exports.indexStoresToElasticsearch = async (store, updateStore) => {
 		storeId: store._id,
 		name: store.name,
 		sellerName: seller.username,
+		subscriptionId: store.subscriptionId,
 		address: store.address,
-		status: store.activated,
-		image: store.image,
+		status: store.activated ? 'Active' : 'Inactive',
+		image: store.image || 'images/stores/shop.jpg',
 	};
 	await esClient.index({
 		index: 'stores',
@@ -35,13 +36,20 @@ exports.searchStores = async (query) => {
 					bool: {
 						must: [
 							{
-								wildcard: {
-									name: `*${query.name?.toLowerCase() || ''}*`,
-								},
-							},
-							{
-								wildcard: {
-									sellerName: `*${query.sellerName?.toLowerCase() || ''}*`,
+								bool: {
+									should: [
+										{
+											wildcard: {
+												name: `*${query.name?.toLowerCase() || ''}*`,
+											},
+										},
+										{
+											wildcard: {
+												sellerName: `*${query.sellerName?.toLowerCase() || ''}*`,
+											},
+										},
+									],
+									minimum_should_match: 1, // At least one "should" clause should match
 								},
 							},
 							{
