@@ -11,6 +11,71 @@ exports.getSubscriptions = async () => {
 	}
 };
 
+// get all Subscriptions created by a payment manager
+exports.getTransactions = async (paymentManagerId) => {
+	try {
+		const subscriptions = await Subscription.aggregate([
+			{
+				$match: { paymentManagerId: mongoose.Types.ObjectId(paymentManagerId) },
+			},
+			{
+				$lookup: {
+					from: 'plans',
+					localField: 'planId',
+					foreignField: '_id',
+					as: 'plan',
+				},
+			},
+			{
+				$unwind: {
+					path: '$plan',
+					preserveNullAndEmptyArrays: true,
+				},
+			},
+			{
+				$lookup: {
+					from: 'stores',
+					let: { storeId: '$storeId' },
+					pipeline: [
+						{
+							$match: {
+								$expr: { $eq: ['$_id', '$$storeId'] },
+							},
+						},
+						{
+							$project: {
+								_id: 0,
+								name: 1,
+							},
+						},
+					],
+					as: 'store',
+				},
+			},
+			{
+				$unwind: {
+					path: '$store',
+					preserveNullAndEmptyArrays: true,
+				},
+			},
+			{
+				$unset: 'planId',
+			},
+		]);
+		const transactions = subscriptions.map((subscription) => {
+			return {
+				type: subscription.plan.type,
+				paymentAmount: subscription.paymentAmount,
+				startDate: subscription.startDate,
+				storeName: subscription.store.name,
+			};
+		});
+		return transactions;
+	} catch (error) {
+		throw error;
+	}
+};
+
 exports.getSubscriptionById = async (id) => {
 	try {
 		const subscription = await Subscription.aggregate([
@@ -74,19 +139,11 @@ exports.getSubscriptionById = async (id) => {
 				},
 			},
 		]);
-
 		return subscription[0];
 	} catch (error) {
 		throw error;
 	}
 };
-
-// try {
-// 	const subscription = await Subscription.findById(id);
-// 	return subscription;
-// } catch (error) {
-// 	throw error;
-// }
 
 // create a new Subscription
 exports.createSubscription = async (req) => {
@@ -127,6 +184,28 @@ exports.updateSubscription = async (id, body) => {
 			new: true,
 		});
 		if (!subscription) throw Error('The subscription with the given ID was not found.');
+		return subscription;
+	} catch (error) {
+		throw error;
+	}
+};
+
+// add a note
+exports.addNote = async (id, historyId, notes) => {
+	try {
+		const subscription = await Subscription.findById(id);
+
+		if (!subscription) {
+			throw new Error('Subscription not found');
+		}
+
+		const historyItem = subscription.subscriptionsHistory.id(historyId);
+		if (!historyItem) {
+			throw new Error('History subscription not found');
+		}
+		historyItem.notes = notes;
+		await subscription.save();
+
 		return subscription;
 	} catch (error) {
 		throw error;

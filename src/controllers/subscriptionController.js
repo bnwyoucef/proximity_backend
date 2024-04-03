@@ -10,6 +10,16 @@ exports.getSubscriptions = async (req, res) => {
 	}
 };
 
+// get all Subscriptions created by a payment manager
+exports.getTransactions = async (req, res) => {
+	try {
+		const transactions = await SubscriptionService.getTransactions(req.params.paymentManagerId);
+		res.send(transactions);
+	} catch (error) {
+		res.status(500).send(error.message);
+	}
+};
+
 // get subscription by id
 exports.getSubscriptionById = async (req, res) => {
 	try {
@@ -36,6 +46,16 @@ exports.updateSubscription = async (req, res) => {
 		const updateSubscription = await SubscriptionService.updateSubscription(req.params.id, req.body);
 		res.send(updateSubscription);
 	} catch (error) {
-		res.status(500).send(err.message);
+		res.status(500).send(error.message);
+	}
+};
+
+// add a new note
+exports.addNote = async (req, res) => {
+	try {
+		const updateSubscription = await SubscriptionService.addNote(req.params.id, req.body.historyId, req.body.notes);
+		res.send(updateSubscription);
+	} catch (error) {
+		res.status(500).send(error.message);
 	}
 };
