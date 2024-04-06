@@ -9,3 +9,13 @@ exports.searchStores = async (req, res) => {
 		res.status(500).send(error.message);
 	}
 };
+
+// search for subscriptions
+exports.searchSubscriptions = async (req, res) => {
+	try {
+		const subscriptions = await ElasticSearchService.searchSubscriptions(req.body);
+		res.send(subscriptions);
+	} catch (error) {
+		res.status(500).send(error.message);
+	}
+};

@@ -1,5 +1,6 @@
 const Subscription = require('../models/Subscription');
 const mongoose = require('mongoose');
+const { indexSubscriptionToElasticsearch } = require('./elasticSearchService');
 
 // get all Subscriptions
 exports.getSubscriptions = async () => {
@@ -170,6 +171,7 @@ exports.createSubscription = async (req) => {
 				subscriptionsHistory: req.body.subscriptionsHistory,
 			});
 			await newSubscription.save();
+			indexSubscriptionToElasticsearch(newSubscription);
 			return newSubscription;
 		}
 	} catch (error) {
@@ -184,6 +186,7 @@ exports.updateSubscription = async (id, body) => {
 			new: true,
 		});
 		if (!subscription) throw Error('The subscription with the given ID was not found.');
+		indexSubscriptionToElasticsearch(subscription);
 		return subscription;
 	} catch (error) {
 		throw error;
