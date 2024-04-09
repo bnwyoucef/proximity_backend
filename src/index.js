@@ -69,7 +69,7 @@ mongoose
 	.connect(process.env.MONGO_URL)
 	.then(() => {
 		console.log('DB Conntected');
-		app.listen(process.env.PORT || 5000, () => {
+		app.listen(process.env.PORT || 8000, () => {
 			console.log('backend Running');
 		});
 	})

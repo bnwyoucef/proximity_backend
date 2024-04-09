@@ -8,7 +8,7 @@ const userSchema = joi.object({
 	username: joi.string().min(5).required(),
 	password: joi.string().min(6).required(),
 	password_confirmation: joi.string().min(6).required(),
-	role: joi.string().valid('user', 'admin', 'seller', 'paymentManager').required(),
+	role: joi.string().valid('user', 'admin', 'seller', 'paymentManager','manager').required(),
 	cart: joi.string().allow(null).allow(''),
 	google: joi.boolean(),
 });
@@ -50,7 +50,7 @@ exports.resetPasswordSchemaValidation = (req, res, next) => {
 
 const userLoginSchema = joi.object({
 	email: joi.string().required(),
-	role: joi.string().valid('user', 'admin', 'seller', 'paymentManager').required(),
+	role: joi.string().valid('user', 'admin', 'seller', 'paymentManager','manager').required(),
 	password: joi.string().min(6),
 	google: joi.boolean(),
 	name: joi.string(),
