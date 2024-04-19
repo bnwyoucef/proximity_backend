@@ -123,3 +123,47 @@ exports.getReportedProducts = async (req, res) => {
 		res.status(500).send(err.message);
 	}
 };
+// ibirahim : controller to get all the products 
+exports.getAllProducts = async (req, res) => {
+	try {
+		const products = await ProductService.getAllProducts();
+		res.json(products);
+	} catch (error) {
+		res.status(500).json({ error: error.message });
+	}
+}
+//ibrahim :  get product by category 
+exports.searchProductsByCategory = async (req, res) => {
+
+	const categoryId = req.params.categoryId;
+
+	try {
+		const products = await ProductService.searchProductsByCategory(categoryId);
+		res.json(products);
+	} catch (error) {
+		res.status(500).json({ message: "Error searching products by category" });
+	}
+}
+// ibrahim : get  product by city 
+exports.searchProductsByCity = async (req, res) => {
+	const city = req.params.city;
+	try {
+		const products = await ProductService.searchProductsByCity(city);
+		res.json(products);
+	} catch (error) {
+		res.status(500).json({ message: "Error searching products by city" });
+	}
+}
+// ibrahim : get all the repostrt
+// exports.getAllProductsWithReports = async (req, res) => {
+
+// 	try {
+// 	  const products = await ProductService.getAllProductsWithReports();
+// 	  res.json(products);
+// 	} catch (error) {
+// 	  res.status(500).json({ error: error.message });
+// 	}
+//   }
+  
+
+  

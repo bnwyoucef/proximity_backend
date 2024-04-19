@@ -14,7 +14,10 @@ const path = require('path');
 const fileUpload = require('express-fileupload');
 const flash = require('connect-flash');
 const helmet = require('helmet');
+const faker = require('faker');
+
 app.use(cors());
+
 //routes
 
 const userRoute = require('./routes/userRoute');
@@ -41,8 +44,8 @@ app.use(express.json());
 
 /////////
 router.get('/', async (req, res) => {
-	console.log('request recieved');
-	res.send('backend connected');
+    console.log('request recieved');
+    res.send('backend connected');
 });
 
 app.use(express.static('public'));
@@ -50,6 +53,9 @@ app.use('/api', router);
 app.use('/api/user', userRoute);
 app.use('/api/auth', authRoute);
 app.use('/api/store', storeRoute);
+// ibrahim 
+app.use('/api/seller', storeRoute);
+
 app.use('/api/product', productRoute);
 app.use('/api/cart', cartRoute);
 app.use('/api/offer', offerRoute);
@@ -65,14 +71,16 @@ app.use('/api/subscriptionOffer', subscriptionOfferRoute);
 app.use('/api/subscription', subscriptionRoute);
 app.use('/api/elasticSearch', elasticSearchRoute);
 
+
 mongoose
-	.connect(process.env.MONGO_URL)
-	.then(() => {
-		console.log('DB Conntected');
-		app.listen(process.env.PORT || 8000, () => {
-			console.log('backend Running');
-		});
-	})
-	.catch((err) => {
-		console.log(err);
-	});
+    .connect(process.env.MONGO_URL)
+    .then(() => {
+        console.log('DB Conntected');
+        app.listen(process.env.PORT || 8000, () => {
+            console.log('backend Running');
+        });
+    })
+    .catch((err) => {
+        console.log(err);
+    });
+

@@ -561,3 +561,60 @@ exports.getReportedProducts = async (req) => {
 		throw err;
 	}
 };
+// ibrahim : get all the products
+exports.getAllProducts = async (req) => {
+	try {
+		const products = await Product.find().populate('storeId').populate('sellerId')
+			.sort({ numberOfSales: -1 })
+			.exec();
+		return products;
+	} catch (error) {
+		throw new Error('Error while fetching products');
+	}
+}
+// ibrahim : get most buy product 
+// exports.getMostSoldProducts = async () => {
+
+//     try {
+//         const products = await Product.find()
+//             .sort({ numberOfSales: -1 }) // Sort by number of sales in descending order
+//             .populate('storeId')
+//             .populate('sellerId');
+//         return products;
+//     } catch (error) {
+//         throw new Error('Error while fetching products');
+//     }
+// }
+
+// ibrahim : get product by category 
+exports.searchProductsByCategory = async (categoryId) => {
+
+	try {
+		const products = await Product.find({ categoryId: categoryId });
+		return products;
+	} catch (error) {
+		throw error;
+	}
+}
+// ibrahim : get product by city
+exports.searchProductsByCity = async (city) => {
+	try {
+		const products = await Product.find({ "storeId.address.city": city });
+		return products;
+	} catch (error) {
+		throw error;
+	}
+}
+// ibrahim : get the reposrtgs 
+// exports.getAllProductsWithReports = async () => {
+
+// 	try {
+// 	  const products = await Product.find({}).populate('reports.idUser', 'username');
+// 	  return products;
+// 	} catch (error) {
+// 	  throw new Error('Error fetching products with reports');
+// 	}
+//   }
+  
+ 
+

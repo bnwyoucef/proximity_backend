@@ -2,7 +2,7 @@ const { json } = require('express');
 var ProductController = require('../controllers/productController');
 const { updateProductSchemaValidation, createProductSchemaValidation } = require('../middleware/dataValidation');
 
-const { verifyToken, verifyAdmin, verifySeller } = require('../middleware/verifyToken');
+const { verifyToken, verifyAdmin, verifySeller, verifyManager } = require('../middleware/verifyToken');
 
 const router = require('express').Router();
 
@@ -30,5 +30,24 @@ router.get('/sales/:id', verifySeller, ProductController.getProductSales);
 router.get('/search/:name', verifyToken, ProductController.searchProduct);
 //search product by his name and store id
 router.get('/search/:name/store/:id', verifyToken, ProductController.searchProductStore);
+// ibrahim  : egt all the product sorted by most buy product
+router.get('/', ProductController.getAllProducts);
+// ibrahim : get product by category 
+router.get('/category/:categoryId', ProductController.searchProductsByCategory);
+// ibrahim : get produc by city 
+router.get('/city/:city', ProductController.searchProductsByCity);
+// ibrahim : get reports
+// router.get('/', ProductController.getAllProductsWithReports);
+
+
+
+
+
+
+
+
+
+
+
 
 module.exports = router;

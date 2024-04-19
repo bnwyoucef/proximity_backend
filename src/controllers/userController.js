@@ -56,3 +56,15 @@ exports.getUsers = async (req, res) => {
 		res.status(500).send(err.message);
 	}
 };
+// ibrahim : get all the sellers 
+exports.getSellers = async (req, res) => {
+
+    try {
+        const users = await UserService.getSellers('seller');
+        res.json(users);
+    } catch (error) {
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+}
+
+

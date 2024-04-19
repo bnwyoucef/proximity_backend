@@ -90,7 +90,7 @@ exports.deleteStore = async (req, res) => {
 	}
 };
 // Stats get seller stores income 
-exports.getSellerStoresIncome  = async (req, res) => {
+exports.getSellerStoresIncome = async (req, res) => {
 	try {
 		const stores = await StoreService.getSellerStoresIncome(req);
 		res.send(stores);
@@ -98,3 +98,53 @@ exports.getSellerStoresIncome  = async (req, res) => {
 		res.status(500).send(err.message);
 	}
 };
+// ibrahim : controller for get all the stores 
+exports.getAllStores = async (req, res) => {
+    try {
+        const stores = await StoreService.getAllStores();
+        res.json(stores);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+}
+// ibrahim  : get stores by city 
+exports.getAllStoresByCity = async (req, res, next) => {
+    const city = req.params.city; // Retrieve city from request parameter 'city'
+    try {
+        const stores = await StoreService.getAllStoresInCity(city);
+        res.json(stores);
+    } catch (error) {
+        console.error("Error fetching stores by city:", error);
+        res.status(500).json({ error: "Could not retrieve stores" });
+    }
+};
+// ibrahim : get store by category 
+exports.getStoresByCategory = async (req, res, next) => {
+
+
+    const categoryId = req.params.categoryId;
+    try {
+        const stores = await StoreService.getStoresByCategory(categoryId);
+        res.json(stores);
+    } catch (error) {
+        console.error("Error fetching stores by category:", error);
+        res.status(500).json({ error: "Could not retrieve stores" });
+    }
+}
+// ibrahim : get store of one seller 
+exports.getStoresOfSeller = async (req, res, next) => {
+
+	try {
+	  const sellerId = req.params.sellerId;
+	  const stores = await StoreService.getStoresOfSeller(sellerId);
+	  res.json(stores);
+	} catch (error) {
+	  next(error);
+	}
+  }
+  
+  
+
+
+
+

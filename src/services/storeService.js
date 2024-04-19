@@ -537,3 +537,48 @@ exports.getSellerStoresIncome = async (req) => {
 		throw err;
 	}
 };
+// ibrahim : get all the stores 
+
+exports.getAllStores = async function getAllStores() {
+    try {
+        const stores = await Store.find();
+        return stores;
+    } catch (error) {
+        throw new Error('Could not fetch stores');
+    }
+}
+// ibrahim : get the stores by city ..
+exports.getAllStoresInCity = async function getAllStoresInCity(city) {
+    try {
+        const stores = await Store.find({ 'address.city': city }).exec();
+        return stores;
+    } catch (error) {
+        throw error;
+    }
+};
+// ibrahim get the stores by category 
+exports.getStoresByCategory = async function getStoresByCategory(categoryId) {
+
+    try {
+        const stores = await Store.find({ storeCategorieIds: categoryId }).exec();
+        return stores;
+    } catch (error) {
+        throw error;
+    }
+}
+// ibrahim : get all the store of one seller 
+exports.getStoresOfSeller = async function getStoresOfSeller(sellerId) {
+
+	try {
+	  const stores = await Store.find({ sellerId: sellerId });
+	  return stores;
+	} catch (error) {
+	  throw error;
+	}
+  }
+  
+ 
+
+
+
+

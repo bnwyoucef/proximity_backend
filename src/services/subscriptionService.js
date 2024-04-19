@@ -2,7 +2,7 @@ const Subscription = require('../models/Subscription');
 const mongoose = require('mongoose');
 const { indexSubscriptionToElasticsearch } = require('./elasticSearchService');
 
-// get all Subscriptions
+// get all Subscriptions 
 exports.getSubscriptions = async () => {
 	try {
 		const subscriptions = await Subscription.find();
@@ -76,7 +76,7 @@ exports.getTransactions = async (paymentManagerId) => {
 		throw error;
 	}
 };
-
+// get alll subscription by id 
 exports.getSubscriptionById = async (id) => {
 	try {
 		const subscription = await Subscription.aggregate([
@@ -214,3 +214,71 @@ exports.addNote = async (id, historyId, notes) => {
 		throw error;
 	}
 };
+//   ibrahim :  get the information of the store associated with a specific subscription
+exports.getStoreBySubscriptionId = async (req, res) => {
+	try {
+		const subscriptionId = req.params.subscriptionId;
+		const subscription = await Subscription.findById(subscriptionId);
+
+		if (!subscription) {
+			return res.status(404).json({ message: "Subscription not found" });
+		}
+
+		const storeId = subscription.storeId;
+		const store = await Store.findById(storeId);
+
+		if (!store) {
+			return res.status(404).json({ message: "Store not found" });
+		}
+
+		return res.status(200).json({ store });
+	} catch (error) {
+		console.error(error);
+		return res.status(500).json({ message: "Internal server error" });
+	}
+};
+// ibrahim : function for  getSubscriptionBy Status or city 
+
+// exports.getSubscriptionByCityAndStatus = async (status, city) => {
+// 	try {
+// 		let filter = {};
+
+// 		// Add status filter if provided
+// 		if (status) {
+// 			filter.status = status;
+// 		}
+
+// 		// Add city filter if provided
+// 		if (city) {
+// 			filter['storeId.address.city'] = city;
+// 		}
+
+// 		// Find subscriptions based on the filter
+// 		const subscriptions = await Subscription.find(filter);
+// 		return subscriptions;
+// 	} catch (error) {
+// 		throw error;
+// 	}
+// };
+// get subscrption by status 
+exports.getSubscriptionsByStatus = async (status) => {
+
+  try {
+    const subscriptions = await Subscription.find({ status });
+    return subscriptions;
+  } catch (err) {
+    throw new Error('Failed to fetch subscriptions by status');
+  }
+}
+//  ibrahim :  change the status of a subscription ...
+exports.updateSubscriptionStatus = async(subscriptionId, newStatus) => {
+
+	try {
+	  const updatedSubscription = await Subscription.findByIdAndUpdate(subscriptionId, { status: newStatus }, { new: true });
+	  return updatedSubscription;
+	} catch (error) {
+	  throw error;
+	}
+  }
+  
+ 

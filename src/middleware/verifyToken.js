@@ -37,6 +37,12 @@ const verifyAdmin = (req, res, next) => {
 		req.user.id == req.params.id || req.user.isAdmin == true ? next() : res.status(403).json('You Are Not admin');
 	});
 };
+// for all access
+const verifyManager = (req, res, next) => {
+	verifyToken(req, res, () => {
+		req.user.id == req.params.id || req.user.role == 'manager' ? next() : res.status(403).json('You Are Not manager');
+	});
+};
 //for seller access
 const verifySeller = (req, res, next) => {
 	verifyToken(req, res, () => {
@@ -45,4 +51,4 @@ const verifySeller = (req, res, next) => {
 };
 // verifyProduct
 
-module.exports = { verifyToken, verifySeller, verifyAdmin, verifyTokenAndAutherization };
+module.exports = { verifyToken, verifySeller, verifyAdmin, verifyTokenAndAutherization,verifyManager };

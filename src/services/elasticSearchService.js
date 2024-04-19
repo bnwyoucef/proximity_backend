@@ -110,7 +110,6 @@ exports.searchStores = async (query) => {
 		throw error;
 	}
 };
-
 // subscription search
 exports.searchSubscriptions = async (query) => {
 	try {

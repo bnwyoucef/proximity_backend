@@ -213,3 +213,14 @@ exports.getUsers = async (req) => {
 		throw err;
 	}
 };
+// ibrahim : get all the sellers 
+exports.getSellers = async (role) => {
+    try {
+        const users = await User.find({ role: role }).exec();
+        return users;
+    } catch (error) {
+        throw new Error('Error while fetching users');
+    }
+}
+
+

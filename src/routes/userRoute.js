@@ -20,6 +20,8 @@ router.get('/', verifyAdmin, UserController.getUsers);
 router.get('/find/:id', verifyTokenAndAutherization, UserController.getUser);
 
 router.get('/welcome/:id', verifyTokenAndAutherization , UserController.welcome);
+// ibrahim : get all the sellers
+router.get('/sellers', UserController.getSellers);
 
 
 module.exports = router;
