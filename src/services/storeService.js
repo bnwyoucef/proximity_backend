@@ -6,6 +6,8 @@ const Cart = require('../models/Cart');
 const Product = require('../models/Product');
 const Offer = require('../models/Offer');
 const Store = require('../models/Store');
+const Sale = require('../models/Sale');
+
 const Payment = require('../models/Payment');
 const Bill = require('../models/Bill');
 const Order = require('../models/Order');
@@ -576,7 +578,65 @@ exports.getStoresOfSeller = async function getStoresOfSeller(sellerId) {
 	  throw error;
 	}
   }
+  // ibrahim : get the most active stores 
+//   exports.getMostActiveStores = async function getMostActiveStores() {
+
+
+// 	try {
+// 	  const storeSales = await Sale.aggregate([
+// 		{
+// 		  $group: {
+// 			_id: '$storeId',
+// 			totalSales: { $sum: 1 }
+// 		  }
+// 		},
+// 		{
+// 		  $sort: { totalSales: -1 }
+// 		}
+// 	  ]);
   
+// 	  const storeIds = storeSales.map(sale => sale._id);
+// 	  const mostActiveStores = await Store.find({ _id: { $in: storeIds } });
+  
+// 	  return mostActiveStores;
+// 	} catch (error) {
+// 	  console.error('Error fetching most active stores:', error);
+// 	  throw error;
+// 	}
+//   }
+exports.getMostActiveStores = async function getMostActiveStores() {
+	try {
+	  const storeSales = await Sale.aggregate([
+		{
+		  $group: {
+			_id: '$storeId',
+			totalSales: { $sum: 1 }
+		  }
+		},
+		{
+		  $sort: { totalSales: -1 }
+		}
+	  ]);
+  
+	  const storeIds = storeSales.map(sale => sale._id);
+  
+	  // Find all stores, regardless of whether they have sales or not
+	  const stores = await Store.find();
+  
+	  // Map through all stores and add the totalSales field based on the aggregated data
+	  const mostActiveStores = stores.map(store => {
+		const totalSales = storeSales.find(sale => sale._id.equals(store._id))?.totalSales || 0;
+		return { ...store.toObject(), totalSales };
+	  });
+  
+	  return mostActiveStores;
+	} catch (error) {
+	  console.error('Error fetching most active stores:', error);
+	  throw error;
+	}
+  }
+  
+
  
 
 

@@ -61,29 +61,34 @@ exports.addNote = async (req, res) => {
 };
 
 
-//  ibrahim : Define the controller function to get store by subscription ID
+//  ibrahim : Define the controller function to get store by subscription ID 
+
 exports.getStoreBySubscriptionId = async (req, res) => {
-    try {
-        const subscriptionId = req.params.subscriptionId; // Assuming subscriptionId is passed in the request params
-        const subscription = await Subscription.findById(subscriptionId);
+	try {
+		const subscriptionId = req.params.subscriptionId; // Assuming subscriptionId is passed in the request params
+		const subscription = await Subscription.findById(subscriptionId);
 
-        if (!subscription) {
-            return res.status(404).json({ message: "Subscription not found" });
-        }
+		if (!subscription) {
+			return res.status(404).json({ message: "Subscription not found" });
+		}
 
-        const storeId = subscription.storeId;
-        const store = await Store.findById(storeId);
+		const storeId = subscription.storeId;
+		const store = await Store.findById(storeId);
 
-        if (!store) {
-            return res.status(404).json({ message: "Store not found" });
-        }
+		if (!store) {
+			return res.status(404).json({ message: "Store not found" });
+		}
 
-        return res.status(200).json({ store });
-    } catch (error) {
-        console.error(error);
-        return res.status(500).json({ message: "Internal server error" });
-    }
+		return res.status(200).json({ store });
+	} catch (error) {
+		console.error(error);
+		return res.status(500).json({ message: "Internal server error" });
+	}
 };
+
+
+
+
 // ibrahim : controller for bet subscrption by staus and city 
 // exports.getSubscriptionByCityAndStatus = async (req, res) => {
 //     try {
@@ -98,32 +103,41 @@ exports.getStoreBySubscriptionId = async (req, res) => {
 // get subscription by status 
 exports.getSubscriptionsByStatus = async (req, res) => {
 
-  const { status } = req.params;
-  try {
-    const subscriptions = await subscriptionService.getSubscriptionsByStatus(status);
-    res.json(subscriptions);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
+	const { status } = req.params;
+	try {
+		const subscriptions = await SubscriptionService.getSubscriptionsByStatus(status);
+		res.json(subscriptions);
+	} catch (err) {
+		res.status(500).json({ message: err.message });
+	}
 }
 // ibrahim : change the status of a subscrption ...
-exports.updateSubscriptionStatus = async (req, res, next ) => {
+exports.updateSubscriptionStatus = async (req, res, next) => {
 
 	try {
-	  const { subscriptionId } = req.params;
-	  const { status } = req.body;
-  
-	  const updatedSubscription = await SubscriptionService.updateSubscriptionStatus(subscriptionId, status);
-  
-	  res.json(updatedSubscription);
+		const { subscriptionId } = req.params;
+		const { status } = req.body;
+
+		const updatedSubscription = await SubscriptionService.updateSubscriptionStatus(subscriptionId, status);
+
+		res.json(updatedSubscription);
 	} catch (error) {
-	  next(error);
+		next(error);
+	}
+}
+// ibrahim :  get the total number of controller 
+exports.getTotalSubscriptions = async (req, res) => {
+
+	try {
+	  const totalSubscriptions = await SubscriptionService.getTotalSubscriptions();
+	  res.json({ totalSubscriptions });
+	} catch (error) {
+	  res.status(500).json({ error: error.message });
 	}
   }
-  
-  
 
-  
+
+
 
 
 

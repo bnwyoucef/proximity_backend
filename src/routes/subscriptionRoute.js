@@ -15,6 +15,12 @@ router.get('/store/:subscriptionId', SubscriptionController.getStoreBySubscripti
 router.get('/subscriptions/:status', SubscriptionController.getSubscriptionsByStatus);
 // ibrahim : change the statuys of a subscrption 
 router.patch('/:subscriptionId/status', SubscriptionController.updateSubscriptionStatus);
+// ibrahim : get the total number of sybscription
+router.get('/subscriptions/total', SubscriptionController.getTotalSubscriptions);
+
+module.exports = router;
+
+
 
 
 

@@ -144,6 +144,17 @@ exports.getStoresOfSeller = async (req, res, next) => {
   }
   
   
+// ibrahim : get the most active store 
+exports.getMostActiveStores = async (req, res, ) => {
+
+  try {
+    const mostActiveStores = await StoreService.getMostActiveStores();
+    res.json(mostActiveStores);
+  } catch (error) {
+    res.status(500).json({ error: 'Could not fetch most active stores' });
+  }
+}
+
 
 
 

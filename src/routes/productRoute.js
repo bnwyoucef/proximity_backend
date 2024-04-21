@@ -47,7 +47,4 @@ router.get('/city/:city', ProductController.searchProductsByCity);
 
 
 
-
-
-
 module.exports = router;

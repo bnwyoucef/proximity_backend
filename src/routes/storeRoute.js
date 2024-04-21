@@ -39,5 +39,8 @@ router.get('/category/:categoryId', StoreController.getStoresByCategory);
 
 // ibrahim : get the stores of one seller 
 router.get('/stores/:sellerId', StoreController.getStoresOfSeller);
+// ibrahim :  get the most active strores 
+router.get('/store/MostActive', StoreController.getMostActiveStores);
+
 
 module.exports = router;

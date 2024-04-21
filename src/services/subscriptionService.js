@@ -263,22 +263,34 @@ exports.getStoreBySubscriptionId = async (req, res) => {
 // get subscrption by status 
 exports.getSubscriptionsByStatus = async (status) => {
 
-  try {
-    const subscriptions = await Subscription.find({ status });
-    return subscriptions;
-  } catch (err) {
-    throw new Error('Failed to fetch subscriptions by status');
-  }
+	try {
+		const subscriptions = await Subscription.find({ status });
+		return subscriptions;
+	} catch (err) {
+		throw new Error('Failed to fetch subscriptions by status');
+	}
 }
 //  ibrahim :  change the status of a subscription ...
-exports.updateSubscriptionStatus = async(subscriptionId, newStatus) => {
+exports.updateSubscriptionStatus = async (subscriptionId, newStatus) => {
 
 	try {
-	  const updatedSubscription = await Subscription.findByIdAndUpdate(subscriptionId, { status: newStatus }, { new: true });
-	  return updatedSubscription;
+		const updatedSubscription = await Subscription.findByIdAndUpdate(subscriptionId, { status: newStatus }, { new: true });
+		return updatedSubscription;
 	} catch (error) {
-	  throw error;
+		throw error;
 	}
-  }
-  
- 
+}
+// ibrahim : get the totral number of subscription 
+exports.getTotalSubscriptions = async () => {
+	try {
+		const subscriptions = await Subscription.find();
+		const totalSubscriptions = subscriptions.length;
+		return totalSubscriptions;
+	} catch (error) {
+		console.error('Error fetching total subscriptions:', error);
+		throw new Error('Could not fetch total subscriptions');
+	}
+}
+
+
+

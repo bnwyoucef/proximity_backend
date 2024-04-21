@@ -1,0 +1,16 @@
+// routes/saleRoutes.js
+// ibrahim : i have  create this file 
+const express = require('express');
+const router = express.Router();
+const saleController = require('../controllers/saleController');
+
+// ibrahim : get the most buy product by region 
+router.get('/MostBoughtProductsByRegion', saleController.getMostBoughtProductByRegion);
+router.get('/MostBoughtProductInPeriod', saleController.getMostBoughtProductInPeriod);
+// routes/saleRoutes.js
+
+router.get('/MostSoldProductsByCategory', saleController.getMostSoldProductsByCategory);
+
+
+ 
+module.exports = router;

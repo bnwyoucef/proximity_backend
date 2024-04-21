@@ -21,6 +21,8 @@ app.use(cors());
 //routes
 
 const userRoute = require('./routes/userRoute');
+const saleRoute = require('./routes/saleRoute');
+
 const authRoute = require('./routes/authRoute');
 const storeRoute = require('./routes/storeRoute');
 const productRoute = require('./routes/productRoute');
@@ -51,6 +53,8 @@ router.get('/', async (req, res) => {
 app.use(express.static('public'));
 app.use('/api', router);
 app.use('/api/user', userRoute);
+app.use('/api/sale', saleRoute);
+
 app.use('/api/auth', authRoute);
 app.use('/api/store', storeRoute);
 // ibrahim 
