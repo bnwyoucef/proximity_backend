@@ -13,7 +13,8 @@ router.put('/:id/city/numberOfSales', ProductController.updateNumberOfSales);
 router.put('/:id/numberOfViews', ProductController.updateNumberOfViews);
 //update
 //Add Product
-router.post('/', verifySeller, createProductSchemaValidation, ProductController.addProduct);
+// ibrahim : i remove the verify seeler for test the end point 
+router.post('/',verifySeller,createProductSchemaValidation, ProductController.addProduct);
 //delete Product
 router.delete('/:id', verifySeller, ProductController.deleteProduct);
 //get Product

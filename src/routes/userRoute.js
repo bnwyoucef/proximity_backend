@@ -10,7 +10,7 @@ const { updateSchemaValidation } = require('../middleware/dataValidation');
 //update user
 router.put('/:id', verifyTokenAndAutherization, updateSchemaValidation, UserController.updateUser);
 //update user image
-router.put('/update_image/:id', verifyTokenAndAutherization,  UserController.updateUserImage);
+router.put('/update_image/:id', verifyTokenAndAutherization, UserController.updateUserImage);
 //delete
 router.delete('/:id', verifyTokenAndAutherization, UserController.deleteUser);
 //get
@@ -19,9 +19,13 @@ router.get('/', verifyAdmin, UserController.getUsers);
 //get user by his id
 router.get('/find/:id', verifyTokenAndAutherization, UserController.getUser);
 
-router.get('/welcome/:id', verifyTokenAndAutherization , UserController.welcome);
+router.get('/welcome/:id', verifyTokenAndAutherization, UserController.welcome);
 // ibrahim : get all the sellers
 router.get('/sellers', UserController.getSellers);
+// ibrahim : get seller by hios id 
+
+router.get('/seller/:sellerId', UserController.getSellerById);
+
 
 
 module.exports = router;

@@ -59,12 +59,24 @@ exports.getUsers = async (req, res) => {
 // ibrahim : get all the sellers 
 exports.getSellers = async (req, res) => {
 
-    try {
-        const users = await UserService.getSellers('seller');
-        res.json(users);
-    } catch (error) {
-        res.status(500).json({ error: "Internal Server Error" });
-    }
+	try {
+		const users = await UserService.getSellers('seller');
+		res.json(users);
+	} catch (error) {
+		res.status(500).json({ error: "Internal Server Error" });
+	}
 }
+// ibrahiml : get seller by id 
+exports.getSellerById = async (req, res) => {
 
+
+	const userId = req.params.userId;
+
+	try {
+		const user = await UserService.getSellerById(userId);
+		res.status(200).json({ user });
+	} catch (error) {
+		res.status(500).json({ error: error.message });
+	}
+}
 

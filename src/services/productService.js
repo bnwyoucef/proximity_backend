@@ -184,8 +184,8 @@ exports.updateNumberOfSales = async (req) => {
 //Add Product
 exports.addProduct = async (req) => {
 	try {
-		//check if store exist
-		//check the id of the store
+		// check if store exist
+		// check the id of the store
 
 		const store = await Store.findById(req.body.storeId);
 		if (!store) throw new Error('The store with the given ID was not found.');
@@ -241,7 +241,7 @@ exports.addProduct = async (req) => {
 			name: req.body.name,
 			price: req.body.price,
 			description: req.body.description,
-			images: imagess,
+			// images: imagess,
 			subcategory: req.body.subcategory || '',
 			sellerId: req.user.id,
 			storeId: store._id,
@@ -261,99 +261,11 @@ exports.addProduct = async (req) => {
 		const regexPatternTitle = new RegExp(`\\b${savedProduct.name}\\b`, 'i');
 		const regexPatternDescription = new RegExp(`\\b${savedProduct.description}\\b`, 'i');
 
-		let users = await User.find({ _id: '6491ed986b54174db78c0695' });
-		// let users = await User.aggregate([
-		// 	{
-		// 	  $match: {
-		// 		$and: [
-		// 			{
-		// 				notification : {
-		// 				offerNotification : true
-		// 				}
-		// 			} ,
-		// 			{
-		// 				productCategorieIds: {
-		// 				$elemMatch: {
-		// 				  subCategories: savedProduct.subCategoryId
-		// 				}
-		// 			  }
-		// 			},
-		// 			{
-		// 				$or : [
-		// 					{
-		// 						Tags: {
-		// 						$regex: regexPatternTitle,
-		// 						$options: 'i'
-		// 						}
-		// 					},
-		// 					{
-		// 						Tags: {
-		// 						$regex: regexPatternDescription,
-		// 						$options: 'i'
-		// 						}
-		// 					},
-
-		// 				]
-		// 			}
-		// 		]
-		// 	  }
-		// 	},
-		// 	{ $limit: 10 } // Limit the search results to 10
-		//   ]).toArray();
-
-		// if(users.length < 10) {
-		// 	let usersSup = await User.aggregate([
-		// 		{
-		// 		  $match: {
-		// 			$and: [
-		// 				{
-		// 					notification : {
-		// 					offerNotification : true
-		// 					}
-		// 				} ,
-		// 				{
-		// 					_id: {
-		// 					$nin: users.map(el => el._id)
-		// 					}
-		// 				} ,
-		// 				{
-		// 					$or: [
-		// 					{
-		// 						productCategorieIds: {
-		// 						$elemMatch: {
-		// 							subCategories: savedProduct.subCategoryId
-		// 						}
-		// 					}
-		// 					},
-		// 					{
-		// 						$or : [
-		// 							{
-		// 								Tags: {
-		// 								$regex: regexPatternTitle,
-		// 								$options: 'i'
-		// 								}
-		// 							},
-		// 							{
-		// 								Tags: {
-		// 								$regex: regexPatternDescription,
-		// 								$options: 'i'
-		// 								}
-		// 							},
-
-		// 						]
-		// 					}
-		// 				]
-		// 				},
-		// 			]
-		// 		  }
-		// 		},
-		// 		{ $limit: 10 } // Limit the search results to 10
-		// 	  ]).toArray();
-		//  users = users.concat(usersSup);
-		// }
+		let users = await User.find({ _id: '66192bc92ec13185a1e9c1c4' });
 		console.log(users);
 		// send product notifications to users
-		if (users.length) {
+		// if (users.length) {
+			if (true) {
 			let data = {
 				owner_id: users.map((el) => el._id),
 				type: 'offer', // order or offer

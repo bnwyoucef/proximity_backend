@@ -78,8 +78,7 @@ app.use('/api/elasticSearch', elasticSearchRoute);
 
 mongoose
     .connect(process.env.MONGO_URL)
-    .then(() => {
-        console.log('DB Conntected');
+    .then(() => { console.log('DB Conntected');
         app.listen(process.env.PORT || 8000, () => {
             console.log('backend Running');
         });

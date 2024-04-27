@@ -222,5 +222,23 @@ exports.getSellers = async (role) => {
         throw new Error('Error while fetching users');
     }
 }
+// ibrahim : get seller by his id 
+exports.getSellerById = async (userId) => {
+	try {
+		const user = await User.findById(userId);
+		if (!user) {
+		  throw new Error('User not found');
+		}
+		return user;
+	  } catch (error) {
+		console.error('Error fetching user by ID:', error);
+		throw new Error('Error fetching user by ID');
+	  }
+	
+	  
+}
+
+
+
 
 
