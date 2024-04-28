@@ -13,8 +13,7 @@ router.put('/:id/city/numberOfSales', ProductController.updateNumberOfSales);
 router.put('/:id/numberOfViews', ProductController.updateNumberOfViews);
 //update
 //Add Product
-// ibrahim : i remove the verify seeler for test the end point 
-router.post('/',verifySeller,createProductSchemaValidation, ProductController.addProduct);
+router.post('/', verifySeller, createProductSchemaValidation, ProductController.addProduct);
 //delete Product
 router.delete('/:id', verifySeller, ProductController.deleteProduct);
 //get Product
@@ -32,7 +31,7 @@ router.get('/search/:name', verifyToken, ProductController.searchProduct);
 //search product by his name and store id
 router.get('/search/:name/store/:id', verifyToken, ProductController.searchProductStore);
 // ibrahim  : egt all the product sorted by most buy product
-router.get('/', ProductController.getAllProducts);
+router.get('/products/all', ProductController.getAllProducts);
 // ibrahim : get product by category 
 router.get('/category/:categoryId', ProductController.searchProductsByCategory);
 // ibrahim : get produc by city 
