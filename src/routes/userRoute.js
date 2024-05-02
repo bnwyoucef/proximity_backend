@@ -24,7 +24,7 @@ router.get('/welcome/:id', verifyTokenAndAutherization, UserController.welcome);
 router.get('/sellers', UserController.getSellers);
 // ibrahim : get seller by hios id 
 
-router.get('/seller/:sellerId', UserController.getSellerById);
+router.get('/seller/:userId', UserController.getUserById);
 
 
 

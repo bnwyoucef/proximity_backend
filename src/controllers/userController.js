@@ -67,16 +67,18 @@ exports.getSellers = async (req, res) => {
 	}
 }
 // ibrahiml : get seller by id 
-exports.getSellerById = async (req, res) => {
-
-
-	const userId = req.params.userId;
+exports.getUserById = async (req, res) => {
 
 	try {
-		const user = await UserService.getSellerById(userId);
-		res.status(200).json({ user });
+		const userId = req.params.userId;
+		const user = await UserService.getUserById(userId);
+		if (!user) {
+			return res.status(404).json({ message: 'User not found' });
+		}
+		res.status(200).json(user);
 	} catch (error) {
-		res.status(500).json({ error: error.message });
+		console.error('Error fetching user by ID:', error);
+		res.status(500).json({ message: 'Internal server error' });
 	}
-}
+};
 
