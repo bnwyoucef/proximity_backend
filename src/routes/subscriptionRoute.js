@@ -2,6 +2,7 @@ const router = require('express').Router();
 var SubscriptionController = require('../controllers/subscriptionController');
 
 router.get('/', SubscriptionController.getSubscriptions);
+router.get('/details', SubscriptionController.getSubscriptionsDetail);
 router.get('/transactions/:paymentManagerId', SubscriptionController.getTransactions);
 router.get('/:id', SubscriptionController.getSubscriptionById);
 router.post('/', SubscriptionController.createSubscription);
@@ -14,9 +15,12 @@ router.get('/store/:subscriptionId', SubscriptionController.getStoreBySubscripti
 // ibrahim : route to get subscrption by status 
 router.get('/subscriptions/:status', SubscriptionController.getSubscriptionsByStatus);
 // ibrahim : change the statuys of a subscrption 
-router.patch('/:subscriptionId/status', SubscriptionController.updateSubscriptionStatus);
+router.patch('/status/:subscriptionId', SubscriptionController.updateSubscriptionStatus);
 // ibrahim : get the total number of sybscription
 router.get('/subscriptions/total', SubscriptionController.getTotalSubscriptions);
+// ibrahim : delete subscrtion 
+router.delete('/subscriptions/:subscriptionId', SubscriptionController.deleteSubscription);
+
 
 module.exports = router;
 

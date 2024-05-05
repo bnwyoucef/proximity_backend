@@ -135,6 +135,26 @@ exports.getTotalSubscriptions = async (req, res) => {
 	  res.status(500).json({ error: error.message });
 	}
   }
+  // ibrahim ; delete subscription 
+  // subscriptionController.js
+exports.deleteSubscription = async (req, res, next) => {
+    try {
+        const { subscriptionId } = req.params; // Extracting subscriptionId from request params
+        const result = await SubscriptionService.deleteSubscription(subscriptionId);
+        res.json(result);
+    } catch (error) {
+        next(error);
+    }
+};
+exports.getSubscriptionsDetail = async (req, res) => {
+	try {
+		const subscriptions = await SubscriptionService.getSubscriptionsDetail();
+		res.send(subscriptions);
+	} catch (error) {
+		res.status(500).send(error.message);
+	}
+}; 
+
 
 
 

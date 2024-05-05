@@ -291,6 +291,43 @@ exports.getTotalSubscriptions = async () => {
 		throw new Error('Could not fetch total subscriptions');
 	}
 }
+// ibrahim : delete subscrption 
+
+exports.deleteSubscription = async (subscriptionId) => {
+	try {
+		// Find the subscription by ID and delete it
+		const result = await Subscription.findByIdAndDelete(subscriptionId);
+
+		if (!result) {
+			throw new Error('Subscription not found');
+		}
+
+		return { message: 'Subscription deleted successfully' };
+	} catch (error) {
+		throw error;
+	}
+};
+// ibrahim : get subscrtion with detail 
+exports.getSubscriptionsDetail = async () => {
+	try {
+		const subscriptions = await Subscription.find()
+			.populate({
+				path: 'storeId',
+				select: 'name'
+			})
+			.populate({
+				path: 'planId',
+				select: 'type price' // Include 'type' and 'price' fields from the referenced Plan model
+			})
+			.populate({
+				path: 'paymentManagerId',
+				select: 'username'
+			});
+		return subscriptions;
+	} catch (error) {
+		throw error;
+	}
+};
 
 
 
