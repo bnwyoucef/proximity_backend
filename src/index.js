@@ -34,6 +34,7 @@ const planRoute = require('./routes/planRoute');
 const subscriptionOfferRoute = require('./routes/SubscriptionOfferRoute');
 const subscriptionRoute = require('./routes/subscriptionRoute');
 const elasticSearchRoute = require('./routes/elasticSearchRoute');
+const paymentTypeRoute = require('./routes/paymentTypeRoute');
 //const adminRoute = require('./routes/admin');*/
 app.use(helmet());
 app.use(fileUpload());
@@ -64,6 +65,7 @@ app.use('/api/plan', planRoute);
 app.use('/api/subscriptionOffer', subscriptionOfferRoute);
 app.use('/api/subscription', subscriptionRoute);
 app.use('/api/elasticSearch', elasticSearchRoute);
+app.use('/api/paymentType', paymentTypeRoute);
 
 mongoose
 	.connect(process.env.MONGO_URL)

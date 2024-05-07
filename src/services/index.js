@@ -9,3 +9,4 @@ module.exports = require('./storeService');
 module.exports = require('./searchService');
 module.exports = require('./resetPasswordService');
 module.exports = require('./viewService');
+module.exports = require('./paymentTypeService');

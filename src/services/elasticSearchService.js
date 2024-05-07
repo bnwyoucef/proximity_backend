@@ -3,7 +3,7 @@ const User = require('../models/User');
 const Store = require('../models/Store');
 const Plan = require('../models/Plan');
 
-const esClient = new Client({ node: process.env.ELASRIC_URL });
+const esClient = new Client({ node: process.env.ELASTIC_URL });
 
 // store index
 exports.indexStoresToElasticsearch = async (store, updateStore) => {

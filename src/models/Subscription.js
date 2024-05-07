@@ -26,6 +26,11 @@ const subscriptionSchema = new mongoose.Schema(
 			type: Number,
 			required: true,
 		},
+		paymentTypeId: {
+			type: mongoose.Schema.Types.ObjectId,
+			required: false,
+			ref: 'PaymentType',
+		},
 		status: {
 			type: String,
 			enum: ['inactive', 'active', 'delayed', 'suspended'],
