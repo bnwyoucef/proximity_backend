@@ -8,6 +8,4 @@ const Sale = new mongoose.Schema({
   region: { type: String }, // If you want to track region for each sale
 });
 
-
-
 module.exports = mongoose.model('Sale', Sale);

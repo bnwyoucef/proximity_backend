@@ -15,7 +15,7 @@ router.get('/store/:subscriptionId', SubscriptionController.getStoreBySubscripti
 // ibrahim : route to get subscrption by status 
 router.get('/subscriptions/:status', SubscriptionController.getSubscriptionsByStatus);
 // ibrahim : change the statuys of a subscrption 
-router.patch('/status/:subscriptionId', SubscriptionController.updateSubscriptionStatus);
+router.put('/status/:subscriptionId', SubscriptionController.updateSubscriptionStatus);
 // ibrahim : get the total number of sybscription
 router.get('/subscriptions/total', SubscriptionController.getTotalSubscriptions);
 // ibrahim : delete subscrtion 

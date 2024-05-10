@@ -4,8 +4,12 @@ const express = require('express');
 const router = express.Router();
 const saleController = require('../controllers/saleController');
 
+// router.post('/create', saleController.createSale);
+
+
 // ibrahim : get the most buy product by region 
 router.get('/MostBoughtProductsByRegion', saleController.getMostBoughtProductByRegion);
+
 router.get('/MostBoughtProductInPeriod', saleController.getMostBoughtProductInPeriod);
 // routes/saleRoutes.js
 

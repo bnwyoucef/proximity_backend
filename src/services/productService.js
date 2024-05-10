@@ -265,7 +265,7 @@ exports.addProduct = async (req) => {
 		console.log(users);
 		// send product notifications to users
 		// if (users.length) {
-			if (true) {
+		if (true) {
 			let data = {
 				owner_id: users.map((el) => el._id),
 				type: 'offer', // order or offer
@@ -525,6 +525,6 @@ exports.searchProductsByCity = async (city) => {
 // 	  throw new Error('Error fetching products with reports');
 // 	}
 //   }
-  
- 
+
+
 
