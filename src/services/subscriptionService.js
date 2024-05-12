@@ -309,25 +309,30 @@ exports.deleteSubscription = async (subscriptionId) => {
 };
 // ibrahim : get subscrtion with detail 
 exports.getSubscriptionsDetail = async () => {
-	try {
-		const subscriptions = await Subscription.find()
-			.populate({
-				path: 'storeId',
-				select: 'name'
-			})
-			.populate({
-				path: 'planId',
-				select: 'type price' // Include 'type' and 'price' fields from the referenced Plan model
-			})
-			.populate({
-				path: 'paymentManagerId',
-				select: 'username'
-			});
-		return subscriptions;
-	} catch (error) {
-		throw error;
-	}
+    try {
+        const subscriptions = await Subscription.find()
+            .populate({
+                path: 'storeId',
+                select: 'name address', // Include the 'address' field from the referenced Store model
+                populate: {
+                    path: 'address', // Populate the 'address' field
+                    select: 'city', // Include the 'city' field from the Address schema
+                }
+            })
+            .populate({
+                path: 'planId',
+                select: 'type price' // Include 'type' and 'price' fields from the referenced Plan model
+            })
+            .populate({
+                path: 'paymentManagerId',
+                select: 'username'
+            });
+        return subscriptions;
+    } catch (error) {
+        throw error;
+    }
 };
+
 
 
 
