@@ -476,12 +476,21 @@ exports.getReportedProducts = async (req) => {
 // ibrahim : get all the products
 exports.getAllProducts = async () => {
 	try {
-		const products = await Product.find();
+		const products = await Product.find().populate({
+			path: 'storeId',
+			select: 'name address',
+		}).populate({
+			path: 'categoryId',
+			select: 'name',
+		}).exec();
 		return products;
 	} catch (error) {
 		throw new Error('Error while fetching products');
 	}
 }
+
+
+
 // ibrahim : get most buy product 
 // exports.getMostSoldProducts = async () => {
 
