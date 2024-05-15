@@ -155,15 +155,17 @@ exports.searchProductsByCity = async (req, res) => {
 	}
 }
 // ibrahim : get all the repostrt
-// exports.getAllProductsWithReports = async (req, res) => {
+exports.getAllProductReports = async (req, res) => {
 
-// 	try {
-// 	  const products = await ProductService.getAllProductsWithReports();
-// 	  res.json(products);
-// 	} catch (error) {
-// 	  res.status(500).json({ error: error.message });
-// 	}
-//   }
+		try {
+			const reports = await ProductService.getAllProductReports();
+			res.json(reports);
+		} catch (error) {
+			console.error("Error fetching reports:", error);
+			res.status(500).json({ error: "Internal server error" });
+		}
+	}
+	
   
 
   

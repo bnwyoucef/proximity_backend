@@ -37,7 +37,7 @@ router.get('/category/:categoryId', ProductController.searchProductsByCategory);
 // ibrahim : get produc by city 
 router.get('/city/:city', ProductController.searchProductsByCity);
 // ibrahim : get reports
-// router.get('/', ProductController.getAllProductsWithReports);
+router.get('/product/report', ProductController.getAllProductReports);
 
 
 

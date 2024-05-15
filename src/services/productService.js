@@ -525,15 +525,19 @@ exports.searchProductsByCity = async (city) => {
 	}
 }
 // ibrahim : get the reposrtgs 
-// exports.getAllProductsWithReports = async () => {
+exports.getAllProductReports = async () => {
 
-// 	try {
-// 	  const products = await Product.find({}).populate('reports.idUser', 'username');
-// 	  return products;
-// 	} catch (error) {
-// 	  throw new Error('Error fetching products with reports');
-// 	}
-//   }
-
+	try {
+		const products = await Product.find({});
+		let allReports = [];
+		products.forEach(product => {
+			allReports = allReports.concat(product.reports);
+		});
+		return allReports;
+	} catch (error) {
+		console.error("Error fetching reports:", error);
+		throw error;
+	}
+}
 
 
