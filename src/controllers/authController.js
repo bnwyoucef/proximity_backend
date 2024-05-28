@@ -16,6 +16,7 @@ exports.login = async (req, res) => {
 		res.status(500).send(err.message);
 	}
 };
+
 exports.verify = async (req, res) => {
 	try {
 		const user = await AuthService.verify(req.body);

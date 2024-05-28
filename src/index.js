@@ -14,7 +14,6 @@ const flash = require('connect-flash');
 const helmet = require('helmet');
 
 //routes
-
 const userRoute = require('./routes/userRoute');
 const authRoute = require('./routes/authRoute');
 const storeRoute = require('./routes/storeRoute');
@@ -27,7 +26,8 @@ const searchRoute = require('./routes/searchRoute');
 const resetPasswordRoute = require('./routes/resetPasswordRoute');
 const notificationRoute = require('./routes/notificationRoute');
 const storeCategoryRoute = require('./routes/storeCategoryRoute');
-//const adminRoute = require('./routes/admin');*/
+//const adminRoute = require('./routes/admin'); // FAIRE UNE ROUTE POUR LE DASHBOARD
+
 app.use(helmet());
 app.use(fileUpload());
 app.use(express.json());
@@ -47,6 +47,8 @@ app.use('/api/search', searchRoute);
 app.use('/api/password-reset', resetPasswordRoute);
 app.use('/api/notification', notificationRoute);
 app.use('/api/storeCategory', storeCategoryRoute);
+
+//app.use('/api/admin', adminRoute);
 
 mongoose
 	.connect(process.env.MONGO_URL)

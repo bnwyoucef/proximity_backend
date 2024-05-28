@@ -16,6 +16,7 @@ exports.getCartt = async (req, res) => {
 		res.status(500).send(err.message);
 	}
 };
+
 exports.updateCart = async (req, res) => {
 	try {
 		const cart = await CartService.updateCart(req);
