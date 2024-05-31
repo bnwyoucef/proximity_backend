@@ -17,6 +17,7 @@ exports.indexStoresToElasticsearch = async (store, updateStore) => {
 		storeId: store._id,
 		name: store.name,
 		sellerName: seller.username,
+		//TODO:Link the store with it's subscription id
 		subscriptionId: store.subscriptionId,
 		address: store.address,
 		status: store.activated ? 'Active' : 'Inactive',
@@ -29,10 +30,13 @@ exports.indexStoresToElasticsearch = async (store, updateStore) => {
 };
 
 // subscription index
-exports.indexSubscriptionToElasticsearch = async (subscription) => {
+exports.indexSubscriptionToElasticsearch = async (subscription, storeId) => {
+	// if (updateSubscription) {
+	// 	deleteIndexedSubscription(subscription._id);
+	// }
 	const manager = await User.findById(subscription.paymentManagerId);
 	if (manager) {
-		const store = await Store.findById(subscription.storeId);
+		const store = await Store.findById(subscription.storeId || storeId);
 		const seller = await User.findById(store.sellerId);
 		const plan = await Plan.findById(subscription.planId);
 		if (store.address.postalCode === '') store.address.postalCode = 'NAN';
@@ -191,3 +195,15 @@ async function deleteIndexedDocument(id) {
 		},
 	});
 }
+exports.deleteIndexedSubscription = async (id) => {
+	await esClient.deleteByQuery({
+		index: 'subscriptions',
+		body: {
+			query: {
+				term: {
+					subscriptionId: id,
+				},
+			},
+		},
+	});
+};

@@ -1,6 +1,6 @@
 const Subscription = require('../models/Subscription');
 const mongoose = require('mongoose');
-const { indexSubscriptionToElasticsearch } = require('./elasticSearchService');
+const { indexSubscriptionToElasticsearch, deleteIndexedSubscription } = require('./elasticSearchService');
 
 // get all Subscriptions
 exports.getSubscriptions = async () => {
@@ -106,20 +106,32 @@ exports.getSubscriptionById = async (id) => {
 				},
 			},
 			{
-				$unwind: {
-					path: '$subscriptionsHistory',
-					preserveNullAndEmptyArrays: true,
-				},
-			},
-			{
-				$unwind: {
-					path: '$subscriptionsHistoryPlans',
-					preserveNullAndEmptyArrays: true,
-				},
-			},
-			{
 				$addFields: {
-					'subscriptionsHistory.plan': '$subscriptionsHistoryPlans',
+					subscriptionsHistory: {
+						$map: {
+							input: '$subscriptionsHistory',
+							as: 'history',
+							in: {
+								$mergeObjects: [
+									'$$history',
+									{
+										plan: {
+											$arrayElemAt: [
+												{
+													$filter: {
+														input: '$subscriptionsHistoryPlans',
+														as: 'plan',
+														cond: { $eq: ['$$plan._id', '$$history.planId'] },
+													},
+												},
+												0,
+											],
+										},
+									},
+								],
+							},
+						},
+					},
 				},
 			},
 			{
@@ -136,10 +148,11 @@ exports.getSubscriptionById = async (id) => {
 					endDate: { $first: '$endDate' },
 					notes: { $first: '$notes' },
 					plan: { $first: '$plan' },
-					subscriptionsHistory: { $push: '$subscriptionsHistory' },
+					subscriptionsHistory: { $first: '$subscriptionsHistory' },
 				},
 			},
 		]);
+
 		return subscription[0];
 	} catch (error) {
 		throw error;
@@ -149,6 +162,7 @@ exports.getSubscriptionById = async (id) => {
 // create a new Subscription
 exports.createSubscription = async (req) => {
 	try {
+		// checking if the subscription exists
 		if (req.body.subscriptionId) {
 			//update the current subscription
 			const currentSubscription = await Subscription.findById(req.body.subscriptionId);
@@ -186,6 +200,9 @@ exports.updateSubscription = async (id, body) => {
 			new: true,
 		});
 		if (!subscription) throw Error('The subscription with the given ID was not found.');
+		// update the status of the indexed subscription from active to suspended
+		deleteIndexedSubscription(subscription.id);
+		indexSubscriptionToElasticsearch(subscription.subscriptionsHistory[0], subscription.storeId);
 		indexSubscriptionToElasticsearch(subscription);
 		return subscription;
 	} catch (error) {
