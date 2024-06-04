@@ -37,7 +37,10 @@ router.get('/category/:categoryId', ProductController.searchProductsByCategory);
 // ibrahim : get produc by city 
 router.get('/city/:city', ProductController.searchProductsByCity);
 // ibrahim : get reports
-router.get('/product/report', ProductController.getAllProductReports);
+router.get('/products/reports', ProductController.getAllProductReports);
+// ibrahim ; i definr thsi route to report a product 
+router.post('/reports/test', ProductController.getReports);
+
 
 
 

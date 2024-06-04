@@ -525,19 +525,45 @@ exports.searchProductsByCity = async (city) => {
 	}
 }
 // ibrahim : get the reposrtgs 
-exports.getAllProductReports = async () => {
 
-	try {
-		const products = await Product.find({});
-		let allReports = [];
-		products.forEach(product => {
-			allReports = allReports.concat(product.reports);
-		});
-		return allReports;
-	} catch (error) {
-		console.error("Error fetching reports:", error);
-		throw error;
-	}
-}
+exports.getAllProductReports = async () => {
+    try {
+        // Find all products
+        const products = await Product.find({});
+
+        let allReports = [];
+
+        for (const product of products) {
+            // Add product details to each report
+            const productDetails = {
+                productId: product._id,
+                productName: product.name,
+                productDescription: product.description,
+                productPrice: product.price
+            };
+
+            for (const report of product.reports) {
+                // Find user by report's _id (considered as userId)
+                const user = await User.findById(report._id).select('username email phone');
+
+                const reportWithDetails = {
+                    ...report.toObject(), // Convert Mongoose document to plain JavaScript object
+                    product: productDetails,
+                    user: user ? {
+                        username: user.username,
+                        email: user.email,
+                        phone: user.phone
+                    } : null
+                };
+                allReports.push(reportWithDetails);
+            }
+        }
+
+        return allReports;
+    } catch (error) {
+        console.error("Error fetching reports:", error);
+        throw error;
+    }
+};
 
 
