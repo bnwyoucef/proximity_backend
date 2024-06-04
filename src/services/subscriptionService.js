@@ -178,6 +178,7 @@ exports.createSubscription = async (req) => {
 				req.body.paymentAmount = req.body.paymentAmount - (req.body.paymentAmount * activeOffer.discount) / 100;
 			}
 			await this.updateSubscription(req.body.subscriptionId, req.body);
+			return currentSubscription;
 		} else {
 			if (activeOffer) {
 				req.body.paymentAmount = req.body.paymentAmount - (req.body.paymentAmount * activeOffer.discount) / 100;
@@ -196,6 +197,7 @@ exports.createSubscription = async (req) => {
 			});
 			await newSubscription.save();
 			indexSubscriptionToElasticsearch(newSubscription);
+			console.log('~~~~~~~~~~~~~~~~~~~~~~~~~~', newSubscription);
 			return newSubscription;
 		}
 	} catch (error) {
@@ -214,6 +216,7 @@ exports.updateSubscription = async (id, body) => {
 		deleteIndexedSubscription(subscription.id);
 		indexSubscriptionToElasticsearch(subscription.subscriptionsHistory[0], subscription.storeId);
 		indexSubscriptionToElasticsearch(subscription);
+		console.log('~~~~~~~~~~~~~~~~~~~~~~~~~~####', subscription);
 		return subscription;
 	} catch (error) {
 		throw error;
