@@ -52,7 +52,6 @@ exports.getSellerStores = async (req, res) => {
 	}
 };
 
-
 //get seller store
 exports.getSellerStore = async (req, res) => {
 	try {
@@ -80,7 +79,6 @@ exports.getStoresByLocation = async (req, res) => {
 	}
 };
 
-
 exports.deleteStore = async (req, res) => {
 	try {
 		const stores = await StoreService.deleteStore(req);
@@ -89,8 +87,8 @@ exports.deleteStore = async (req, res) => {
 		res.status(500).send(err.message);
 	}
 };
-// Stats get seller stores income 
-exports.getSellerStoresIncome  = async (req, res) => {
+// Stats get seller stores income
+exports.getSellerStoresIncome = async (req, res) => {
 	try {
 		const stores = await StoreService.getSellerStoresIncome(req);
 		res.send(stores);

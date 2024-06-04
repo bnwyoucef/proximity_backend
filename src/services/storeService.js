@@ -71,9 +71,6 @@ async function myAsyncProductCategoryFunc(element) {
 
 //createStore
 exports.createStore = async (req) => {
-	console.log('req.body');
-	console.log(req.body);
-	console.log(req.files);
 	try {
 		if (typeof req.body.location === 'string') {
 			req.body.location = JSON.parse(req.body.location);
@@ -120,7 +117,6 @@ exports.createStore = async (req) => {
 		const fileName = `${uuid.v4()}${image.name}`;
 		const uploadPath = path.resolve(__dirname, '..', '..', 'public', 'images', 'stores', fileName);
 		const storagePath = `images/stores/${fileName}`;
-		console.log(storagePath, 'storagePath');
 
 		// Use the mv() method to place the file somewhere on your server
 
@@ -167,7 +163,6 @@ exports.createStore = async (req) => {
 		indexStoresToElasticsearch(store, false);
 		return store;
 	} catch (err) {
-		console.log(err);
 		throw err;
 	}
 };
@@ -219,8 +214,7 @@ exports.updateStore = async (req) => {
 				req.body.templateId = parseInt(req.body.template);
 				delete req.body.template;
 			}
-
-			if (store.sellerId != req.user.id) {
+			if (store.sellerId != req.user.id && !req.body.changeSubscription) {
 				throw new Error({ message: 'You are not authorized to update this store' });
 			} else {
 				let image = null;
@@ -255,7 +249,6 @@ exports.updateStore = async (req) => {
 					);
 				} else {
 					console.log('im here without image');
-					console.log(req.body);
 					updatedStore = await Store.findByIdAndUpdate(
 						req.params.id,
 						{
@@ -264,8 +257,6 @@ exports.updateStore = async (req) => {
 						{ new: true }
 					);
 				}
-
-				console.log(updatedStore.storeCategorieIds);
 				indexStoresToElasticsearch(updatedStore, true);
 				return updatedStore;
 			}
@@ -279,8 +270,6 @@ exports.updateStore = async (req) => {
 //updateStore
 exports.updateStoreRating = async (req) => {
 	try {
-		console.log(req.body);
-
 		const store = await Store.findById(req.body.store_id);
 		if (!Store) {
 			throw new Error({ message: 'Store not found' });
@@ -530,7 +519,6 @@ exports.getSellerStoresIncome = async (req) => {
 				stores: storeData,
 				totalRevenue: totalRevenue,
 			};
-			console.log(result);
 			return result;
 		}
 	} catch (err) {

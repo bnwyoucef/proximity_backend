@@ -31,9 +31,6 @@ exports.indexStoresToElasticsearch = async (store, updateStore) => {
 
 // subscription index
 exports.indexSubscriptionToElasticsearch = async (subscription, storeId) => {
-	// if (updateSubscription) {
-	// 	deleteIndexedSubscription(subscription._id);
-	// }
 	const manager = await User.findById(subscription.paymentManagerId);
 	if (manager) {
 		const store = await Store.findById(subscription.storeId || storeId);
@@ -51,7 +48,7 @@ exports.indexSubscriptionToElasticsearch = async (subscription, storeId) => {
 			status: subscription.status,
 			paymentAmount: subscription.paymentAmount,
 		};
-		await esClient.index({
+		const rs = await esClient.index({
 			index: 'subscriptions',
 			body: subscriptionData,
 		});
@@ -166,6 +163,8 @@ exports.searchSubscriptions = async (query) => {
 					},
 				},
 			},
+			size: 10000, // Maximum number of documents in a single request
+			scroll: '1m',
 		};
 		// from date
 		if (query.paymentDateAfter !== null) {

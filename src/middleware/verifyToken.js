@@ -37,10 +37,12 @@ const verifyAdmin = (req, res, next) => {
 		req.user.id == req.params.id || req.user.isAdmin == true ? next() : res.status(403).json('You Are Not admin');
 	});
 };
-//for seller access
+//for seller & payment Manager access
 const verifySeller = (req, res, next) => {
 	verifyToken(req, res, () => {
-		req.user.id == req.params.id || req.user.role == 'seller' ? next() : res.status(403).json('You Are Not Authorized');
+		req.user.id == req.params.id || req.user.role == 'seller' || req.user.role == 'paymentManager'
+			? next()
+			: res.status(403).json('You Are Not Authorized');
 	});
 };
 // verifyProduct
