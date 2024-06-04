@@ -17,7 +17,7 @@ exports.indexStoresToElasticsearch = async (store, updateStore) => {
 		storeId: store._id,
 		name: store.name,
 		sellerName: seller.username,
-		//TODO:Link the store with it's subscription id
+		//Link the store with its subscription id
 		subscriptionId: store.subscriptionId,
 		address: store.address,
 		status: store.activated ? 'Active' : 'Inactive',
@@ -48,7 +48,7 @@ exports.indexSubscriptionToElasticsearch = async (subscription, storeId) => {
 			status: subscription.status,
 			paymentAmount: subscription.paymentAmount,
 		};
-		const rs = await esClient.index({
+		await esClient.index({
 			index: 'subscriptions',
 			body: subscriptionData,
 		});

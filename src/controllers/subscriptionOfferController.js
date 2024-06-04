@@ -10,6 +10,16 @@ exports.getOffers = async (req, res) => {
 	}
 };
 
+// get the active offer
+exports.getActiveOffer = async (req, res) => {
+	try {
+		const activeOffer = await SubscriptionOfferService.getActiveOffer();
+		res.send(activeOffer);
+	} catch (error) {
+		throw error;
+	}
+};
+
 // create a new offer
 exports.createOffer = async (req, res) => {
 	try {

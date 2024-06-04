@@ -1,6 +1,7 @@
 const Subscription = require('../models/Subscription');
 const mongoose = require('mongoose');
 const { indexSubscriptionToElasticsearch, deleteIndexedSubscription } = require('./elasticSearchService');
+const { getActiveOffer } = require('./subscriptionOfferService');
 
 // get all Subscriptions
 exports.getSubscriptions = async () => {
@@ -162,6 +163,8 @@ exports.getSubscriptionById = async (id) => {
 // create a new Subscription
 exports.createSubscription = async (req) => {
 	try {
+		// get the active offer
+		const activeOffer = await getActiveOffer();
 		// checking if the subscription exists
 		if (req.body.subscriptionId) {
 			//update the current subscription
@@ -170,14 +173,21 @@ exports.createSubscription = async (req) => {
 			previousSubscription.status = 'suspended';
 			currentSubscription.subscriptionsHistory.unshift(previousSubscription);
 			req.body.subscriptionsHistory = currentSubscription.subscriptionsHistory;
+			if (activeOffer) {
+				req.body.subscriptionOfferId = activeOffer.id;
+				req.body.paymentAmount = req.body.paymentAmount - (req.body.paymentAmount * activeOffer.discount) / 100;
+			}
 			await this.updateSubscription(req.body.subscriptionId, req.body);
 		} else {
+			if (activeOffer) {
+				req.body.paymentAmount = req.body.paymentAmount - (req.body.paymentAmount * activeOffer.discount) / 100;
+			}
 			// create a new subscription
 			const newSubscription = new Subscription({
 				paymentManagerId: req.body.paymentManagerId,
 				storeId: req.body.storeId,
 				planId: req.body.planId,
-				subscriptionOfferId: req.body.subscriptionOfferId,
+				subscriptionOfferId: activeOffer.id,
 				paymentAmount: req.body.paymentAmount,
 				startDate: req.body.startDate,
 				endDate: req.body.endDate,
