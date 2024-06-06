@@ -136,7 +136,44 @@ exports.getSubscriptionById = async (id) => {
 				},
 			},
 			{
-				$unset: 'subscriptionsHistory.planId',
+				$lookup: {
+					from: 'plans',
+					localField: 'upcomingSubscriptions.planId',
+					foreignField: '_id',
+					as: 'upcomingSubscriptionsPlans',
+				},
+			},
+			{
+				$addFields: {
+					upcomingSubscriptions: {
+						$map: {
+							input: '$upcomingSubscriptions',
+							as: 'upcoming',
+							in: {
+								$mergeObjects: [
+									'$$upcoming',
+									{
+										plan: {
+											$arrayElemAt: [
+												{
+													$filter: {
+														input: '$upcomingSubscriptionsPlans',
+														as: 'plan',
+														cond: { $eq: ['$$plan._id', '$$upcoming.planId'] },
+													},
+												},
+												0,
+											],
+										},
+									},
+								],
+							},
+						},
+					},
+				},
+			},
+			{
+				$unset: ['subscriptionsHistory.planId', 'upcomingSubscriptions.planId'],
 			},
 			{
 				$group: {
@@ -150,6 +187,7 @@ exports.getSubscriptionById = async (id) => {
 					notes: { $first: '$notes' },
 					plan: { $first: '$plan' },
 					subscriptionsHistory: { $first: '$subscriptionsHistory' },
+					upcomingSubscriptions: { $first: '$upcomingSubscriptions' },
 				},
 			},
 		]);
@@ -165,14 +203,34 @@ exports.createSubscription = async (req) => {
 	try {
 		// get the active offer
 		const activeOffer = await getActiveOffer();
+		const currentSubscription = await Subscription.findById(req.body.subscriptionId);
+		//add an upcoming subscription
+		if (req.body.upcoming) {
+			let { subscriptionsHistory, _id, storeId, ...upcomingSubscription } = currentSubscription._doc;
+			upcomingSubscription.status = 'upcoming';
+			upcomingSubscription.paymentManagerId = req.body.paymentManagerId;
+			upcomingSubscription.paymentTypeId = req.body.paymentTypeId;
+			upcomingSubscription.startDate = req.body.startDate;
+			upcomingSubscription.endDate = req.body.endDate;
+			currentSubscription.upcomingSubscriptions.unshift(upcomingSubscription);
+			// apply the discount depending on the current active offer
+			if (activeOffer) {
+				upcomingSubscription.subscriptionOfferId = activeOffer.id;
+				upcomingSubscription.paymentAmount = req.body.paymentAmount - (req.body.paymentAmount * activeOffer.discount) / 100;
+			}
+			await this.updateSubscription(req.body.subscriptionId, { upcomingSubscriptions: currentSubscription.upcomingSubscriptions });
+			return currentSubscription;
+		}
 		// checking if the subscription exists
+		// if it exists change the current subscription to new one
+		// and push the previous one to the history list
 		if (req.body.subscriptionId) {
 			//update the current subscription
-			const currentSubscription = await Subscription.findById(req.body.subscriptionId);
 			let { subscriptionsHistory, _id, storeId, ...previousSubscription } = currentSubscription._doc;
 			previousSubscription.status = 'suspended';
 			currentSubscription.subscriptionsHistory.unshift(previousSubscription);
 			req.body.subscriptionsHistory = currentSubscription.subscriptionsHistory;
+			// apply the discount depending on the current active offer
 			if (activeOffer) {
 				req.body.subscriptionOfferId = activeOffer.id;
 				req.body.paymentAmount = req.body.paymentAmount - (req.body.paymentAmount * activeOffer.discount) / 100;
@@ -194,10 +252,10 @@ exports.createSubscription = async (req) => {
 				endDate: req.body.endDate,
 				notes: req.body.notes,
 				subscriptionsHistory: req.body.subscriptionsHistory,
+				upcomingSubscriptions: [],
 			});
 			await newSubscription.save();
 			indexSubscriptionToElasticsearch(newSubscription);
-			console.log('~~~~~~~~~~~~~~~~~~~~~~~~~~', newSubscription);
 			return newSubscription;
 		}
 	} catch (error) {
@@ -216,7 +274,6 @@ exports.updateSubscription = async (id, body) => {
 		deleteIndexedSubscription(subscription.id);
 		indexSubscriptionToElasticsearch(subscription.subscriptionsHistory[0], subscription.storeId);
 		indexSubscriptionToElasticsearch(subscription);
-		console.log('~~~~~~~~~~~~~~~~~~~~~~~~~~####', subscription);
 		return subscription;
 	} catch (error) {
 		throw error;

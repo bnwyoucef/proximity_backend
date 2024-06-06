@@ -163,7 +163,7 @@ exports.searchSubscriptions = async (query) => {
 					},
 				},
 			},
-			size: 10000, // Maximum number of documents in a single request
+			size: 1000, // Maximum number of documents in a single request
 			scroll: '1m',
 		};
 		// from date
