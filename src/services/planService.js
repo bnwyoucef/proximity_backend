@@ -15,6 +15,7 @@ exports.createPlan = async (req) => {
 	try {
 		const newPlan = new Plan({
 			type: req.body.type,
+			months: req.body.months,
 			price: req.body.price,
 		});
 		await newPlan.save();

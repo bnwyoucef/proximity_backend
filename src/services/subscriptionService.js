@@ -321,7 +321,7 @@ exports.getSubscriptionsDetail = async () => {
             })
             .populate({
                 path: 'planId',
-                select: 'type price' // Include 'type' and 'price' fields from the referenced Plan model
+                select: 'type price, status' // Include 'type' and 'price' fields from the referenced Plan model
             })
             .populate({
                 path: 'paymentManagerId',
