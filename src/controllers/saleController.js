@@ -57,6 +57,18 @@ exports.getMostSoldProductsByCategory = async (req, res, next) => {
   }
 }
 
+// ibrahim : this is to ipmliment thze regio (zone geograpgique )...
+exports.getSalesCountByRegion = async (req, res)=> {
+
+  try {
+    const salesCount = await saleService.getSalesCountByRegion();
+    res.status(200).json(salesCount);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+
 
 
 

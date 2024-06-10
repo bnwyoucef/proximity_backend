@@ -149,6 +149,25 @@ exports.getMostSoldProductsByCategory = async (categoryId) => {
     throw error;
   }
 }
+// ibrahim : this is to ipmliment thze regio (zone geograpgique )...
+exports.getSalesCountByRegion = async () => {
+
+  try {
+    const salesCount = await Sale.aggregate([
+      {
+        $group: {
+          _id: '$region',
+          count: { $sum: 1 }
+        }
+      }
+    ]);
+    return salesCount;
+  } catch (error) {
+    throw new Error('Error fetching sales count by region: ' + error.message);
+  }
+};
+
+
 
 
 

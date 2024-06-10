@@ -15,6 +15,9 @@ router.get('/MostBoughtProductInPeriod', saleController.getMostBoughtProductInPe
 
 router.get('/MostSoldProductsByCategory', saleController.getMostSoldProductsByCategory);
 
+router.get('/sales-count-by-region', saleController.getSalesCountByRegion);
+
+
 
  
 module.exports = router;
