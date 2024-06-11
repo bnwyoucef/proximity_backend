@@ -214,7 +214,7 @@ exports.updateStore = async (req) => {
 				req.body.templateId = parseInt(req.body.template);
 				delete req.body.template;
 			}
-			if (store.sellerId != req.user.id && !req.body.changeSubscription) {
+			if (store.sellerId != req.user?.id && !req.body.changeSubscription) {
 				throw new Error({ message: 'You are not authorized to update this store' });
 			} else {
 				let image = null;
@@ -523,5 +523,26 @@ exports.getSellerStoresIncome = async (req) => {
 		}
 	} catch (err) {
 		throw err;
+	}
+};
+
+// get all the stores of a Seller with subscriptionId
+exports.getAllSellerStores = async (req) => {
+	try {
+		const stores = await Store.find({ sellerId: req.params.id });
+		let sellerStores = [];
+		stores.map((store) => {
+			sellerStores.push({
+				storeId: store.id,
+				name: store.name,
+				subscriptionId: store.subscriptionId,
+				status: store.isActive ? 'active' : 'inactive',
+				address: store.address,
+				image: store?.image,
+			});
+		});
+		return sellerStores;
+	} catch (error) {
+		throw error;
 	}
 };

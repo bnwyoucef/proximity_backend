@@ -1,7 +1,9 @@
 const Subscription = require('../models/Subscription');
 const mongoose = require('mongoose');
+const cron = require('node-cron');
 const { indexSubscriptionToElasticsearch, deleteIndexedSubscription } = require('./elasticSearchService');
 const { getActiveOffer } = require('./subscriptionOfferService');
+const { updateStore } = require('./storeService');
 
 // get all Subscriptions
 exports.getSubscriptions = async () => {
@@ -209,16 +211,18 @@ exports.createSubscription = async (req) => {
 			let { subscriptionsHistory, _id, storeId, ...upcomingSubscription } = currentSubscription._doc;
 			upcomingSubscription.status = 'upcoming';
 			upcomingSubscription.paymentManagerId = req.body.paymentManagerId;
+			upcomingSubscription.planId = req.body.planId;
+			// TODO: check why the paymentTypeId not added
 			upcomingSubscription.paymentTypeId = req.body.paymentTypeId;
 			upcomingSubscription.startDate = req.body.startDate;
 			upcomingSubscription.endDate = req.body.endDate;
-			currentSubscription.upcomingSubscriptions.unshift(upcomingSubscription);
 			// apply the discount depending on the current active offer
 			if (activeOffer) {
 				upcomingSubscription.subscriptionOfferId = activeOffer.id;
 				upcomingSubscription.paymentAmount = req.body.paymentAmount - (req.body.paymentAmount * activeOffer.discount) / 100;
 			}
-			await this.updateSubscription(req.body.subscriptionId, { upcomingSubscriptions: currentSubscription.upcomingSubscriptions });
+			currentSubscription.upcomingSubscriptions.unshift(upcomingSubscription);
+			await this.updateSubscription(req.body.subscriptionId, { upcomingSubscriptions: currentSubscription.upcomingSubscriptions }, true);
 			return currentSubscription;
 		}
 		// checking if the subscription exists
@@ -235,7 +239,7 @@ exports.createSubscription = async (req) => {
 				req.body.subscriptionOfferId = activeOffer.id;
 				req.body.paymentAmount = req.body.paymentAmount - (req.body.paymentAmount * activeOffer.discount) / 100;
 			}
-			await this.updateSubscription(req.body.subscriptionId, req.body);
+			await this.updateSubscription(req.body.subscriptionId, req.body, false);
 			return currentSubscription;
 		} else {
 			if (activeOffer) {
@@ -248,6 +252,7 @@ exports.createSubscription = async (req) => {
 				planId: req.body.planId,
 				subscriptionOfferId: activeOffer.id,
 				paymentAmount: req.body.paymentAmount,
+				paymentTypeId: req.body.paymentTypeId,
 				startDate: req.body.startDate,
 				endDate: req.body.endDate,
 				notes: req.body.notes,
@@ -255,6 +260,9 @@ exports.createSubscription = async (req) => {
 				upcomingSubscriptions: [],
 			});
 			await newSubscription.save();
+			//TODO:add a condition to excute if the request just
+			// come from multi store subscription
+			updateStore({ params: { id: req.body.storeId }, body: { subscriptionId: newSubscription.id, changeSubscription: true } });
 			indexSubscriptionToElasticsearch(newSubscription);
 			return newSubscription;
 		}
@@ -264,16 +272,18 @@ exports.createSubscription = async (req) => {
 };
 
 // update a subscription
-exports.updateSubscription = async (id, body) => {
+exports.updateSubscription = async (id, body, isUpcomingSubscription) => {
 	try {
 		const subscription = await Subscription.findByIdAndUpdate(id, body, {
 			new: true,
 		});
 		if (!subscription) throw Error('The subscription with the given ID was not found.');
-		// update the status of the indexed subscription from active to suspended
-		deleteIndexedSubscription(subscription.id);
-		indexSubscriptionToElasticsearch(subscription.subscriptionsHistory[0], subscription.storeId);
-		indexSubscriptionToElasticsearch(subscription);
+		if (!isUpcomingSubscription) {
+			// update the status of the indexed subscription from active to suspended
+			deleteIndexedSubscription(subscription.id);
+			indexSubscriptionToElasticsearch(subscription.subscriptionsHistory[0], subscription.storeId);
+			indexSubscriptionToElasticsearch(subscription);
+		}
 		return subscription;
 	} catch (error) {
 		throw error;
@@ -301,3 +311,63 @@ exports.addNote = async (id, historyId, notes) => {
 		throw error;
 	}
 };
+
+exports.createMultiStoreSubscription = async (req) => {
+	try {
+		let newSubscriptionsList = [];
+		req.body.subscriptions.map(async (subscription) => {
+			console.log('~~~~~~~~~~~~~~~~~~~~++++ ', subscription);
+			let newSubscription = await exports.createSubscription({ body: subscription });
+			newSubscriptionsList.push(newSubscription);
+		});
+		return;
+	} catch (error) {
+		throw error;
+	}
+};
+
+cron.schedule('0 0 * * *', async () => {
+	try {
+		// TODO: get the today date
+		const today = '2025-10-04T16:46:10.715+00:00';
+		//today.setHours(0, 0, 0, 0);
+
+		// Find subscriptions with renewal date matching today's date
+		const matchingSubscriptions = await Subscription.find({ endDate: today });
+		// Filtering the subscriptions that have another upcoming subscripiton
+		await Promise.all(
+			matchingSubscriptions.map(async (subscription) => {
+				if (subscription.upcomingSubscriptions.length > 0) {
+					// Push the current subsription to the subscriptionsHistory List
+					let { subscriptionsHistory, _id, storeId, ...previousSubscription } = subscription._doc;
+					previousSubscription.status = 'suspended';
+					subscription.subscriptionsHistory.unshift(previousSubscription);
+					// update the current subscription with the upcoming one
+					let newSubscription = subscription.upcomingSubscriptions[0];
+					newSubscription.subscriptionsHistory = subscription.subscriptionsHistory;
+					newSubscription.status = 'active';
+					newSubscription.storeId = subscription.storeId;
+					// remove the upcoming one from the upcoming subscriptions list
+					subscription.upcomingSubscriptions.shift();
+					newSubscription.upcomingSubscriptions = subscription.upcomingSubscriptions;
+					let { _id: id, ...upcomingSub } = newSubscription._doc;
+					upcomingSub.upcomingSubscriptions = subscription.upcomingSubscriptions;
+					upcomingSub.subscriptionsHistory = subscription.subscriptionsHistory;
+					await this.updateSubscription(subscription.id, upcomingSub, false);
+					return;
+				} else {
+					// TODO: Test this case
+					let { _id, ...updatedSubscription } = subscription._doc;
+					// change the current subscription status to suspended
+					updatedSubscription.status = 'suspended';
+					// remove the id field
+					exports.updateSubscription(subscription.id, updatedSubscription, false);
+				}
+			})
+		);
+		console.log('Auto Subscription status updated successfully.');
+		return;
+	} catch (err) {
+		console.error('Error updating subscription status:', err);
+	}
+});

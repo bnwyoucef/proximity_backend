@@ -96,3 +96,12 @@ exports.getSellerStoresIncome = async (req, res) => {
 		res.status(500).send(err.message);
 	}
 };
+// get all the stores of a Seller with subscription
+exports.getAllSellerStores = async (req, res) => {
+	try {
+		const stores = await StoreService.getAllSellerStores(req);
+		res.send(stores);
+	} catch (err) {
+		res.status(500).send(err.message);
+	}
+};

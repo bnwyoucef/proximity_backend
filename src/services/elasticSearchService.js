@@ -17,6 +17,7 @@ exports.indexStoresToElasticsearch = async (store, updateStore) => {
 		storeId: store._id,
 		name: store.name,
 		sellerName: seller.username,
+		sellerId: seller.id,
 		//Link the store with its subscription id
 		subscriptionId: store.subscriptionId,
 		address: store.address,

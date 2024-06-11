@@ -59,3 +59,12 @@ exports.addNote = async (req, res) => {
 		res.status(500).send(error.message);
 	}
 };
+// create a subscription for multi store
+exports.createMultiStoreSubscription = async (req, res) => {
+	try {
+		const subscripitons = await SubscriptionService.createMultiStoreSubscription(req);
+		res.send(subscripitons);
+	} catch (error) {
+		res.status(500).send(error.message);
+	}
+};
