@@ -33,7 +33,7 @@ exports.getSubscriptionById = async (req, res) => {
 // create a new subscription
 exports.createSubscription = async (req, res) => {
 	try {
-		const newSubscription = await SubscriptionService.createSubscription(req);
+		const newSubscription = await SubscriptionService.createSubscription(req, false);
 		res.send(newSubscription);
 	} catch (error) {
 		res.status(500).send(error.message);

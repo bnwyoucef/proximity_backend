@@ -201,7 +201,7 @@ exports.getSubscriptionById = async (id) => {
 };
 
 // create a new Subscription
-exports.createSubscription = async (req) => {
+exports.createSubscription = async (req, isMultiStore) => {
 	try {
 		// get the active offer
 		const activeOffer = await getActiveOffer();
@@ -212,7 +212,6 @@ exports.createSubscription = async (req) => {
 			upcomingSubscription.status = 'upcoming';
 			upcomingSubscription.paymentManagerId = req.body.paymentManagerId;
 			upcomingSubscription.planId = req.body.planId;
-			// TODO: check why the paymentTypeId not added
 			upcomingSubscription.paymentTypeId = req.body.paymentTypeId;
 			upcomingSubscription.startDate = req.body.startDate;
 			upcomingSubscription.endDate = req.body.endDate;
@@ -260,9 +259,8 @@ exports.createSubscription = async (req) => {
 				upcomingSubscriptions: [],
 			});
 			await newSubscription.save();
-			//TODO:add a condition to excute if the request just
-			// come from multi store subscription
-			updateStore({ params: { id: req.body.storeId }, body: { subscriptionId: newSubscription.id, changeSubscription: true } });
+			// update the store subscriptionId if the request come from multiStore subscription creation
+			if (isMultiStore) updateStore({ params: { id: req.body.storeId }, body: { subscriptionId: newSubscription.id, changeSubscription: true } });
 			indexSubscriptionToElasticsearch(newSubscription);
 			return newSubscription;
 		}
@@ -280,9 +278,10 @@ exports.updateSubscription = async (id, body, isUpcomingSubscription) => {
 		if (!subscription) throw Error('The subscription with the given ID was not found.');
 		if (!isUpcomingSubscription) {
 			// update the status of the indexed subscription from active to suspended
-			deleteIndexedSubscription(subscription.id);
-			indexSubscriptionToElasticsearch(subscription.subscriptionsHistory[0], subscription.storeId);
-			indexSubscriptionToElasticsearch(subscription);
+			await deleteIndexedSubscription(subscription.id);
+			if (subscription.subscriptionsHistory[0] != null)
+				await indexSubscriptionToElasticsearch(subscription.subscriptionsHistory[0], subscription.storeId);
+			await indexSubscriptionToElasticsearch(subscription);
 		}
 		return subscription;
 	} catch (error) {
@@ -316,8 +315,7 @@ exports.createMultiStoreSubscription = async (req) => {
 	try {
 		let newSubscriptionsList = [];
 		req.body.subscriptions.map(async (subscription) => {
-			console.log('~~~~~~~~~~~~~~~~~~~~++++ ', subscription);
-			let newSubscription = await exports.createSubscription({ body: subscription });
+			let newSubscription = await exports.createSubscription({ body: subscription }, true);
 			newSubscriptionsList.push(newSubscription);
 		});
 		return;
@@ -326,48 +324,64 @@ exports.createMultiStoreSubscription = async (req) => {
 	}
 };
 
-cron.schedule('0 0 * * *', async () => {
-	try {
-		// TODO: get the today date
-		const today = '2025-10-04T16:46:10.715+00:00';
-		//today.setHours(0, 0, 0, 0);
+cron.schedule(
+	'0 0 * * *',
+	async () => {
+		try {
+			// Get the current date and time
+			const now = new Date();
+			// Extract the year, month, and day from the current date
+			const year = now.getUTCFullYear();
+			const month = now.getUTCMonth();
+			const day = now.getUTCDate();
 
-		// Find subscriptions with renewal date matching today's date
-		const matchingSubscriptions = await Subscription.find({ endDate: today });
-		// Filtering the subscriptions that have another upcoming subscripiton
-		await Promise.all(
-			matchingSubscriptions.map(async (subscription) => {
-				if (subscription.upcomingSubscriptions.length > 0) {
-					// Push the current subsription to the subscriptionsHistory List
-					let { subscriptionsHistory, _id, storeId, ...previousSubscription } = subscription._doc;
-					previousSubscription.status = 'suspended';
-					subscription.subscriptionsHistory.unshift(previousSubscription);
-					// update the current subscription with the upcoming one
-					let newSubscription = subscription.upcomingSubscriptions[0];
-					newSubscription.subscriptionsHistory = subscription.subscriptionsHistory;
-					newSubscription.status = 'active';
-					newSubscription.storeId = subscription.storeId;
-					// remove the upcoming one from the upcoming subscriptions list
-					subscription.upcomingSubscriptions.shift();
-					newSubscription.upcomingSubscriptions = subscription.upcomingSubscriptions;
-					let { _id: id, ...upcomingSub } = newSubscription._doc;
-					upcomingSub.upcomingSubscriptions = subscription.upcomingSubscriptions;
-					upcomingSub.subscriptionsHistory = subscription.subscriptionsHistory;
-					await this.updateSubscription(subscription.id, upcomingSub, false);
-					return;
-				} else {
-					// TODO: Test this case
-					let { _id, ...updatedSubscription } = subscription._doc;
-					// change the current subscription status to suspended
-					updatedSubscription.status = 'suspended';
-					// remove the id field
-					exports.updateSubscription(subscription.id, updatedSubscription, false);
-				}
-			})
-		);
-		console.log('Auto Subscription status updated successfully.');
-		return;
-	} catch (err) {
-		console.error('Error updating subscription status:', err);
+			// Create the start and end of the current day in UTC
+			const startOfDay = new Date(Date.UTC(year, month, day, 0, 0, 0));
+			const endOfDay = new Date(Date.UTC(year, month, day, 23, 59, 59, 999));
+
+			// Perform the query to find all documents with endDate within the current day
+			const matchingSubscriptions = await Subscription.find({
+				endDate: {
+					$gte: startOfDay,
+					$lte: endOfDay,
+				},
+			});
+			// Filtering the subscriptions that have another upcoming subscripiton
+			await Promise.all(
+				matchingSubscriptions.map(async (subscription) => {
+					if (subscription.upcomingSubscriptions.length > 0) {
+						// Push the current subsription to the subscriptionsHistory List
+						let { subscriptionsHistory, _id, storeId, ...previousSubscription } = subscription._doc;
+						previousSubscription.status = 'suspended';
+						subscription.subscriptionsHistory.unshift(previousSubscription);
+						// update the current subscription with the upcoming one
+						let newSubscription = subscription.upcomingSubscriptions[0];
+						newSubscription.subscriptionsHistory = subscription.subscriptionsHistory;
+						newSubscription.status = 'active';
+						newSubscription.storeId = subscription.storeId;
+						// remove the upcoming one from the upcoming subscriptions list
+						subscription.upcomingSubscriptions.shift();
+						newSubscription.upcomingSubscriptions = subscription.upcomingSubscriptions;
+						let { _id: id, ...upcomingSub } = newSubscription._doc;
+						upcomingSub.upcomingSubscriptions = subscription.upcomingSubscriptions;
+						upcomingSub.subscriptionsHistory = subscription.subscriptionsHistory;
+						await this.updateSubscription(subscription.id, upcomingSub, false);
+					} else {
+						let { _id, ...updatedSubscription } = subscription._doc;
+						// change the current subscription status to suspended
+						updatedSubscription.status = 'suspended';
+						// remove the id field
+						this.updateSubscription(subscription.id, updatedSubscription, false);
+					}
+				})
+			);
+			console.log('Auto Subscription status updated successfully.');
+			return;
+		} catch (err) {
+			console.error('Error updating subscription status:', err);
+		}
+	},
+	{
+		timezone: 'UTC',
 	}
-});
+);

@@ -32,7 +32,7 @@ exports.indexStoresToElasticsearch = async (store, updateStore) => {
 
 // subscription index
 exports.indexSubscriptionToElasticsearch = async (subscription, storeId) => {
-	const manager = await User.findById(subscription.paymentManagerId);
+	const manager = await User.findById(subscription?.paymentManagerId);
 	if (manager) {
 		const store = await Store.findById(subscription.storeId || storeId);
 		const seller = await User.findById(store.sellerId);
