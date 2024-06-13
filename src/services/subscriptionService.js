@@ -233,6 +233,7 @@ exports.createSubscription = async (req, isMultiStore) => {
 			previousSubscription.status = 'suspended';
 			currentSubscription.subscriptionsHistory.unshift(previousSubscription);
 			req.body.subscriptionsHistory = currentSubscription.subscriptionsHistory;
+			req.body.status = 'active';
 			// apply the discount depending on the current active offer
 			if (activeOffer) {
 				req.body.subscriptionOfferId = activeOffer.id;
@@ -311,10 +312,67 @@ exports.addNote = async (id, historyId, notes) => {
 	}
 };
 
+function getDaysBetween(startDate, endDate) {
+	const oneDay = 24 * 60 * 60 * 1000; // Hours * minutes * seconds * milliseconds
+	const start = new Date(startDate);
+	const end = new Date(endDate);
+	const diffDays = Math.round(Math.abs((end - start) / oneDay));
+	return diffDays;
+}
+
+// Function to add a number of days to a date
+function addDaysToDate(date, days) {
+	const result = new Date(date);
+	result.setDate(result.getDate() + days);
+	return result;
+}
 exports.createMultiStoreSubscription = async (req) => {
 	try {
 		let newSubscriptionsList = [];
+		// check if there's any subscriptions with null id
+		let isOneSubscriptionNull = false;
+		let i = 0;
+		while (i < req.body.subscriptions?.length && !isOneSubscriptionNull) {
+			if (req.body.subscriptions[i].subscriptionId === null) {
+				isOneSubscriptionNull = true;
+			}
+			i++;
+		}
+		// get all the subscriptions from the db
+		let dbSubscriptions = [];
+		if (!isOneSubscriptionNull) {
+			i = 0;
+			while (i < req.body.subscriptions?.length) {
+				const dbSubscription = await Subscription.findById(req.body.subscriptions[i]?.subscriptionId);
+				dbSubscriptions.push(dbSubscription);
+				i++;
+			}
+		}
+
+		// the start date is the first end date of one of the subscriptions in the list
+		let minDate;
+		let todayDate = new Date();
+		if (req.body.subscriptions.length > 0) {
+			minDate = new Date(dbSubscriptions[0]?.endDate);
+			if (!isOneSubscriptionNull) {
+				i = 1;
+				while (i < req.body.subscriptions?.length) {
+					let subscDate = new Date(dbSubscriptions[i]?.endDate);
+					minDate = minDate < subscDate ? minDate : subscDate;
+					i++;
+				}
+			}
+		}
 		req.body.subscriptions.map(async (subscription) => {
+			// the start date of the subscriptions is today
+			if (isOneSubscriptionNull) {
+				subscription.endDate = addDaysToDate(new Date(), getDaysBetween(subscription.startDate, subscription.endDate));
+				subscription.startDate = new Date();
+			} else {
+				if (minDate > todayDate) subscription.upcoming = true;
+				subscription.endDate = addDaysToDate(minDate, getDaysBetween(subscription.endDate, subscription.startDate));
+				subscription.startDate = minDate;
+			}
 			let newSubscription = await exports.createSubscription({ body: subscription }, true);
 			newSubscriptionsList.push(newSubscription);
 		});
@@ -324,6 +382,7 @@ exports.createMultiStoreSubscription = async (req) => {
 	}
 };
 
+// every day test if the subscription expired and update it
 cron.schedule(
 	'0 0 * * *',
 	async () => {
