@@ -10,8 +10,6 @@ router.patch('/:id', SubscriptionController.updateSubscription);
 router.post('/addNote/:id', SubscriptionController.addNote);
 //  ibrahim : Add the new route for fetching store information by subscription ID
 router.get('/store/:subscriptionId', SubscriptionController.getStoreBySubscriptionId);
-// router.get('/subscriptionsbycityorstatus', SubscriptionController.getSubscriptionByCityAndStatus);
-// router.get('/subscriptionsbycityandstatus', SubscriptionController.getSubscriptionByCityAndStatus);
 // ibrahim : route to get subscrption by status 
 router.get('/subscriptions/:status', SubscriptionController.getSubscriptionsByStatus);
 // ibrahim : change the statuys of a subscrption 

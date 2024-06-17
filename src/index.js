@@ -14,7 +14,6 @@ const path = require('path');
 const fileUpload = require('express-fileupload');
 const flash = require('connect-flash');
 const helmet = require('helmet');
-const faker = require('faker');
 
 app.use(cors());
 
@@ -39,6 +38,8 @@ const planRoute = require('./routes/planRoute');
 const subscriptionOfferRoute = require('./routes/SubscriptionOfferRoute');
 const subscriptionRoute = require('./routes/subscriptionRoute');
 const elasticSearchRoute = require('./routes/elasticSearchRoute');
+const reductionRoute = require('./routes/reductionRoute');
+
 //const adminRoute = require('./routes/admin');*/
 app.use(helmet());
 app.use(fileUpload());
@@ -59,6 +60,7 @@ app.use('/api/auth', authRoute);
 app.use('/api/store', storeRoute);
 // ibrahim 
 app.use('/api/seller', storeRoute);
+app.use('/api/reduction', reductionRoute);
 
 app.use('/api/product', productRoute);
 app.use('/api/cart', cartRoute);
@@ -78,7 +80,8 @@ app.use('/api/elasticSearch', elasticSearchRoute);
 
 mongoose
     .connect(process.env.MONGO_URL)
-    .then(() => { console.log('DB Conntected');
+    .then(() => {
+        console.log('DB Conntected');
         app.listen(process.env.PORT || 8000, () => {
             console.log('backend Running');
         });
