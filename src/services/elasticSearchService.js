@@ -3,7 +3,7 @@ const User = require('../models/User');
 const Store = require('../models/Store');
 const Plan = require('../models/Plan');
 
-const esClient = new Client({ node: process.env.ELASRIC_URL });
+const esClient = new Client({ node: process.env.ELASTIC_URL });
 
 // store index
 exports.indexStoresToElasticsearch = async (store, updateStore) => {
@@ -17,6 +17,8 @@ exports.indexStoresToElasticsearch = async (store, updateStore) => {
 		storeId: store._id,
 		name: store.name,
 		sellerName: seller.username,
+		sellerId: seller.id,
+		//Link the store with its subscription id
 		subscriptionId: store.subscriptionId,
 		address: store.address,
 		status: store.activated ? 'Active' : 'Inactive',
@@ -29,10 +31,10 @@ exports.indexStoresToElasticsearch = async (store, updateStore) => {
 };
 
 // subscription index
-exports.indexSubscriptionToElasticsearch = async (subscription) => {
-	const manager = await User.findById(subscription.paymentManagerId);
+exports.indexSubscriptionToElasticsearch = async (subscription, storeId) => {
+	const manager = await User.findById(subscription?.paymentManagerId);
 	if (manager) {
-		const store = await Store.findById(subscription.storeId);
+		const store = await Store.findById(subscription.storeId || storeId);
 		const seller = await User.findById(store.sellerId);
 		const plan = await Plan.findById(subscription.planId);
 		if (store.address.postalCode === '') store.address.postalCode = 'NAN';
@@ -161,6 +163,8 @@ exports.searchSubscriptions = async (query) => {
 					},
 				},
 			},
+			size: 1000, // Maximum number of documents in a single request
+			scroll: '1m',
 		};
 		// from date
 		if (query.paymentDateAfter !== null) {
@@ -190,3 +194,15 @@ async function deleteIndexedDocument(id) {
 		},
 	});
 }
+exports.deleteIndexedSubscription = async (id) => {
+	await esClient.deleteByQuery({
+		index: 'subscriptions',
+		body: {
+			query: {
+				term: {
+					subscriptionId: id,
+				},
+			},
+		},
+	});
+};

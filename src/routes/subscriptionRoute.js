@@ -6,6 +6,7 @@ router.get('/details', SubscriptionController.getSubscriptionsDetail);
 router.get('/transactions/:paymentManagerId', SubscriptionController.getTransactions);
 router.get('/:id', SubscriptionController.getSubscriptionById);
 router.post('/', SubscriptionController.createSubscription);
+router.post('/multiStore', SubscriptionController.createMultiStoreSubscription);
 router.patch('/:id', SubscriptionController.updateSubscription);
 router.post('/addNote/:id', SubscriptionController.addNote);
 //  ibrahim : Add the new route for fetching store information by subscription ID

@@ -73,9 +73,6 @@ async function myAsyncProductCategoryFunc(element) {
 
 //createStore
 exports.createStore = async (req) => {
-	console.log('req.body');
-	console.log(req.body);
-	console.log(req.files);
 	try {
 		if (typeof req.body.location === 'string') {
 			req.body.location = JSON.parse(req.body.location);
@@ -122,7 +119,6 @@ exports.createStore = async (req) => {
 		const fileName = `${uuid.v4()}${image.name}`;
 		const uploadPath = path.resolve(__dirname, '..', '..', 'public', 'images', 'stores', fileName);
 		const storagePath = `images/stores/${fileName}`;
-		console.log(storagePath, 'storagePath');
 
 		// Use the mv() method to place the file somewhere on your server
 
@@ -169,7 +165,6 @@ exports.createStore = async (req) => {
 		indexStoresToElasticsearch(store, false);
 		return store;
 	} catch (err) {
-		console.log(err);
 		throw err;
 	}
 };
@@ -221,8 +216,7 @@ exports.updateStore = async (req) => {
 				req.body.templateId = parseInt(req.body.template);
 				delete req.body.template;
 			}
-
-			if (store.sellerId != req.user.id) {
+			if (store.sellerId != req.user?.id && !req.body.changeSubscription) {
 				throw new Error({ message: 'You are not authorized to update this store' });
 			} else {
 				let image = null;
@@ -257,7 +251,6 @@ exports.updateStore = async (req) => {
 					);
 				} else {
 					console.log('im here without image');
-					console.log(req.body);
 					updatedStore = await Store.findByIdAndUpdate(
 						req.params.id,
 						{
@@ -266,8 +259,6 @@ exports.updateStore = async (req) => {
 						{ new: true }
 					);
 				}
-
-				console.log(updatedStore.storeCategorieIds);
 				indexStoresToElasticsearch(updatedStore, true);
 				return updatedStore;
 			}
@@ -281,8 +272,6 @@ exports.updateStore = async (req) => {
 //updateStore
 exports.updateStoreRating = async (req) => {
 	try {
-		console.log(req.body);
-
 		const store = await Store.findById(req.body.store_id);
 		if (!Store) {
 			throw new Error({ message: 'Store not found' });
@@ -532,55 +521,72 @@ exports.getSellerStoresIncome = async (req) => {
 				stores: storeData,
 				totalRevenue: totalRevenue,
 			};
-			console.log(result);
 			return result;
 		}
 	} catch (err) {
 		throw err;
 	}
 };
-// ibrahim : get all the stores 
+
+// get all the stores of a Seller with subscriptionId
+exports.getAllSellerStores = async (req) => {
+	try {
+		const stores = await Store.find({ sellerId: req.params.id });
+		let sellerStores = [];
+		stores.map((store) => {
+			sellerStores.push({
+				storeId: store.id,
+				name: store.name,
+				subscriptionId: store.subscriptionId,
+				status: store.isActive ? 'active' : 'inactive',
+				address: store.address,
+				image: store?.image,
+			});
+		});
+		return sellerStores;
+	} catch (error) {
+		throw error;
+	}
+};
+// ibrahim : get all the stores
 
 exports.getAllStores = async function getAllStores() {
-    try {
-        const stores = await Store.find();
-        return stores;
-    } catch (error) {
-        throw new Error('Could not fetch stores');
-    }
-}
+	try {
+		const stores = await Store.find();
+		return stores;
+	} catch (error) {
+		throw new Error('Could not fetch stores');
+	}
+};
 // ibrahim : get the stores by city ..
 exports.getAllStoresInCity = async function getAllStoresInCity(city) {
-    try {
-        const stores = await Store.find({ 'address.city': city }).exec();
-        return stores;
-    } catch (error) {
-        throw error;
-    }
-};
-// ibrahim get the stores by category 
-exports.getStoresByCategory = async function getStoresByCategory(categoryId) {
-
-    try {
-        const stores = await Store.find({ storeCategorieIds: categoryId }).exec();
-        return stores;
-    } catch (error) {
-        throw error;
-    }
-}
-// ibrahim : get all the store of one seller 
-exports.getStoresOfSeller = async function getStoresOfSeller(sellerId) {
-
 	try {
-	  const stores = await Store.find({ sellerId: sellerId });
-	  return stores;
+		const stores = await Store.find({ 'address.city': city }).exec();
+		return stores;
 	} catch (error) {
-	  throw error;
+		throw error;
 	}
-  }
-  // ibrahim : get the most active stores 
+};
+// ibrahim get the stores by category
+exports.getStoresByCategory = async function getStoresByCategory(categoryId) {
+	try {
+		const stores = await Store.find({ storeCategorieIds: categoryId }).exec();
+		return stores;
+	} catch (error) {
+		throw error;
+	}
+};
+// ibrahim : get all the store of one seller
+exports.getStoresOfSeller = async function getStoresOfSeller(sellerId) {
+	try {
+		const stores = await Store.find({ sellerId: sellerId });
+		return stores;
+	} catch (error) {
+		throw error;
+	}
+};
+// ibrahim : get the most active stores
 //   exports.getMostActiveStores = async function getMostActiveStores() {
-
 
 // 	try {
 // 	  const storeSales = await Sale.aggregate([
@@ -594,10 +600,10 @@ exports.getStoresOfSeller = async function getStoresOfSeller(sellerId) {
 // 		  $sort: { totalSales: -1 }
 // 		}
 // 	  ]);
-  
+
 // 	  const storeIds = storeSales.map(sale => sale._id);
 // 	  const mostActiveStores = await Store.find({ _id: { $in: storeIds } });
-  
+
 // 	  return mostActiveStores;
 // 	} catch (error) {
 // 	  console.error('Error fetching most active stores:', error);
@@ -606,39 +612,32 @@ exports.getStoresOfSeller = async function getStoresOfSeller(sellerId) {
 //   }
 exports.getMostActiveStores = async function getMostActiveStores() {
 	try {
-	  const storeSales = await Sale.aggregate([
-		{
-		  $group: {
-			_id: '$storeId',
-			totalSales: { $sum: 1 }
-		  }
-		},
-		{
-		  $sort: { totalSales: -1 }
-		}
-	  ]);
-  
-	  const storeIds = storeSales.map(sale => sale._id);
-  
-	  // Find all stores, regardless of whether they have sales or not
-	  const stores = await Store.find();
-  
-	  // Map through all stores and add the totalSales field based on the aggregated data
-	  const mostActiveStores = stores.map(store => {
-		const totalSales = storeSales.find(sale => sale._id.equals(store._id))?.totalSales || 0;
-		return { ...store.toObject(), totalSales };
-	  });
-  
-	  return mostActiveStores;
+		const storeSales = await Sale.aggregate([
+			{
+				$group: {
+					_id: '$storeId',
+					totalSales: { $sum: 1 },
+				},
+			},
+			{
+				$sort: { totalSales: -1 },
+			},
+		]);
+
+		const storeIds = storeSales.map((sale) => sale._id);
+
+		// Find all stores, regardless of whether they have sales or not
+		const stores = await Store.find();
+
+		// Map through all stores and add the totalSales field based on the aggregated data
+		const mostActiveStores = stores.map((store) => {
+			const totalSales = storeSales.find((sale) => sale._id.equals(store._id))?.totalSales || 0;
+			return { ...store.toObject(), totalSales };
+		});
+
+		return mostActiveStores;
 	} catch (error) {
-	  console.error('Error fetching most active stores:', error);
-	  throw error;
+		console.error('Error fetching most active stores:', error);
+		throw error;
 	}
-  }
-  
-
- 
-
-
-
-
+};

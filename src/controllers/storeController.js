@@ -52,7 +52,6 @@ exports.getSellerStores = async (req, res) => {
 	}
 };
 
-
 //get seller store
 exports.getSellerStore = async (req, res) => {
 	try {
@@ -80,7 +79,6 @@ exports.getStoresByLocation = async (req, res) => {
 	}
 };
 
-
 exports.deleteStore = async (req, res) => {
 	try {
 		const stores = await StoreService.deleteStore(req);
@@ -89,7 +87,7 @@ exports.deleteStore = async (req, res) => {
 		res.status(500).send(err.message);
 	}
 };
-// Stats get seller stores income 
+// Stats get seller stores income
 exports.getSellerStoresIncome = async (req, res) => {
 	try {
 		const stores = await StoreService.getSellerStoresIncome(req);
@@ -98,64 +96,63 @@ exports.getSellerStoresIncome = async (req, res) => {
 		res.status(500).send(err.message);
 	}
 };
-// ibrahim : controller for get all the stores 
-exports.getAllStores = async (req, res) => {
-    try {
-        const stores = await StoreService.getAllStores();
-        res.json(stores);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-}
-// ibrahim  : get stores by city 
-exports.getAllStoresByCity = async (req, res, next) => {
-    const city = req.params.city; // Retrieve city from request parameter 'city'
-    try {
-        const stores = await StoreService.getAllStoresInCity(city);
-        res.json(stores);
-    } catch (error) {
-        console.error("Error fetching stores by city:", error);
-        res.status(500).json({ error: "Could not retrieve stores" });
-    }
-};
-// ibrahim : get store by category 
-exports.getStoresByCategory = async (req, res, next) => {
-
-
-    const categoryId = req.params.categoryId;
-    try {
-        const stores = await StoreService.getStoresByCategory(categoryId);
-        res.json(stores);
-    } catch (error) {
-        console.error("Error fetching stores by category:", error);
-        res.status(500).json({ error: "Could not retrieve stores" });
-    }
-}
-// ibrahim : get store of one seller 
-exports.getStoresOfSeller = async (req, res, next) => {
-
+// get all the stores of a Seller with subscription
+exports.getAllSellerStores = async (req, res) => {
 	try {
-	  const sellerId = req.params.sellerId;
-	  const stores = await StoreService.getStoresOfSeller(sellerId);
-	  res.json(stores);
-	} catch (error) {
-	  next(error);
+		const stores = await StoreService.getAllSellerStores(req);
+		res.send(stores);
+	} catch (err) {
+		res.status(500).send(err.message);
 	}
-  }
-  
-  
-// ibrahim : get the most active store 
-exports.getMostActiveStores = async (req, res, ) => {
+};
+// ibrahim : controller for get all the stores
+exports.getAllStores = async (req, res) => {
+	try {
+		const stores = await StoreService.getAllStores();
+		res.json(stores);
+	} catch (error) {
+		res.status(500).json({ error: error.message });
+	}
+};
+// ibrahim  : get stores by city
+exports.getAllStoresByCity = async (req, res, next) => {
+	const city = req.params.city; // Retrieve city from request parameter 'city'
+	try {
+		const stores = await StoreService.getAllStoresInCity(city);
+		res.json(stores);
+	} catch (error) {
+		console.error('Error fetching stores by city:', error);
+		res.status(500).json({ error: 'Could not retrieve stores' });
+	}
+};
+// ibrahim : get store by category
+exports.getStoresByCategory = async (req, res, next) => {
+	const categoryId = req.params.categoryId;
+	try {
+		const stores = await StoreService.getStoresByCategory(categoryId);
+		res.json(stores);
+	} catch (error) {
+		console.error('Error fetching stores by category:', error);
+		res.status(500).json({ error: 'Could not retrieve stores' });
+	}
+};
+// ibrahim : get store of one seller
+exports.getStoresOfSeller = async (req, res, next) => {
+	try {
+		const sellerId = req.params.sellerId;
+		const stores = await StoreService.getStoresOfSeller(sellerId);
+		res.json(stores);
+	} catch (error) {
+		next(error);
+	}
+};
 
-  try {
-    const mostActiveStores = await StoreService.getMostActiveStores();
-    res.json(mostActiveStores);
-  } catch (error) {
-    res.status(500).json({ error: 'Could not fetch most active stores' });
-  }
-}
-
-
-
-
-
+// ibrahim : get the most active store
+exports.getMostActiveStores = async (req, res) => {
+	try {
+		const mostActiveStores = await StoreService.getMostActiveStores();
+		res.json(mostActiveStores);
+	} catch (error) {
+		res.status(500).json({ error: 'Could not fetch most active stores' });
+	}
+};

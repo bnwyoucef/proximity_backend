@@ -11,7 +11,7 @@ const planSchema = new mongoose.Schema(
 		},
 		months: {
 			type: Number,
-			required: false,
+			required: true,
 			unique: true,
 		},
 		price: {
@@ -23,7 +23,6 @@ const planSchema = new mongoose.Schema(
 			enum: ['active', 'suspended'],
 			default: 'active',
 		},
-
 	},
 	{}
 );

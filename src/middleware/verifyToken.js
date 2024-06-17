@@ -46,9 +46,11 @@ const verifyManager = (req, res, next) => {
 //for seller access
 const verifySeller = (req, res, next) => {
 	verifyToken(req, res, () => {
-		req.user.id == req.params.id || req.user.role == 'seller' ? next() : res.status(403).json('You Are Not Authorized');
+		req.user.id == req.params.id || req.user.role == 'seller' || req.user.role == 'paymentManager'
+			? next()
+			: res.status(403).json('You Are Not Authorized');
 	});
 };
 // verifyProduct
 
-module.exports = { verifyToken, verifySeller, verifyAdmin, verifyTokenAndAutherization,verifyManager };
+module.exports = { verifyToken, verifySeller, verifyAdmin, verifyTokenAndAutherization, verifyManager };

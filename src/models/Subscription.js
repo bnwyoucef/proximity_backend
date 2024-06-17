@@ -26,9 +26,14 @@ const subscriptionSchema = new mongoose.Schema(
 			type: Number,
 			required: true,
 		},
+		paymentTypeId: {
+			type: mongoose.Schema.Types.ObjectId,
+			required: false,
+			ref: 'PaymentType',
+		},
 		status: {
 			type: String,
-			enum: ['inactive', 'active', 'delayed', 'suspended', 'deleted'],
+			enum: ['inactive', 'active', 'delayed', 'suspended', 'upcoming', 'deleted'],
 			default: 'inactive',
 		},
 		startDate: {
@@ -64,6 +69,42 @@ const subscriptionSchema = new mongoose.Schema(
 				status: {
 					type: String,
 					default: 'suspended',
+				},
+				startDate: {
+					type: Date,
+					required: true,
+				},
+				endDate: {
+					type: Date,
+					required: true,
+				},
+				notes: [{ type: String }],
+			},
+		],
+		upcomingSubscriptions: [
+			{
+				paymentManagerId: {
+					type: mongoose.Schema.Types.ObjectId,
+					required: true,
+					ref: 'User',
+				},
+				planId: {
+					type: mongoose.Schema.Types.ObjectId,
+					required: true,
+					ref: 'Plan',
+				},
+				subscriptionOfferId: {
+					type: mongoose.Schema.Types.ObjectId,
+					required: false,
+					ref: 'SubscriptionOffer',
+				},
+				paymentAmount: {
+					type: Number,
+					required: true,
+				},
+				status: {
+					type: String,
+					default: 'upcoming',
 				},
 				startDate: {
 					type: Date,

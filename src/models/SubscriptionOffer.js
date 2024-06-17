@@ -6,9 +6,10 @@ const subscriptionOfferSchema = new mongoose.Schema(
 			type: Number,
 			required: true,
 		},
-		storesNumber: {
-			type: Number,
+		isActive: {
+			type: Boolean,
 			required: true,
+			default: false,
 		},
 	},
 	{ timestamps: true }

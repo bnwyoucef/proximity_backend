@@ -40,6 +40,7 @@ const subscriptionRoute = require('./routes/subscriptionRoute');
 const elasticSearchRoute = require('./routes/elasticSearchRoute');
 const reductionRoute = require('./routes/reductionRoute');
 
+const paymentTypeRoute = require('./routes/paymentTypeRoute');
 //const adminRoute = require('./routes/admin');*/
 app.use(helmet());
 app.use(fileUpload());
@@ -47,8 +48,8 @@ app.use(express.json());
 
 /////////
 router.get('/', async (req, res) => {
-    console.log('request recieved');
-    res.send('backend connected');
+	console.log('request recieved');
+	res.send('backend connected');
 });
 
 app.use(express.static('public'));
@@ -58,7 +59,7 @@ app.use('/api/sale', saleRoute);
 
 app.use('/api/auth', authRoute);
 app.use('/api/store', storeRoute);
-// ibrahim 
+// ibrahim
 app.use('/api/seller', storeRoute);
 app.use('/api/reduction', reductionRoute);
 
@@ -76,17 +77,16 @@ app.use('/api/plan', planRoute);
 app.use('/api/subscriptionOffer', subscriptionOfferRoute);
 app.use('/api/subscription', subscriptionRoute);
 app.use('/api/elasticSearch', elasticSearchRoute);
-
+app.use('/api/paymentType', paymentTypeRoute);
 
 mongoose
-    .connect(process.env.MONGO_URL)
-    .then(() => {
-        console.log('DB Conntected');
-        app.listen(process.env.PORT || 8000, () => {
-            console.log('backend Running');
-        });
-    })
-    .catch((err) => {
-        console.log(err);
-    });
-
+	.connect(process.env.MONGO_URL)
+	.then(() => {
+		console.log('DB Conntected');
+		app.listen(process.env.PORT || 8000, () => {
+			console.log('backend Running');
+		});
+	})
+	.catch((err) => {
+		console.log(err);
+	});

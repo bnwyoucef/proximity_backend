@@ -9,6 +9,15 @@ exports.getOffers = async () => {
 		throw error;
 	}
 };
+// get the active offer
+exports.getActiveOffer = async () => {
+	try {
+		const activeOffer = await SubscriptionOffer.findOne({ isActive: true });
+		return activeOffer;
+	} catch (error) {
+		throw error;
+	}
+};
 
 // create a new offer
 exports.createOffer = async (req) => {
