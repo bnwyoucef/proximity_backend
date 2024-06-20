@@ -5,7 +5,7 @@ const reductionOfferController = require('../controllers/reductionController');
 
 router.post('/', reductionOfferController.createReductionOffer);
 router.put('/:id', reductionOfferController.updateReductionOffer);
-router.delete('/:id', reductionOfferController.deleteReductionOffer);
+router.delete('/delete/:id', reductionOfferController.deleteReductionOffer);
 router.get('/:id', reductionOfferController.getReductionOfferById);
 router.get('/', reductionOfferController.getAllReductionOffers);
 
