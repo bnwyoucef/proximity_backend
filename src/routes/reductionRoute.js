@@ -3,10 +3,10 @@ const express = require('express');
 const router = express.Router();
 const reductionOfferController = require('../controllers/reductionController');
 
-router.post('/reduction-offers', reductionOfferController.createReductionOffer);
-router.put('/reduction-offers/:id', reductionOfferController.updateReductionOffer);
-router.delete('/reduction-offers/:id', reductionOfferController.deleteReductionOffer);
-router.get('/reduction-offers/:id', reductionOfferController.getReductionOfferById);
-router.get('/reduction-offers', reductionOfferController.getAllReductionOffers);
+router.post('/', reductionOfferController.createReductionOffer);
+router.put('/:id', reductionOfferController.updateReductionOffer);
+router.delete('/:id', reductionOfferController.deleteReductionOffer);
+router.get('/:id', reductionOfferController.getReductionOfferById);
+router.get('/', reductionOfferController.getAllReductionOffers);
 
 module.exports = router;
