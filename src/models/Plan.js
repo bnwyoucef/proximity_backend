@@ -7,12 +7,12 @@ const planSchema = new mongoose.Schema(
 			type: String,
 			enum: ['Annual', 'Semi-annual', 'Quarterly', 'Monthly'],
 			required: true,
-			unique: true,
+			unique: false,
 		},
 		months: {
 			type: Number,
 			required: true,
-			unique: true,
+			unique: false
 		},
 		price: {
 			type: Number,
@@ -23,6 +23,7 @@ const planSchema = new mongoose.Schema(
 			enum: ['active', 'suspended'],
 			default: 'active',
 		},
+		
 	},
 	{}
 );
