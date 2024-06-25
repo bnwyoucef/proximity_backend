@@ -1,13 +1,18 @@
-const { string } = require('joi');
 const mongoose = require('mongoose');
 
 const planSchema = new mongoose.Schema(
 	{
 		type: {
 			type: String,
-			enum: ['Annual', 'Semi-annual', 'Quarterly', 'Monthly'],
 			required: true,
 			unique: false,
+			validate: {
+				validator: function (value) {
+					const predefinedTypes = ['Annual', 'Semi-annual', 'Quarterly', 'Monthly'];
+					return predefinedTypes.includes(value) || /^[a-zA-Z\s]+$/.test(value);
+				},
+				message: props => `${props.value} is not a valid plan type!`
+			}
 		},
 		months: {
 			type: Number,
@@ -18,12 +23,18 @@ const planSchema = new mongoose.Schema(
 			type: Number,
 			required: true,
 		},
+		reductionOffers: [
+			{
+				type: mongoose.Schema.Types.ObjectId,
+				ref: 'ReductionOffer'
+			}
+		],
 		status: {
 			type: String,
 			enum: ['active', 'suspended'],
 			default: 'active',
 		},
-		
+
 	},
 	{}
 );

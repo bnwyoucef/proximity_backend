@@ -14,10 +14,6 @@ const ReductionOfferSchema = new mongoose.Schema(
 			type: Number,
 			required: true,
 		},
-		planId: {
-			type: mongoose.Schema.Types.ObjectId,
-			ref: 'Plan',
-		},
 		StartDate: {
 			type: Date,
 			required: true,
@@ -35,6 +31,11 @@ const ReductionOfferSchema = new mongoose.Schema(
 			enum: ['inactive', 'active', 'expired'],
 			default: 'inactive',
 		},
+		plan: {
+			type: mongoose.Schema.Types.ObjectId,
+			ref: 'Plan',
+			required: true
+		}
 	},
 	{ timestamps: true }
 );

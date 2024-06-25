@@ -1,14 +1,16 @@
 const Plan = require('../models/Plan');
 
 // get all plans
+
 exports.getPlans = async (req) => {
 	try {
-		const plans = await Plan.find();
+		const plans = await Plan.find().populate('reductionOffers');
 		return plans;
 	} catch (error) {
 		throw error;
 	}
 };
+
 
 // create a new plan
 exports.createPlan = async (req) => {
@@ -17,7 +19,8 @@ exports.createPlan = async (req) => {
 			type: req.body.type,
 			months: req.body.months,
 			price: req.body.price,
-			months: req.body.months,
+			reductionOffers: req.body.reductionOffers,
+			status: req.body.status || 'active',  // Set default status to 'active' if not provided
 		});
 		await newPlan.save();
 		return newPlan;
