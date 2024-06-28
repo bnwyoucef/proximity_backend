@@ -59,4 +59,14 @@ exports.getAllReductionOffers = async (req, res) => {
         res.status(400).json({ message: error.message });
     }
 };
+// ibrahim: delete reduction of a plan 
 
+exports.removeAllReductionsForPlan = async (req, res) => {
+    try {
+        const { planId } = req.params;
+        const reductionOffers = await reductionService.removeAllReductionsForPlan(planId);
+        res.status(200).json({ message: 'All reduction offers removed successfully', reductionOffers });
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+};

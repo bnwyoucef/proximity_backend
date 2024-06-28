@@ -93,3 +93,20 @@ exports.getAllReductionOffers = async () => {
         throw new Error(error.message);
     }
 };
+// ibrahim : delete reduction of a plan 
+exports.removeAllReductionsForPlan = async (planId) => {
+    try {
+        // Find all reduction offers for the given plan
+        const reductionOffers = await ReductionOffer.find({ plan: planId });
+
+        // Delete all reduction offers for the given plan
+        await ReductionOffer.deleteMany({ plan: planId });
+
+        // Update the plan by removing all reduction offer references
+        await Plan.findByIdAndUpdate(planId, { $set: { reductionOffers: [] } });
+
+        return reductionOffers;
+    } catch (error) {
+        throw new Error(error.message);
+    }
+};
