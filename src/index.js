@@ -63,6 +63,7 @@ app.use('/api/store', storeRoute);
 app.use('/api/seller', storeRoute);
 app.use('/api/reduction', reductionRoute);
 
+
 app.use('/api/product', productRoute);
 app.use('/api/cart', cartRoute);
 app.use('/api/offer', offerRoute);

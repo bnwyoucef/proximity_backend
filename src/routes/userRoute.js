@@ -23,8 +23,10 @@ router.get('/welcome/:id', verifyTokenAndAutherization, UserController.welcome);
 // ibrahim : get all the sellers
 router.get('/sellers', UserController.getSellers);
 // ibrahim : get seller by hios id 
-
 router.get('/seller/:userId', UserController.getUserById);
+// ibrahim : get all manager 
+router.get('/managers', UserController.getManagers);
+
 
 
 

@@ -66,6 +66,16 @@ exports.getSellers = async (req, res) => {
 		res.status(500).json({ error: "Internal Server Error" });
 	}
 }
+// ibrahim : get all manager 
+exports.getManagers= async (req, res) => {
+
+	try {
+		const users = await UserService.getManagers('manager');
+		res.json(users);
+	} catch (error) {
+		res.status(500).json({ error: "Internal Server Error" });
+	}
+}
 // ibrahiml : get seller by id 
 exports.getUserById = async (req, res) => {
 

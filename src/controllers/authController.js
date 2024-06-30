@@ -7,6 +7,15 @@ exports.register = async (req, res) => {
 		res.status(500).send(err.message);
 	}
 };
+// ibrahim : this is to add a manager
+exports.createManager = async (req, res) => {
+	try {
+		const user = await AuthService.createManager(req.body);
+		res.send(user);
+	} catch (err) {
+		res.status(500).send(err.message);
+	}
+};
 
 exports.login = async (req, res) => {
 	try {

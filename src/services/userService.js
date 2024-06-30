@@ -222,6 +222,15 @@ exports.getSellers = async (role) => {
 		throw new Error('Error while fetching users');
 	}
 }
+// ibrahim : get all the managers 
+exports.getManagers = async (role) => {
+	try {
+		const users = await User.find({ role: role }).exec();
+		return users;
+	} catch (error) {
+		throw new Error('Error while fetching users');
+	}
+}
 // ibrahim : get seller by his id 
 exports.getUserById = async (userId) => {
 
