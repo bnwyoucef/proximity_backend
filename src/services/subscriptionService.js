@@ -88,6 +88,20 @@ exports.getSubscriptionById = async (id) => {
 			},
 			{
 				$lookup: {
+					from: 'reductionoffers',
+					localField: 'reductionOfferId',
+					foreignField: '_id',
+					as: 'reductionOffer',
+				},
+			},
+			{
+				$unwind: {
+					path: '$reductionOffer',
+					preserveNullAndEmptyArrays: true,
+				},
+			},
+			{
+				$lookup: {
 					from: 'plans',
 					localField: 'planId',
 					foreignField: '_id',
@@ -188,6 +202,7 @@ exports.getSubscriptionById = async (id) => {
 					endDate: { $first: '$endDate' },
 					notes: { $first: '$notes' },
 					plan: { $first: '$plan' },
+					reductionOffer: { $first: '$reductionOffer' },
 					subscriptionsHistory: { $first: '$subscriptionsHistory' },
 					upcomingSubscriptions: { $first: '$upcomingSubscriptions' },
 				},
@@ -220,6 +235,7 @@ exports.createSubscription = async (req, isMultiStore) => {
 				upcomingSubscription.subscriptionOfferId = activeOffer.id;
 				upcomingSubscription.paymentAmount = req.body.paymentAmount - (req.body.paymentAmount * activeOffer.discount) / 100;
 			}
+			if (isMultiStore) currentSubscription.upcomingSubscriptions = [];
 			currentSubscription.upcomingSubscriptions.unshift(upcomingSubscription);
 			await this.updateSubscription(req.body.subscriptionId, { upcomingSubscriptions: currentSubscription.upcomingSubscriptions }, true);
 			return currentSubscription;
@@ -239,6 +255,8 @@ exports.createSubscription = async (req, isMultiStore) => {
 				req.body.subscriptionOfferId = activeOffer.id;
 				req.body.paymentAmount = req.body.paymentAmount - (req.body.paymentAmount * activeOffer.discount) / 100;
 			}
+			console.log('~~~~~~~~~~~~~~~~~~~~~~', req.body);
+			if (isMultiStore) req.body.upcomingSubscriptions = [];
 			await this.updateSubscription(req.body.subscriptionId, req.body, false);
 			return currentSubscription;
 		} else {
@@ -251,6 +269,7 @@ exports.createSubscription = async (req, isMultiStore) => {
 				storeId: req.body.storeId,
 				planId: req.body.planId,
 				subscriptionOfferId: activeOffer.id,
+				reductionOfferId: req.body.reductionOfferId,
 				paymentAmount: req.body.paymentAmount,
 				paymentTypeId: req.body.paymentTypeId,
 				startDate: req.body.startDate,

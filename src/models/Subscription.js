@@ -31,6 +31,11 @@ const subscriptionSchema = new mongoose.Schema(
 			required: false,
 			ref: 'PaymentType',
 		},
+		reductionOfferId: {
+			type: mongoose.Schema.Types.ObjectId,
+			required: false,
+			ref: 'ReductionOffer',
+		},
 		status: {
 			type: String,
 			enum: ['inactive', 'active', 'delayed', 'suspended', 'upcoming', 'deleted'],

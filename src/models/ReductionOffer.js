@@ -4,6 +4,7 @@ const ReductionOfferSchema = new mongoose.Schema(
 	{
 		name: {
 			type: String,
+			unique: true,
 			required: true,
 		},
 		discount: {
@@ -14,17 +15,22 @@ const ReductionOfferSchema = new mongoose.Schema(
 			type: Number,
 			required: true,
 		},
+		plan: {
+			type: mongoose.Schema.Types.ObjectId,
+			required: true,
+			ref: 'Plan',
+		},
 		StartDate: {
 			type: Date,
-			required: true,
+			required: false,
 		},
 		EndDate: {
 			type: Date,
-			required: true,
+			required: false,
 		},
 		description: {
 			type: String,
-			required: true,
+			required: false,
 		},
 		status: {
 			type: String,

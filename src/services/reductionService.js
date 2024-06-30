@@ -74,15 +74,15 @@ exports.deleteReductionOffer = async (id) => {
 
 // get reduction by id
 exports.getReductionOfferById = async (id) => {
-    try {
-        const reductionOffer = await ReductionOffer.findById(id);
-        if (!reductionOffer) {
-            throw new Error('ReductionOffer not found');
-        }
-        return reductionOffer;
-    } catch (error) {
-        throw new Error(error.message);
-    }
+	try {
+		const reductionOffer = await ReductionOffer.findById(id);
+		if (!reductionOffer) {
+			throw new Error('ReductionOffer not found');
+		}
+		return reductionOffer;
+	} catch (error) {
+		throw new Error(error.message);
+	}
 };
 
 // get all reduction
