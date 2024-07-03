@@ -5,9 +5,9 @@ name: Development
 
 on:
   push:
-    branches: ['final2024']
+    branches: ['main']
   pull_request:
-    branches: ['final2024']
+    branches: ['main']
 
 jobs:
   build:
