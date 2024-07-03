@@ -5,9 +5,9 @@ name: Development
 
 on:
   push:
-    branches: [ "final2024" ]
+    branches: ['final2024']
   pull_request:
-    branches: [ "final2024" ]
+    branches: ['final2024']
 
 jobs:
   build:
@@ -16,17 +16,16 @@ jobs:
       matrix:
         node-version: [14.x, 16.x, 18.x]
     steps:
-    - name: "✨ checkout code"
-      uses: actions/checkout@v4
-      
-    - name: "🔧 setup node.js" 
-      uses: actions/setup-node@v3
-      with:
-        node-version: ${{ matrix.node-version }}
-        cache: 'npm'
-        
-    - name: "⚒️ Install dependencies"
-      run: npm install
-      
-    - run: npm ci
-    - run: npm test
+      - name: '✨ checkout code'
+        uses: actions/checkout@v4
+
+      - name: '🔧 setup node.js'
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - name: '⚒️ Install dependencies'
+        run: npm ci
+      - name: '🚀 Run tests'
+        run: npm test
