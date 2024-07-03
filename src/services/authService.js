@@ -64,14 +64,14 @@ exports.register = async (userInfo) => {
 					newUser.email,
 					'Welcome to SmartCity',
 					'Welcome ' +
-						newUser.email.split('@')[0] +
-						' You have successfully registered to the app your account is now active you can login to the app ' +
-						'' +
-						' your verification code is ' +
-						random +
-						' ' +
-						' your email is ' +
-						userInfo.email
+					newUser.email.split('@')[0] +
+					' You have successfully registered to the app your account is now active you can login to the app ' +
+					'' +
+					' your verification code is ' +
+					random +
+					' ' +
+					' your email is ' +
+					userInfo.email
 				);
 			} else if (newUser.phone) {
 				var phone_to = newUser.phone.substring(1);
@@ -251,11 +251,11 @@ exports.resend_verification_code = async (userInfo) => {
 						user.email,
 						'Welcome to SmartCity',
 						'Welcome ' +
-							user.email.split('@')[0] +
-							' You have successfully registered to the app your account is now active you can login to the app ' +
-							'' +
-							' your verification code is ' +
-							random
+						user.email.split('@')[0] +
+						' You have successfully registered to the app your account is now active you can login to the app ' +
+						'' +
+						' your verification code is ' +
+						random
 					);
 				} else if (user.phone) {
 					var phone_to = user.phone.substring(1);
@@ -416,6 +416,131 @@ async function myAsyncFuncAddToCart(element) {
 			await cart.save();
 			return cart;
 		}
-	} catch (err) {}
+	} catch (err) { }
 	return null;
 }
+// ibrahim : i add this function 
+exports.createManager = async (userInfo) => {
+	try {
+		const random = Math.floor(Math.random() * (9999 - 1000 + 1)) + 1000;
+		if (userInfo.email && userInfo.email != '') {
+			const userEmail = await User.findOne({ email: userInfo.email });
+			if (userEmail) {
+				throw new Error('Email already exists!');
+			}
+		} else if (userInfo.phone && userInfo.phone != '') {
+			const userphone = await User.findOne({ phone: userInfo.phone });
+			if (userphone) {
+				throw new Error('Phone number already exists!');
+			}
+		} else {
+			throw new Error('You must enter an email or a phone number!');
+		}
+
+		const username = await User.findOne({ username: userInfo.username });
+		if (username) {
+			throw new Error('Username already exists!');
+		}
+
+		if (!(userInfo.password && userInfo.password_confirmation && userInfo.password == userInfo.password_confirmation)) {
+			throw new Error('The password and its confirmation are not the same');
+		}
+		let newUser = null;
+		if (userInfo.google) {
+			newUser = new User({
+				email: userInfo.email,
+				phone: userInfo.phone,
+				username: userInfo.username,
+				password: userInfo.password,
+				role: userInfo.role,
+				verificationCode: random,
+				isVerified: true,
+				welcome: false,
+			});
+		} else {
+			newUser = new User({
+				email: userInfo.email,
+				phone: userInfo.phone,
+				username: userInfo.username,
+				password: userInfo.password,
+				role: userInfo.role,
+				verificationCode: random,
+			});
+		}
+
+		newUser.password = CryptoJS.AES.encrypt(newUser.password, process.env.ACCESS_TOKEN_SECRET).toString();
+
+		try {
+			if (newUser.email) {
+				sendMail(
+					newUser.email,
+					'LOgin informaiotn ',
+					'Welcome ' +
+					newUser.email +
+					'. You have successfully registered to the app. Your account is now active and you can log in to the app. ' +
+					'. Your password  is ' +
+					userInfo.password
+				);
+				sendMail(
+					newUser.email,
+					'Welcome to SmartCity',
+					'Welcome ' +
+					newUser.email.split('@')[0] +
+					'. You have successfully registered to the app. Your account is now active and you can log in to the app. ' +
+					'Your verification code is ' +
+					random
+
+				);
+			} else if (newUser.phone) {
+				const phone_to = newUser.phone.substring(1);
+				const data = JSON.stringify({
+					message: 'Your verification code is ' + random,
+					to: phone_to,
+					sender_id: 'Proximity',
+				});
+
+				const config = {
+					method: 'post',
+					url: 'https://api.sms.to/sms/estimate',
+					headers: {
+						Authorization: 'Bearer ' + process.env.SMSTO_API_KEY,
+						'Content-Type': 'application/json',
+					},
+					data: data,
+				};
+
+				axios(config)
+					.then(function (response) {
+						console.log(JSON.stringify(response.data));
+					})
+					.catch(function (error) {
+						console.log(error);
+					});
+			}
+
+
+		} catch (err) {
+			throw err;
+		}
+
+		const savedUser = await newUser.save();
+
+		let cartItems = [];
+
+		if (userInfo.role == 'user' && typeof userInfo.cart === 'string' && userInfo.cart != '') {
+			cartItems = JSON.parse(userInfo.cart);
+		}
+
+		cartItems = cartItems.map((el) => {
+			return { ...el, userId: savedUser._id };
+		});
+
+		console.log('Cart Items', cartItems);
+		cartItems = await asyncMapAddToCart(cartItems, myAsyncFuncAddToCart);
+
+		return savedUser;
+	} catch (err) {
+		throw err;
+	}
+
+};
