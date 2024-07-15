@@ -19,6 +19,7 @@ const Category = require('../models/Category');
 const { default: mongoose } = require('mongoose');
 const { getCategoryByStoreId } = require('./categoryService');
 const { indexStoresToElasticsearch } = require('./elasticSearchService');
+const { uploadFileToGCS } = require('./storageService');
 
 async function asyncMap(array, asyncFunc) {
 	const promises = array.map(asyncFunc);
@@ -115,17 +116,19 @@ exports.createStore = async (req) => {
 
 		// The name of the input field (i.e. "sampleFile") is used to retrieve the uploaded file
 
+		// image = req.files.image;
+		// const fileName = `${uuid.v4()}${image.name}`;
+		// const uploadPath = path.resolve(__dirname, '..', '..', 'public', 'images', 'stores', fileName);
+		// const storagePath = `images/stores/${fileName}`;
+
+		// // Use the mv() method to place the file somewhere on your server
+
+		// image.mv(uploadPath, function (err) {
+		// 	if (err) throw err;
+		// });
+
 		image = req.files.image;
-		const fileName = `${uuid.v4()}${image.name}`;
-		const uploadPath = path.resolve(__dirname, '..', '..', 'public', 'images', 'stores', fileName);
-		const storagePath = `images/stores/${fileName}`;
-
-		// Use the mv() method to place the file somewhere on your server
-
-		image.mv(uploadPath, function (err) {
-			if (err) throw err;
-		});
-
+		const storagePath = await uploadFileToGCS(image);
 		const newStore = new Store({
 			sellerId: req.user.id,
 			name: req.body.name,
@@ -223,22 +226,21 @@ exports.updateStore = async (req) => {
 				let updatedStore = null;
 
 				if (req.files && Object.keys(req.files).length !== 0) {
-					image = req.files.image;
-					const fileName = `${uuid.v4()}${image.name}`;
-					const uploadPath = path.resolve(__dirname, '..', '..', 'public', 'images', 'stores', fileName);
-					const storagePath = `images/stores/${fileName}`;
-					console.log(storagePath, 'storagePath');
-
+					// image = req.files.image;
+					// const fileName = `${uuid.v4()}${image.name}`;
+					// const uploadPath = path.resolve(__dirname, '..', '..', 'public', 'images', 'stores', fileName);
+					// const storagePath = `images/stores/${fileName}`;
 					// Use the mv() method to place the file somewhere on your server
+					// image.mv(uploadPath, function (err) {
+					// 	if (err) throw err;
+					// });
 
-					image.mv(uploadPath, function (err) {
-						if (err) throw err;
-					});
-
-					if (store.image != null && store.image != '') {
-						fs.unlinkSync(path.resolve(__dirname, '..', '..', 'public') + '/' + store.image);
-					}
-
+					// if (store.image != null && store.image != '') {
+					// 	fs.unlinkSync(path.resolve(__dirname, '..', '..', 'public') + '/' + store.image);
+					// }
+					// uploading the image to GCS
+					image = req.files.image;
+					const storagePath = await uploadFileToGCS(image);
 					updatedStore = await Store.findByIdAndUpdate(
 						req.params.id,
 						{
