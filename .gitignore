@@ -14,6 +14,6 @@ public/images/categories/*
 !public/images/categories/default.jpg
 src/routes/flashDeal.js
 src/routes/twilio.js
-google_cloud\storage_service_key.json
+google_cloud/storage_service_key.json
 
 

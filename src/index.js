@@ -2,7 +2,8 @@ const express = require('express');
 const cors = require('cors');
 const app = express();
 const dotenv = require('dotenv');
-const NODE_ENV = process.env.NODE_ENV || 'development';
+// const NODE_ENV = process.env.NODE_ENV || 'development';
+const NODE_ENV = 'production';
 dotenv.config({ path: `.env.${NODE_ENV}` });
 const router = require('express').Router();
 
@@ -62,7 +63,6 @@ app.use('/api/store', storeRoute);
 // ibrahim
 app.use('/api/seller', storeRoute);
 app.use('/api/reduction', reductionRoute);
-
 
 app.use('/api/product', productRoute);
 app.use('/api/cart', cartRoute);
